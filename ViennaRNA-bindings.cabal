@@ -26,11 +26,25 @@ description:
 library
   exposed-modules:
     -- public interfaces
-    BioInf.ViennaRNA.Bindings.Fold
+    BioInf.ViennaRNA.Bindings
     -- the FFI
     BioInf.ViennaRNA.Bindings.FFI.Fold
-  -- other-modules:       
+    BioInf.ViennaRNA.Bindings.FFI.PartFunc
+    BioInf.ViennaRNA.Bindings.FFI.Utils
+  -- other-modules:
   build-depends:
-    base == 4.*
+    base == 4.* ,
+    array
   build-tools:
     c2hs
+  extra-libraries:
+    RNA
+    gomp
+
+executable Test
+  build-depends:
+    base == 4.*     ,
+    array           ,
+    ViennaRNA-bindings
+  main-is:
+    Test.hs
