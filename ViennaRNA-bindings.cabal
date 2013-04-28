@@ -17,7 +17,13 @@ description:
   Only a partial set of bindings is provided. If you need additional functions,
   please open an issue on github.
   .
-  The ViennaRNA package needs to be installed.
+  The ViennaRNA package needs to be installed. In addition, you should create a
+  shared object from libRNA.a:
+  .
+  @mkdir tmp; ar -x /usr/lib/libRNA.a; rm svm.o; gcc -shared *.o -o libRNA.so@
+  .
+  Then, copy the resulting .so file into your library path or set
+  @LD_LIBRARY_PATH@ appropriately.
   .
   If you use this software, please cite:
   R. Lorenz, S.H. Bernhart, C. Hoener zu Siederdissen, H. Tafer, C. Flamm, P.F. Stadler and I.L. Hofacker (2011),
