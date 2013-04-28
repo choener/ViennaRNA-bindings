@@ -29,6 +29,6 @@ ffiPartitionFunction i =
   s  <- peekCAString cs
   bp <- {#call export_bppm #}
   xs <- peekArray z (bp :: Ptr CDouble)
-  let ar = A.accumArray (const id) 0 ((1,1),(n,n)) $ zip [ (ii,jj) | ii <- [n,n-1..1], jj <- [13,12..ii]] (drop 1 $ map unsafeCoerce xs)
+  let ar = A.accumArray (const id) 0 ((1,1),(n,n)) $ zip [ (ii,jj) | ii <- [n,n-1..1], jj <- [n,n-1..ii]] (drop 1 $ map unsafeCoerce xs)
   return (cf2d e, s, ar)
 
