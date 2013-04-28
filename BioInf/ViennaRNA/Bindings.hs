@@ -11,8 +11,8 @@ import BioInf.ViennaRNA.Bindings.FFI.PartFunc as FFI
 -- | Fold a sequence into an optimal secondary structure. Returns a pair of
 -- energy and structure.
 
-fold :: String -> IO (Double,String)
-fold = ffiFold
+mfe :: String -> IO (Double,String)
+mfe = ffiFold
 
 -- | Given a sequence and a structure, returns the energy of the
 -- sequence/structure pair.
