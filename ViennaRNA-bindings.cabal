@@ -30,10 +30,6 @@ description:
   R. Lorenz, S.H. Bernhart, C. Hoener zu Siederdissen, H. Tafer, C. Flamm, P.F. Stadler and I.L. Hofacker (2011),
   "ViennaRNA Package 2.0", Algorithms for Molecular Biology: 6:26
 
-Flag devel
-  description: build developer test files
-  default: False
-
 library
   exposed-modules:
     -- public interfaces
@@ -52,15 +48,3 @@ library
     RNA
     gomp
 
-executable Test
-  buildable:
-    False
-  if flag(devel)
-    buildable:
-      True
-  build-depends:
-    base == 4.*     ,
-    array           ,
-    ViennaRNA-bindings
-  main-is:
-    tests/Test.hs
