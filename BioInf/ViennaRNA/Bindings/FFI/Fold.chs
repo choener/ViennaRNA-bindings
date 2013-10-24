@@ -1,4 +1,5 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE CPP #-}
 
 module BioInf.ViennaRNA.Bindings.FFI.Fold
   ( ffiFold
@@ -16,6 +17,7 @@ import BioInf.ViennaRNA.Bindings.FFI.Utils
 
 
 
+
 #include <ViennaRNA/fold.h>
 
 ffiFold :: String -> IO (Double,String)
@@ -29,5 +31,7 @@ ffiEnergyOfStructure :: String -> String -> Int -> IO Double
 ffiEnergyOfStructure inp struc verb =
   withCAString inp   $ \i ->
   withCAString struc $ \s ->
-  {#call energy_of_structure #} i s (fromIntegral verb :: CInt) >>= (return . cf2d)
+    setCutPoint (-1)
+    >>  {#call energy_of_structure #} i s (fromIntegral verb :: CInt)
+    >>= (return . cf2d)
 
