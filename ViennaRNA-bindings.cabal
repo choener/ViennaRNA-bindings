@@ -1,5 +1,5 @@
 name:                ViennaRNA-bindings
-version:             0.0.2.3
+version:             0.0.3.0
 synopsis:            ViennaRNA v2 bindings
 homepage:            http://www.tbi.univie.ac.at/~choener/
 license:             OtherLicense
@@ -35,6 +35,7 @@ library
     -- public interfaces
     BioInf.ViennaRNA.Bindings
     -- the FFI
+    BioInf.ViennaRNA.Bindings.FFI.CoFold
     BioInf.ViennaRNA.Bindings.FFI.Fold
     BioInf.ViennaRNA.Bindings.FFI.PartFunc
     BioInf.ViennaRNA.Bindings.FFI.Utils
