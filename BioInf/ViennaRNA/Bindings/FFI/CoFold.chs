@@ -87,7 +87,7 @@ ffiCoPartitionFunction cutpoint i =
   let ar = A.accumArray (const id) 0 ((1,1),(n,n)) $ zip [ (ii,jj) | ii <- [n,n-1..1], jj <- [n,n-1..ii]] (drop 1 $ map unsafeCoerce xs)
   return (eF, s, ar)
 
-foreign import ccall "co_pf_fold_P" co_pf_fold_p :: CString -> CString -> IO CofoldFPtr
+foreign import ccall "co_pf_fold" co_pf_fold_p :: CString -> CString -> IO CofoldFPtr
 
 #c
 cofoldF * co_pf_fold_p (char * inp, char * str)
