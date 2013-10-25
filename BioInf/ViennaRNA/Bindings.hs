@@ -1,11 +1,20 @@
 
 -- | Bindings to important functions in the ViennaRNA library.
 
-module BioInf.ViennaRNA.Bindings where
+module BioInf.ViennaRNA.Bindings
+  ( mfe
+  , eos
+  , part
+  , coeos
+  , comfe
+  , copart
+  , CofoldF (..)
+  ) where
 
 import qualified Data.Array.IArray as A
 
 import BioInf.ViennaRNA.Bindings.FFI.Fold as FFI
+import BioInf.ViennaRNA.Bindings.FFI.CoFold as FFI
 import BioInf.ViennaRNA.Bindings.FFI.PartFunc as FFI
 
 -- | Fold a sequence into an optimal secondary structure. Returns a pair of
@@ -27,4 +36,21 @@ eos i s = ffiEnergyOfStructure i s 0
 
 part :: String -> IO (Double,String,A.Array (Int,Int) Double)
 part = ffiPartitionFunction
+
+
+
+-- * RNAcofold
+
+-- | Energy of struct for cofolded structures.
+
+coeos :: String -> String -> Int -> IO Double
+coeos i s c = ffiCoEnergyOfStructure c i s 0
+
+-- | mfe of co-folded structure
+
+comfe :: String -> Int -> IO (Double,String)
+comfe s c = ffiCoFold c s
+
+copart :: String -> Int -> IO (CofoldF,String,A.Array (Int,Int) Double)
+copart s c = ffiCoPartitionFunction  c s
 
