@@ -51,6 +51,9 @@ coeos i s c = ffiCoEnergyOfStructure c i s 0
 comfe :: String -> Int -> IO (Double,String)
 comfe s c = ffiCoFold c s
 
+-- | Cofolded partition function. Makes the set of different partfun values
+-- from cofoldF available.
+
 copart :: String -> Int -> IO (CofoldF,String,A.Array (Int,Int) Double)
 copart s c = ffiCoPartitionFunction  c s
 

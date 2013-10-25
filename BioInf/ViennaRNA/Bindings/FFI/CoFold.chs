@@ -51,15 +51,6 @@ instance Storable CofoldF where
                    <*> liftM unsafeCoerce ({# get cofoldF->FA   #} p)
                    <*> liftM unsafeCoerce ({# get cofoldF->FB   #} p)
 
--- toCofoldF = CofoldF . castPtr
-
-{-
-{#fun co_pf_fold
-    { `String'
-    , `String'
-    } -> `CofoldF' toCofoldF #}
--}
-
 -- |
 
 ffiCoFold :: Int -> String -> IO (Double,String)
@@ -103,19 +94,4 @@ cofoldF * co_pf_fold_p (char * inp, char * str)
 { return & co_pf_fold (inp, str);
 }
 #endc
-
-{-
-getF0AB, getFAB, getFcAB, getFA, getFB :: CofoldF -> IO Double
-
-getF0AB t = {#get cofoldF->F0AB#} t >>= return . unsafeCoerce
-
-getFAB t = {#get cofoldF->FAB#} t >>= return . unsafeCoerce
-
-getFcAB t = {#get cofoldF->FcAB#} t >>= return . unsafeCoerce
-
-getFA t = {#get cofoldF->FA#} t >>= return . unsafeCoerce
-
-getFB t = {#get cofoldF->FB#} t >>= return . unsafeCoerce
-
--}
 
