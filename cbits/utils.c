@@ -12,7 +12,7 @@
 #include <errno.h>
 #include <time.h>
 #include <string.h>
-#include "../config.h"
+#include "config.h" // chzs
 #include "utils.h"
 
 #ifdef WITH_DMALLOC
