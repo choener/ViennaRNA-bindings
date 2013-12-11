@@ -30,6 +30,22 @@ description:
   R. Lorenz, S.H. Bernhart, C. Hoener zu Siederdissen, H. Tafer, C. Flamm, P.F. Stadler and I.L. Hofacker (2011),
   "ViennaRNA Package 2.0", Algorithms for Molecular Biology: 6:26
 
+extra-source-files:
+  include/fold.h,
+  include/data_structures.h,
+  include/cofold.h,
+  include/part_func_co.h,
+  include/part_func.h,
+  include/config.h,
+  include/energy_par.h,
+  include/energy_const.h,
+  include/fold_vars.h,
+  include/pair_math.h,
+  include/params.h,
+  include/loop_energies.h,
+  include/gquad.h
+  cbits/circfold.inc
+
 library
   exposed-modules:
     -- public interfaces
@@ -46,6 +62,12 @@ library
   build-tools:
     c2hs
   extra-libraries:
-    RNA
-    gomp
+  c-sources:
+    cbits/fold.c
+    cbits/utils.c
+  cc-options:
+  include-dirs: include
+  includes: config.h
+--    RNA
+--    gomp
 
