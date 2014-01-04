@@ -4,7 +4,7 @@ synopsis:            ViennaRNA v2 bindings
 homepage:            http://www.tbi.univie.ac.at/~choener/
 license:             OtherLicense
 license-file:        LICENSE
-author:              Christian Hoener zu Siederdissen (bindings) 2013, The ViennaRNA Team (library) 1994-2013
+author:              Christian Hoener zu Siederdissen (bindings) 2013-4, The ViennaRNA Team (library) 1994-2014
 maintainer:          choener@tbi.univie.ac.at
 copyright:           The ViennaRNA Team 1994-2013
 category:            Bioinformatics, FFI
@@ -22,8 +22,12 @@ description:
   ViennaRNA package.
   .
   If you use this software, please cite:
-  R. Lorenz, S.H. Bernhart, C. Hoener zu Siederdissen, H. Tafer, C. Flamm, P.F. Stadler and I.L. Hofacker (2011),
-  "ViennaRNA Package 2.0", Algorithms for Molecular Biology: 6:26
+  .
+  @
+  R. Lorenz, S.H. Bernhart, C. Hoener zu Siederdissen, H. Tafer, C. Flamm, P.F. Stadler and I.L. Hofacker (2011)
+  ViennaRNA Package 2.0
+  Algorithms for Molecular Biology: 6:26
+  @
 
 extra-source-files:
   cbits/circfold.inc
@@ -55,6 +59,7 @@ extra-source-files:
   include/PS_dot.h
   include/subopt.h
   include/utils.h
+  changelog
 
 
 library

@@ -1,0 +1,4 @@
+0.1.0.0
+-------
+
+- relevant cbits are now provided as part of the cabal package
