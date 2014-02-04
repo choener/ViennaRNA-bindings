@@ -1,5 +1,5 @@
 name:                ViennaRNA-bindings
-version:             0.1.0.0
+version:             0.1.1.0
 synopsis:            ViennaRNA v2 bindings
 homepage:            http://www.tbi.univie.ac.at/~choener/
 license:             OtherLicense
@@ -88,6 +88,7 @@ library
     cbits/part_func.c
     cbits/part_func_co.c
     cbits/cofold.c
+    cbits/ffiwrap_part_func.c
   cc-options:
   include-dirs: include
   includes: config.h

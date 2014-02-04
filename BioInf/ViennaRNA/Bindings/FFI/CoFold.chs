@@ -8,28 +8,26 @@ module BioInf.ViennaRNA.Bindings.FFI.CoFold
   , CofoldF (..)
   ) where
 
-import Foreign.C.String
-import Foreign.C.Types
-import Foreign.Marshal.Alloc
-import Foreign.Ptr
-import Foreign.Storable
-import GHC.Float
-import Unsafe.Coerce
+import           Control.Applicative
+import           Control.Monad
+import           Foreign.C.String
+import           Foreign.C.Types
+import           Foreign.Marshal.Alloc
+import           Foreign.Marshal.Array
+import           Foreign.Ptr
+import           Foreign.Storable
+import           GHC.Float
 import qualified Data.Array.IArray as A
-import Foreign.Marshal.Array
-import Control.Applicative
-import Control.Monad
+import           Unsafe.Coerce
 
-import BioInf.ViennaRNA.Bindings.FFI.Utils
-
-import Debug.Trace
+import           BioInf.ViennaRNA.Bindings.FFI.Utils
 
 
 
-#include <ViennaRNA/fold.h>
-#include <ViennaRNA/data_structures.h>
-#include <ViennaRNA/cofold.h>
-#include <ViennaRNA/part_func_co.h>
+#include "cofold.h"
+#include "data_structures.h"
+#include "fold.h"
+#include "part_func_co.h"
 
 {#pointer *cofoldF as CofoldFPtr -> CofoldF #}
 

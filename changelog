@@ -1,3 +1,10 @@
+0.1.1.0
+-------
+
+- breaking changes to PartFunc.chs
+- constrained partition function folding
+- includes should now all be local (that one was bad)
+
 0.1.0.0
 -------
 

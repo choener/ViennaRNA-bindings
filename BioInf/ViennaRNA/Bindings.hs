@@ -13,8 +13,8 @@ module BioInf.ViennaRNA.Bindings
 
 import qualified Data.Array.IArray as A
 
-import BioInf.ViennaRNA.Bindings.FFI.Fold as FFI
-import BioInf.ViennaRNA.Bindings.FFI.CoFold as FFI
+import BioInf.ViennaRNA.Bindings.FFI.CoFold   as FFI
+import BioInf.ViennaRNA.Bindings.FFI.Fold     as FFI
 import BioInf.ViennaRNA.Bindings.FFI.PartFunc as FFI
 
 -- | Fold a sequence into an optimal secondary structure. Returns a pair of
@@ -35,7 +35,10 @@ eos i s = ffiEnergyOfStructure i s 0
 -- pair probability table.
 
 part :: String -> IO (Double,String,A.Array (Int,Int) Double)
-part = ffiPartitionFunction
+part = ffi_pf_fold
+
+partConstrained :: String -> String -> IO (Double, String, A.Array (Int,Int) Double)
+partConstrained = ffi_pf_fold_constrained
 
 
 
