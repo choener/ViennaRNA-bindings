@@ -28,6 +28,8 @@ description:
   ViennaRNA Package 2.0
   Algorithms for Molecular Biology: 6:26
   @
+  .
+  <http://www.almob.org/content/6/1/26>
 
 extra-source-files:
   cbits/circfold.inc
