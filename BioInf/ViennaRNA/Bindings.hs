@@ -2,12 +2,7 @@
 -- | Bindings to important functions in the ViennaRNA library.
 
 module BioInf.ViennaRNA.Bindings
-  ( mfe
-  , eos
-  , part
-  , coeos
-  , comfe
-  , copart
+  ( module BioInf.ViennaRNA.Bindings
   , CofoldF (..)
   ) where
 
