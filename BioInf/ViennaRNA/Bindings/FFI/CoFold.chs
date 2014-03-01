@@ -79,7 +79,6 @@ ffiCoPartitionFunction cutpoint i =
   setCutPoint cutpoint
   let n = length i
   let z = n * (n+1) `div` 2 +1
-  -- eF <- {#call ffiwrap_co_pf_fold #} ci cs >>= peek -- co_pf_fold_p ci cs >>= peek -- {#call co_pf_fold #} ci cs
   eF <- co_pf_fold_p ci cs >>= peek
   s  <- peekCAString cs
   bp <- {#call export_co_bppm #}
@@ -88,6 +87,10 @@ ffiCoPartitionFunction cutpoint i =
   return (eF, s, ar)
 
 -- | Constrained partition function
+--
+-- NOTE the wrapped C function we @foreign import@ use very dirty
+-- return-pointer-from-stack stuff. We should fix that. On the other hand, it just
+-- works, because we immediately peek into the structure and marshall to Haskell.
 
 ffiCoPartitionConstrained :: Int -> String -> String -> IO (CofoldF,String,A.Array (Int,Int) Double)
 ffiCoPartitionConstrained cutpoint sq st =
@@ -99,13 +102,11 @@ ffiCoPartitionConstrained cutpoint sq st =
   setCutPoint cutpoint
   let n = length sq
   let z = n * (n+1) `div` 2 +1
-  -- eF <- {#call ffiwrap_pf_cofold_constrained #} csq cst 1 >>= peek
   eF <- co_pf_fold_constrained_p csq cst 1 >>= peek
   s  <- peekCAString cst
   bp <- {#call export_co_bppm #}
   xs <- peekArray z (bp :: Ptr CDouble)
   let ar = A.accumArray (const id) 0 ((1,1),(n,n)) $ zip [ (ii,jj) | ii <- [n,n-1..1], jj <- [n,n-1..ii]] (drop 1 $ map unsafeCoerce xs)
---  let ar = A.accumArray (const id) 0 ((1,1),(n,n)) []
   return (eF, s, ar)
 
 
@@ -113,24 +114,4 @@ ffiCoPartitionConstrained cutpoint sq st =
 foreign import ccall "ffiwrap_co_pf_fold" co_pf_fold_p :: CString -> CString -> IO CofoldFPtr
 
 foreign import ccall "ffiwrap_co_pf_fold_constrained" co_pf_fold_constrained_p :: CString -> CString -> Int -> IO CofoldFPtr
-
--- #c
--- cofoldF * co_pf_fold_p (char * inp, char * str)
--- { return & ffiwrap_co_pf_fold (inp, str);
--- }
--- #endc
-
--- #c
--- cofoldF * ffiwrap_co_pf_fold (const char *sequence, char *structure);
--- #endc
-
--- #c
--- cofoldF * ffiwrap_pf_cofold_constrained (char *sequence, char *structure, int constrained);
--- #endc
-
---  #c
---  cofoldF * co_pf_fold_p_c (char * sequence, char *structure, int constrained)
---  { return & ffiwrap_pf_cofold_constrained (const char *sequence, structure, constrained);
---  }
---  #endc
 

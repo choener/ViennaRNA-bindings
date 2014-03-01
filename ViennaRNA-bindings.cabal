@@ -73,7 +73,6 @@ library
     BioInf.ViennaRNA.Bindings.FFI.Fold
     BioInf.ViennaRNA.Bindings.FFI.PartFunc
     BioInf.ViennaRNA.Bindings.FFI.Utils
-  -- other-modules:
   build-depends:
     base == 4.* ,
     array
@@ -94,6 +93,4 @@ library
   cc-options:
   include-dirs: include
   includes: config.h
---    RNA
---    gomp
 
