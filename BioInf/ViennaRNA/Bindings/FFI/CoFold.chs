@@ -96,9 +96,6 @@ ffiCoPartitionConstrained :: Int -> String -> String -> IO (CofoldF,String,A.Arr
 ffiCoPartitionConstrained cutpoint sq st =
   withCAString sq $ \csq ->
   withCAString st $ \cst -> do
-  print sq
-  print st
-  print cutpoint
   setCutPoint cutpoint
   let n = length sq
   let z = n * (n+1) `div` 2 +1
