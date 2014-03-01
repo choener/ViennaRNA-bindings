@@ -55,3 +55,7 @@ comfe s c = ffiCoFold c s
 copart :: String -> Int -> IO (CofoldF,String,A.Array (Int,Int) Double)
 copart s c = ffiCoPartitionFunction  c s
 
+copartConstrained :: String -> String -> Int -> IO (CofoldF,String,A.Array (Int,Int) Double)
+copartConstrained sq str c = ffiCoPartitionConstrained c sq str
+
+

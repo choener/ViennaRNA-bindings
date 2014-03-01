@@ -1,12 +1,12 @@
 name:                ViennaRNA-bindings
-version:             0.1.1.1
+version:             0.1.2.0
 synopsis:            ViennaRNA v2 bindings
 homepage:            http://www.tbi.univie.ac.at/~choener/
 license:             OtherLicense
 license-file:        LICENSE
 author:              Christian Hoener zu Siederdissen (bindings) 2013-4, The ViennaRNA Team (library) 1994-2014
 maintainer:          choener@tbi.univie.ac.at
-copyright:           The ViennaRNA Team 1994-2013
+copyright:           The ViennaRNA Team 1994-2014
 category:            Bioinformatics, FFI
 build-type:          Simple
 cabal-version:       >=1.8
