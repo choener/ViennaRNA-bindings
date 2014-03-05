@@ -15,22 +15,18 @@ float ffiwrap_pf_fold_constrained (const char *sequence, char *structure, int co
 }
 
 // wrap the RNAcofold constrained partition function.
-//
-// TODO the current implementation makes me cry.
 
-cofoldF * ffiwrap_co_pf_fold_constrained (char *sequence, char *structure, int constrained)
+void ffiwrap_co_pf_fold_constrained (cofoldF * x, char *sequence, char *structure, int constrained)
 {
-  cofoldF x = co_pf_fold_par (sequence, structure, 0, 1, constrained);
-  return &x;
+  *x = co_pf_fold_par (sequence, structure, 0, 1, constrained);
+  return;
 }
 
 // wrap RNAcofold partition function
-//
-// TODO the current implementation makes me cry.
 
-cofoldF * ffiwrap_co_pf_fold (char * inp, char * str)
+void ffiwrap_co_pf_fold (cofoldF * x, char * inp, char * str)
 {
-  cofoldF x = co_pf_fold (inp, str);
-  return &x;
+  *x = co_pf_fold (inp, str);
+  return;
 }
 

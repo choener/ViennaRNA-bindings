@@ -33,22 +33,22 @@ import           BioInf.ViennaRNA.Bindings.FFI.Utils
 {#pointer *cofoldF as CofoldFPtr -> CofoldF #}
 
 data CofoldF = CofoldF
-  { f0ab :: Double
-  , fab  :: Double
-  , fcab :: Double
-  , fa   :: Double
-  , fb   :: Double
+  { f0ab :: {-# UNPACK #-} !Double
+  , fab  :: {-# UNPACK #-} !Double
+  , fcab :: {-# UNPACK #-} !Double
+  , fa   :: {-# UNPACK #-} !Double
+  , fb   :: {-# UNPACK #-} !Double
   }
   deriving (Show)
 
 instance Storable CofoldF where
   sizeOf _ = {#sizeof cofoldF#}
   alignment _ = sizeOf (undefined :: CDouble)
-  peek p = CofoldF <$> liftM unsafeCoerce ({# get cofoldF->F0AB #} p)
-                   <*> liftM unsafeCoerce ({# get cofoldF->FAB  #} p)
-                   <*> liftM unsafeCoerce ({# get cofoldF->FcAB #} p)
-                   <*> liftM unsafeCoerce ({# get cofoldF->FA   #} p)
-                   <*> liftM unsafeCoerce ({# get cofoldF->FB   #} p)
+  peek p = CofoldF <$> liftM realToFrac ({# get cofoldF->F0AB #} p)
+                   <*> liftM realToFrac ({# get cofoldF->FAB  #} p)
+                   <*> liftM realToFrac ({# get cofoldF->FcAB #} p)
+                   <*> liftM realToFrac ({# get cofoldF->FA   #} p)
+                   <*> liftM realToFrac ({# get cofoldF->FB   #} p)
 
 -- |
 
@@ -75,11 +75,12 @@ ffiCoEnergyOfStructure cp inp struc verb =
 ffiCoPartitionFunction :: Int -> String -> IO (CofoldF,String,A.Array (Int,Int) Double)
 ffiCoPartitionFunction cutpoint i =
   withCAString i $ \ci ->
-  withCAString i $ \cs -> do
+  withCAString i $ \cs ->
+  alloca         $ \ptr -> do
   setCutPoint cutpoint
   let n = length i
   let z = n * (n+1) `div` 2 +1
-  eF <- co_pf_fold_p ci cs >>= peek
+  eF <- co_pf_fold_p ptr ci cs >> peek ptr
   s  <- peekCAString cs
   bp <- {#call export_co_bppm #}
   xs <- peekArray z (bp :: Ptr CDouble)
@@ -87,19 +88,16 @@ ffiCoPartitionFunction cutpoint i =
   return (eF, s, ar)
 
 -- | Constrained partition function
---
--- NOTE the wrapped C function we @foreign import@ use very dirty
--- return-pointer-from-stack stuff. We should fix that. On the other hand, it just
--- works, because we immediately peek into the structure and marshall to Haskell.
 
 ffiCoPartitionConstrained :: Int -> String -> String -> IO (CofoldF,String,A.Array (Int,Int) Double)
 ffiCoPartitionConstrained cutpoint sq st =
   withCAString sq $ \csq ->
-  withCAString st $ \cst -> do
+  withCAString st $ \cst ->
+  alloca          $ \ptr -> do
   setCutPoint cutpoint
   let n = length sq
   let z = n * (n+1) `div` 2 +1
-  eF <- co_pf_fold_constrained_p csq cst 1 >>= peek
+  eF <- co_pf_fold_constrained_p ptr csq cst 1 >> peek ptr
   s  <- peekCAString cst
   bp <- {#call export_co_bppm #}
   xs <- peekArray z (bp :: Ptr CDouble)
@@ -108,7 +106,7 @@ ffiCoPartitionConstrained cutpoint sq st =
 
 
 
-foreign import ccall "ffiwrap_co_pf_fold" co_pf_fold_p :: CString -> CString -> IO CofoldFPtr
+foreign import ccall "ffiwrap_co_pf_fold" co_pf_fold_p :: CofoldFPtr -> CString -> CString -> IO ()
 
-foreign import ccall "ffiwrap_co_pf_fold_constrained" co_pf_fold_constrained_p :: CString -> CString -> Int -> IO CofoldFPtr
+foreign import ccall "ffiwrap_co_pf_fold_constrained" co_pf_fold_constrained_p :: CofoldFPtr -> CString -> CString -> Int -> IO ()
 
