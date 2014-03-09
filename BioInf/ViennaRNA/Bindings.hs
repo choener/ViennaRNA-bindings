@@ -4,6 +4,7 @@
 module BioInf.ViennaRNA.Bindings
   ( module BioInf.ViennaRNA.Bindings
   , CofoldF (..)
+  , Duplex (..)
   ) where
 
 import qualified Data.Array.IArray as A
