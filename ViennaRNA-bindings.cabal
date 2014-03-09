@@ -1,5 +1,5 @@
 name:                ViennaRNA-bindings
-version:             0.1.2.2
+version:             0.1.3.0
 synopsis:            ViennaRNA v2 bindings
 homepage:            http://www.tbi.univie.ac.at/~choener/
 license:             OtherLicense
@@ -32,13 +32,16 @@ description:
   <http://www.almob.org/content/6/1/26>
 
 extra-source-files:
+  cbits/alicircfold.inc
   cbits/circfold.inc
   include/1.8.4_epars.h
   include/1.8.4_intloops.h
+  include/alifold.h
   include/aln_util.h
   include/cofold.h
   include/config.h
   include/data_structures.h
+  include/duplex.h
   include/energy_const.h
   include/energy_par.h
   include/fold.h
@@ -59,6 +62,7 @@ extra-source-files:
   include/part_func.h
   include/plot_layouts.h
   include/PS_dot.h
+  include/snofold.h
   include/subopt.h
   include/utils.h
   changelog
@@ -70,6 +74,7 @@ library
     BioInf.ViennaRNA.Bindings
     -- the FFI
     BioInf.ViennaRNA.Bindings.FFI.CoFold
+    BioInf.ViennaRNA.Bindings.FFI.Duplex
     BioInf.ViennaRNA.Bindings.FFI.Fold
     BioInf.ViennaRNA.Bindings.FFI.PartFunc
     BioInf.ViennaRNA.Bindings.FFI.Utils
@@ -80,16 +85,27 @@ library
     c2hs
   extra-libraries:
   c-sources:
-    cbits/fold.c
-    cbits/utils.c
-    cbits/fold_vars.c
+    cbits/alifold.c
+    cbits/aln_util.c
+    cbits/cofold.c
+    cbits/duplex.c
     cbits/energy_par.c
+    cbits/ffiwrap_part_func.c
+    cbits/fold.c
+    cbits/fold_vars.c
     cbits/gquad.c
+    cbits/list.c
+    cbits/naview.c
     cbits/params.c
     cbits/part_func.c
     cbits/part_func_co.c
-    cbits/cofold.c
-    cbits/ffiwrap_part_func.c
+    cbits/plot_layouts.c
+    cbits/PS_dot.c
+    cbits/ribo.c
+    cbits/snofold.c
+    cbits/snoop.c
+    cbits/subopt.c
+    cbits/utils.c
   cc-options:
   include-dirs: include
   includes: config.h

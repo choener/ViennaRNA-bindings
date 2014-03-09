@@ -9,6 +9,7 @@ module BioInf.ViennaRNA.Bindings
 import qualified Data.Array.IArray as A
 
 import BioInf.ViennaRNA.Bindings.FFI.CoFold   as FFI
+import BioInf.ViennaRNA.Bindings.FFI.Duplex   as FFI
 import BioInf.ViennaRNA.Bindings.FFI.Fold     as FFI
 import BioInf.ViennaRNA.Bindings.FFI.PartFunc as FFI
 
@@ -58,4 +59,7 @@ copart s c = ffiCoPartitionFunction  c s
 copartConstrained :: String -> String -> Int -> IO (CofoldF,String,A.Array (Int,Int) Double)
 copartConstrained sq str c = ffiCoPartitionConstrained c sq str
 
+-- | Fold a duplex structure
 
+duplexFold :: String -> String -> IO Duplex
+duplexFold = ffiDuplexFold

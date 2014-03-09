@@ -6,6 +6,8 @@
 
 #include "part_func.h"
 #include "part_func_co.h"
+#include "duplex.h"
+#include "alifold.h"
 
 // wrap the RNAfold constrained partition function
 
@@ -27,6 +29,14 @@ void ffiwrap_co_pf_fold_constrained (cofoldF * x, char *sequence, char *structur
 void ffiwrap_co_pf_fold (cofoldF * x, char * inp, char * str)
 {
   *x = co_pf_fold (inp, str);
+  return;
+}
+
+// wrap folding a duplex
+
+void ffiwrap_duplexfold (duplexT * x, char * linp, char * rinp)
+{
+  *x = duplexfold (linp, rinp);
   return;
 }
 
