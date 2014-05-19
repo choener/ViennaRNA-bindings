@@ -1,3 +1,9 @@
+0.1.4.0
+
+- added circular folding and partition function calculations
+- NOTE due to circular dependencies in fold / fold_vars we currently can not
+  build on ghc 7.8
+
 0.1.3.0
 
 - added duplexfold

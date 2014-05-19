@@ -1,5 +1,5 @@
 name:                ViennaRNA-bindings
-version:             0.1.3.0
+version:             0.1.4.0
 synopsis:            ViennaRNA v2 bindings
 homepage:            http://www.tbi.univie.ac.at/~choener/
 license:             OtherLicense
@@ -85,28 +85,31 @@ library
     c2hs
   extra-libraries:
   c-sources:
+    cbits/energy_par.c
+    cbits/ffiwrap_part_func.c
+    cbits/gquad.c
+    cbits/list.c
+    cbits/naview.c
+    cbits/plot_layouts.c
+    cbits/ribo.c
+    cbits/utils.c
+    -- basic fold
+    cbits/fold_vars.c
+    cbits/fold.c
+    cbits/params.c
+    -- higher level stuff, needs to be later in the source order for ghc 7.8
+    cbits/snoop.c
+    cbits/subopt.c
+    cbits/snofold.c
+    cbits/PS_dot.c
     cbits/alifold.c
     cbits/aln_util.c
     cbits/cofold.c
     cbits/duplex.c
-    cbits/energy_par.c
-    cbits/ffiwrap_part_func.c
-    cbits/fold.c
-    cbits/fold_vars.c
-    cbits/gquad.c
-    cbits/list.c
-    cbits/naview.c
-    cbits/params.c
     cbits/part_func.c
     cbits/part_func_co.c
-    cbits/plot_layouts.c
-    cbits/PS_dot.c
-    cbits/ribo.c
-    cbits/snofold.c
-    cbits/snoop.c
-    cbits/subopt.c
-    cbits/utils.c
   cc-options:
+    -fPIC
   include-dirs: include
   includes: config.h
 

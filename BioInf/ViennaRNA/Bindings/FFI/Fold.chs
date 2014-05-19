@@ -4,6 +4,7 @@
 module BioInf.ViennaRNA.Bindings.FFI.Fold
   ( ffiFold
   , ffiEnergyOfStructure
+  , ffiCircFold
   ) where
 
 import Foreign.C.String
@@ -33,4 +34,11 @@ ffiEnergyOfStructure inp struc verb =
     setCutPoint (-1)
     >>  {#call energy_of_structure #} i s (fromIntegral verb :: CInt)
     >>= (return . cf2d)
+
+ffiCircFold :: String -> IO (Double,String)
+ffiCircFold inp = withCAString inp $ \cinp ->
+                  withCAString inp $ \struc -> do
+  e <- {#call circfold #} cinp struc
+  s <- peekCAString struc
+  return (cf2d e, s)
 

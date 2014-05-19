@@ -20,6 +20,9 @@ import BioInf.ViennaRNA.Bindings.FFI.PartFunc as FFI
 mfe :: String -> IO (Double,String)
 mfe = ffiFold
 
+circmfe :: String -> IO (Double,String)
+circmfe = ffiCircFold
+
 -- | Given a sequence and a structure, returns the energy of the
 -- sequence/structure pair.
 
@@ -37,6 +40,8 @@ part = ffi_pf_fold
 partConstrained :: String -> String -> IO (Double, String, A.Array (Int,Int) Double)
 partConstrained = ffi_pf_fold_constrained
 
+circPart :: String -> IO (Double,String,A.Array (Int,Int) Double)
+circPart = ffi_pf_circ_fold
 
 
 -- * RNAcofold
