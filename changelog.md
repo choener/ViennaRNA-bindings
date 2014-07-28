@@ -2,7 +2,7 @@
 
 - added circular folding and partition function calculations
 - NOTE due to circular dependencies in fold / fold_vars we currently can not
-  build on ghc 7.8
+  cabal repl on ghc 7.8.{1,2,3}
 
 0.1.3.0
 
