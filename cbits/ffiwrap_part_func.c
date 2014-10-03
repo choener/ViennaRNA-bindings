@@ -16,6 +16,13 @@ float ffiwrap_pf_fold_constrained (const char *sequence, char *structure, int co
   return pf_fold_par (sequence, structure, 0, 1, constrained, 0);
 }
 
+// wrap the RNAfold constrained partition function for circular RNAs
+
+float ffiwrap_pf_circ_fold_constrained (const char *sequence, char *structure, int constrained)
+{
+  return pf_fold_par (sequence, structure, 0, 1, constrained, 1);
+}
+
 // wrap the RNAcofold constrained partition function.
 
 void ffiwrap_co_pf_fold_constrained (cofoldF * x, char *sequence, char *structure, int constrained)

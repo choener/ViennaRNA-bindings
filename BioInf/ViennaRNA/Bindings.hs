@@ -29,6 +29,11 @@ circmfe = ffiCircFold
 eos :: String -> String -> IO Double
 eos i s = ffiEnergyOfStructure i s 0
 
+-- | Energy of a circular structure
+
+eosCirc :: String -> String -> IO Double
+eosCirc i s = ffiEnergyOfCircStructure i s 0
+
 -- | Given a string, calculates the partition function for said string. Returns
 -- the ensemble energy, a string with where each nucleotide position is
 -- annotated with the strength of the potential pairing, and the whole base
@@ -42,6 +47,9 @@ partConstrained = ffi_pf_fold_constrained
 
 circPart :: String -> IO (Double,String,A.Array (Int,Int) Double)
 circPart = ffi_pf_circ_fold
+
+circPartConstrained :: String -> String -> IO (Double, String, A.Array (Int,Int) Double)
+circPartConstrained = ffi_pf_circ_fold_constrained
 
 
 -- * RNAcofold
