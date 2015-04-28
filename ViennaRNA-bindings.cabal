@@ -65,7 +65,9 @@ extra-source-files:
   include/snofold.h
   include/subopt.h
   include/utils.h
-  changelog
+
+  changelog.md
+  README.md
 
 
 library
