@@ -1,35 +1,37 @@
-name:                ViennaRNA-bindings
-version:             0.1.5.0
-synopsis:            ViennaRNA v2 bindings
-homepage:            http://www.tbi.univie.ac.at/~choener/
-license:             OtherLicense
-license-file:        LICENSE
-author:              Christian Hoener zu Siederdissen (bindings) 2013-4, The ViennaRNA Team (library) 1994-2014
-maintainer:          choener@tbi.univie.ac.at
-copyright:           The ViennaRNA Team 1994-2014
-category:            Bioinformatics, FFI
-build-type:          Simple
-cabal-version:       >=1.8
+name:           ViennaRNA-bindings
+version:        0.1.5.0
+maintainer:     choener@tbi.univie.ac.at
+homepage:       https://github.com/choener/ViennaRNA-bindings
+bug-reports:    https://github.com/choener/ViennaRNA-bindings/issues
+license:        OtherLicense
+license-file:   LICENSE
+author:         Christian Hoener zu Siederdissen (bindings) 2013-2015, The ViennaRNA Team (library) 1994-2015
+copyright:      The ViennaRNA Team 1994-2015
+category:       Bioinformatics, FFI
+build-type:     Simple
+cabal-version:  >=1.10
+tested-with:    GHC == 7.8.4, GHC == 7.10.1
+synopsis:       ViennaRNA v2 bindings
+description:    Bindings to the ViennaRNA package, version 2.x.y.
+                .
+                Only a partial set of bindings is provided. If you need
+                additional functions, please open an issue on github.
+                .
+                The ViennaRNA bindings package now directly provide all
+                necessary functionality. Please note that this package uses the
+                same license as the ViennaRNA package.
+                .
+                If you use this software, please cite:
+                .
+                @
+                R. Lorenz, S.H. Bernhart, C. Hoener zu Siederdissen, H. Tafer, C. Flamm, P.F. Stadler and I.L. Hofacker (2011)
+                ViennaRNA Package 2.0
+                Algorithms for Molecular Biology: 6:26
+                @
+                .
+                <http://www.almob.org/content/6/1/26>
 
-description:
-  Bindings to the ViennaRNA package, version 2.x.y.
-  .
-  Only a partial set of bindings is provided. If you need additional functions,
-  please open an issue on github.
-  .
-  The ViennaRNA bindings package now directly provide all necessary
-  functionality. Please note that this package uses the same license as the
-  ViennaRNA package.
-  .
-  If you use this software, please cite:
-  .
-  @
-  R. Lorenz, S.H. Bernhart, C. Hoener zu Siederdissen, H. Tafer, C. Flamm, P.F. Stadler and I.L. Hofacker (2011)
-  ViennaRNA Package 2.0
-  Algorithms for Molecular Biology: 6:26
-  @
-  .
-  <http://www.almob.org/content/6/1/26>
+
 
 extra-source-files:
   cbits/alicircfold.inc
@@ -70,6 +72,7 @@ extra-source-files:
   README.md
 
 
+
 library
   exposed-modules:
     -- public interfaces
@@ -80,9 +83,8 @@ library
     BioInf.ViennaRNA.Bindings.FFI.Fold
     BioInf.ViennaRNA.Bindings.FFI.PartFunc
     BioInf.ViennaRNA.Bindings.FFI.Utils
-  build-depends:
-    base == 4.* ,
-    array
+  build-depends: base == 4.*
+               , array
   build-tools:
     c2hs
   extra-libraries:
@@ -112,6 +114,8 @@ library
     cbits/part_func_co.c
   cc-options:
     -fPIC
-  include-dirs: include
-  includes: config.h
+  include-dirs:
+    include
+  includes:
+    config.h
 
