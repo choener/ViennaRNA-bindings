@@ -1,23 +1,33 @@
+0.1.5.0
+-------
+
+- added stack.yaml file
+
 0.1.4.0
+-------
 
 - added circular folding and partition function calculations
 - NOTE due to circular dependencies in fold / fold_vars we currently can not
   cabal repl on ghc 7.8.{1,2,3}
 
 0.1.3.0
+-------
 
 - added duplexfold
 - added a bunch of c/h files due to duplexfold dependencies
 
 0.1.2.1
+-------
 
 - removed debug statements
 
 0.1.2.0
+-------
 
 - constrained cofold partition function added
 
 0.1.1.1
+-------
 
 - export everything in the bindings
 
@@ -32,3 +42,4 @@
 -------
 
 - relevant cbits are now provided as part of the cabal package
+
