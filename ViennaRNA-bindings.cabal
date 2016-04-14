@@ -7,7 +7,7 @@ license:        OtherLicense
 license-file:   LICENSE
 author:         Christian Hoener zu Siederdissen (bindings) 2013-2015, The ViennaRNA Team (library) 1994-2015
 copyright:      The ViennaRNA Team 1994-2015
-category:       Bioinformatics, FFI
+category:       Bioinformatics, Bindings, FFI
 build-type:     Simple
 cabal-version:  >=1.10
 tested-with:    GHC == 7.8.4, GHC == 7.10.1
