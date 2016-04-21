@@ -1,5 +1,3 @@
-{-# LANGUAGE ForeignFunctionInterface #-}
-{-# LANGUAGE CPP #-}
 
 module BioInf.ViennaRNA.Bindings.FFI.Fold
   ( ffiFold

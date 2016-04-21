@@ -1,4 +1,3 @@
-{-# LANGUAGE ForeignFunctionInterface #-}
 
 module BioInf.ViennaRNA.Bindings.FFI.PartFunc
   ( ffi_pf_fold

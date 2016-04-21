@@ -1,5 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE ForeignFunctionInterface #-}
 
 module BioInf.ViennaRNA.Bindings.FFI.CoFold
   ( ffiCoFold
