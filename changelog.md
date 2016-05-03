@@ -1,3 +1,9 @@
+0.1.6.0
+-------
+
+- partial bindings to ViennaRNA 2.2.5
+- tests/properties.hs
+
 0.1.5.0
 -------
 
