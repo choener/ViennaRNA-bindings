@@ -23,10 +23,10 @@ import           BioInf.ViennaRNA.Bindings.FFI.Utils
 
 
 
-#include "cofold.h"
-#include "data_structures.h"
-#include "fold.h"
-#include "part_func_co.h"
+#include "ViennaRNA/cofold.h"
+#include "ViennaRNA/data_structures.h"
+#include "ViennaRNA/fold.h"
+#include "ViennaRNA/part_func_co.h"
 
 {#pointer *cofoldF as CofoldFPtr -> CofoldF #}
 

@@ -17,7 +17,7 @@ import BioInf.ViennaRNA.Bindings.FFI.Utils
 
 
 
-#include "fold.h"
+#include "ViennaRNA/fold.h"
 
 ffiFold :: String -> IO (Double,String)
 ffiFold inp = withCAString inp $ \cinp ->

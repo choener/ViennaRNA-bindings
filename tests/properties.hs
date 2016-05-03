@@ -24,8 +24,16 @@ case_s_001 = do
 case_s_002 :: Assertion
 case_s_002 = do
   (e,s) <- V.mfe "uguagcuagcuagcuagcuacguacguagcuagc"
-  assertBool "energy" $ e =~ (-14.3)
+  assertBool "energy" $ e =~ (-14.0)
   assertBool "structure" $ s == "............(((((((((....)))))))))"
+
+-- RNAfold webserver test sequence, allowing for isolated base pairs
+
+case_s_003 :: Assertion
+case_s_003 = do
+  (e,s) <- V.mfe "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
+  assertBool "energy" $ e =~ (-29.90)
+  assertBool "structure" $ s == "(((((((..(((.((((.(....(((((.(((((....)))).)..).))))....).)))).))))))))))."
 
 
 

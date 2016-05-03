@@ -20,8 +20,8 @@ import           BioInf.ViennaRNA.Bindings.FFI.Utils
 
 
 
-#include "duplex.h"
-#include "data_structures.h"
+#include "ViennaRNA/duplex.h"
+#include "ViennaRNA/data_structures.h"
 
 {#pointer *duplexT as DuplexPtr -> Duplex #}
 

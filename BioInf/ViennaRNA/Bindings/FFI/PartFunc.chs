@@ -19,7 +19,7 @@ import BioInf.ViennaRNA.Bindings.FFI.Utils
 
 
 
-#include "part_func.h"
+#include "ViennaRNA/part_func.h"
 
 ffi_pf_fold :: String -> IO (Double,String,A.Array (Int,Int) Double)
 ffi_pf_fold i =

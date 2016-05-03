@@ -34,39 +34,9 @@ description:    Bindings to the ViennaRNA package, version 2.x.y.
 
 
 extra-source-files:
-  cbits/alicircfold.inc
-  cbits/circfold.inc
-  include/1.8.4_epars.h
-  include/1.8.4_intloops.h
-  include/alifold.h
-  include/aln_util.h
-  include/cofold.h
-  include/config.h
-  include/data_structures.h
-  include/duplex.h
-  include/energy_const.h
-  include/energy_par.h
-  include/fold.h
-  include/fold_vars.h
-  include/gquad.h
-  include/intl11dH.h
-  include/intl11.h
-  include/intl21dH.h
-  include/intl21.h
-  include/intl22dH.h
-  include/intl22.h
-  include/list.h
-  include/loop_energies.h
-  include/naview.h
-  include/pair_mat.h
-  include/params.h,
-  include/part_func_co.h
-  include/part_func.h
-  include/plot_layouts.h
-  include/PS_dot.h
-  include/snofold.h
-  include/subopt.h
-  include/utils.h
+  C/ViennaRNA/*.h
+  C/ViennaRNA/*.c
+  C/ViennaRNA/*.inc
 
   changelog.md
   README.md
@@ -95,35 +65,37 @@ library
                     , NondecreasingIndentation
                     , ScopedTypeVariables
   c-sources:
-    cbits/energy_par.c
-    cbits/ffiwrap_part_func.c
-    cbits/gquad.c
-    cbits/list.c
-    cbits/naview.c
-    cbits/plot_layouts.c
-    cbits/ribo.c
-    cbits/utils.c
-    -- basic fold
-    cbits/fold_vars.c
-    cbits/fold.c
-    cbits/params.c
-    -- higher level stuff, needs to be later in the source order for ghc 7.8
-    cbits/snoop.c
-    cbits/subopt.c
-    cbits/snofold.c
-    cbits/PS_dot.c
-    cbits/alifold.c
-    cbits/aln_util.c
-    cbits/cofold.c
-    cbits/duplex.c
-    cbits/part_func.c
-    cbits/part_func_co.c
+    -- remove all of these, then @stack build --test@ and include files that have the missing definitions
+    C/ViennaRNA/data_structures.c
+    C/ViennaRNA/eval.c
+    C/ViennaRNA/mfe.c
+    C/ViennaRNA/model.c
+    C/ViennaRNA/energy_par.c
+    C/ViennaRNA/fold.c
+    C/ViennaRNA/utils.c
+    C/ViennaRNA/gquad.c
+    C/ViennaRNA/exterior_loops.c
+    C/ViennaRNA/interior_loops.c
+    C/ViennaRNA/structure_utils.c
+    C/ViennaRNA/hairpin_loops.c
+    C/ViennaRNA/multibranch_loops.c
+    C/ViennaRNA/constraints.c
+    C/ViennaRNA/constraints_soft.c
+    C/ViennaRNA/params.c
+    C/ViennaRNA/alphabet.c
+    C/ViennaRNA/constraints_SHAPE.c
+    C/ViennaRNA/aln_util.c
+    C/ViennaRNA/cofold.c
+    C/ViennaRNA/dp_matrices.c
+    C/ViennaRNA/constraints_hard.c
+    C/ViennaRNA/mm.c
+    C/ViennaRNA/ribo.c
+    C/ViennaRNA/string_utils.c
+    C/ViennaRNA/file_formats.c
   cc-options:
     -fPIC
   include-dirs:
-    include
-  includes:
-    config.h
+    C
 
 
 
