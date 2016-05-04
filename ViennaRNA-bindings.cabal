@@ -78,6 +78,7 @@ library
     C/ViennaRNA/constraints_soft.c
     C/ViennaRNA/data_structures.c
     C/ViennaRNA/dp_matrices.c
+    C/ViennaRNA/duplex.c
     C/ViennaRNA/energy_par.c
     C/ViennaRNA/eval.c
     C/ViennaRNA/exterior_loops.c
@@ -86,6 +87,7 @@ library
     C/ViennaRNA/gquad.c
     C/ViennaRNA/hairpin_loops.c
     C/ViennaRNA/interior_loops.c
+    C/ViennaRNA/list.c
     C/ViennaRNA/mfe.c
     C/ViennaRNA/mm.c
     C/ViennaRNA/model.c
@@ -98,6 +100,7 @@ library
     C/ViennaRNA/ribo.c
     C/ViennaRNA/string_utils.c
     C/ViennaRNA/structure_utils.c
+    C/ViennaRNA/subopt.c
     C/ViennaRNA/utils.c
   cc-options:
     -fPIC
@@ -120,6 +123,7 @@ test-suite properties
   default-extensions: CPP
                     , TemplateHaskell
   build-depends: base
+               , array
                , QuickCheck
                , tasty                >= 0.11
                , tasty-hunit          >= 0.9
