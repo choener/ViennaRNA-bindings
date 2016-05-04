@@ -77,3 +77,4 @@ copartConstrained sq str c = ffiCoPartitionConstrained c sq str
 
 duplexFold :: String -> String -> IO Duplex
 duplexFold = ffiDuplexFold
+

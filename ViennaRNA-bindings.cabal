@@ -65,33 +65,40 @@ library
                     , NondecreasingIndentation
                     , ScopedTypeVariables
   c-sources:
+    C/ffiwrap_part_func.c
     -- remove all of these, then @stack build --test@ and include files that have the missing definitions
-    C/ViennaRNA/data_structures.c
-    C/ViennaRNA/eval.c
-    C/ViennaRNA/mfe.c
-    C/ViennaRNA/model.c
-    C/ViennaRNA/energy_par.c
-    C/ViennaRNA/fold.c
-    C/ViennaRNA/utils.c
-    C/ViennaRNA/gquad.c
-    C/ViennaRNA/exterior_loops.c
-    C/ViennaRNA/interior_loops.c
-    C/ViennaRNA/structure_utils.c
-    C/ViennaRNA/hairpin_loops.c
-    C/ViennaRNA/multibranch_loops.c
-    C/ViennaRNA/constraints.c
-    C/ViennaRNA/constraints_soft.c
-    C/ViennaRNA/params.c
-    C/ViennaRNA/alphabet.c
-    C/ViennaRNA/constraints_SHAPE.c
     C/ViennaRNA/aln_util.c
+    C/ViennaRNA/alphabet.c
+    C/ViennaRNA/boltzmann_sampling.c
+    C/ViennaRNA/centroid.c
     C/ViennaRNA/cofold.c
-    C/ViennaRNA/dp_matrices.c
+    C/ViennaRNA/constraints.c
     C/ViennaRNA/constraints_hard.c
+    C/ViennaRNA/constraints_SHAPE.c
+    C/ViennaRNA/constraints_soft.c
+    C/ViennaRNA/data_structures.c
+    C/ViennaRNA/dp_matrices.c
+    C/ViennaRNA/energy_par.c
+    C/ViennaRNA/eval.c
+    C/ViennaRNA/exterior_loops.c
+    C/ViennaRNA/file_formats.c
+    C/ViennaRNA/fold.c
+    C/ViennaRNA/gquad.c
+    C/ViennaRNA/hairpin_loops.c
+    C/ViennaRNA/interior_loops.c
+    C/ViennaRNA/mfe.c
     C/ViennaRNA/mm.c
+    C/ViennaRNA/model.c
+    C/ViennaRNA/multibranch_loops.c
+    C/ViennaRNA/params.c
+    C/ViennaRNA/part_func.c
+    C/ViennaRNA/part_func_co.c
+    C/ViennaRNA/plex.c
+    C/ViennaRNA/plex_functions.c
     C/ViennaRNA/ribo.c
     C/ViennaRNA/string_utils.c
-    C/ViennaRNA/file_formats.c
+    C/ViennaRNA/structure_utils.c
+    C/ViennaRNA/utils.c
   cc-options:
     -fPIC
   include-dirs:
