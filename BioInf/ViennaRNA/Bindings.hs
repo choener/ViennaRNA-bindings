@@ -32,6 +32,9 @@ circmfe = ffiCircFold
 eos :: String -> String -> IO Double
 eos i s = ffiEnergyOfStructure i s 0
 
+eosTemp :: Double -> String -> String -> IO Double
+eosTemp t i s = ffiEnergyOfStructureTemp t i s 0
+
 -- | Energy of a circular structure
 
 eosCirc :: String -> String -> IO Double

@@ -27,3 +27,25 @@ float ffiwrap_fold_temp (float temp, const char *sequence, char *structure)
   return mfe;
 }
 
+float
+ffiwrap_eos_temp (float temp, const char *string, const char *structure)
+{
+  float e;
+
+  vrna_md_t             md;
+  vrna_md_set_default(&md);
+  md.temperature = temp;
+
+  /* create fold_compound with default parameters and without DP matrices */
+  vrna_fold_compound_t *vc = vrna_fold_compound(string, &md, VRNA_OPTION_EVAL_ONLY);
+
+  /* evaluate structure */
+  e = vrna_eval_structure(vc, structure);
+
+  /* free fold_compound */
+  vrna_fold_compound_free(vc);
+
+  return e;
+}
+
+

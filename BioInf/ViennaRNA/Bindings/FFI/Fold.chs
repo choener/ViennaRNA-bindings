@@ -54,7 +54,16 @@ ffiFoldTemp t inp =
   s <- peekCAString struc
   return (cf2d e, s)
 
+ffiEnergyOfStructureTemp :: Double -> String -> String -> Int -> IO Double
+ffiEnergyOfStructureTemp t inp struc verb =
+  withCAString inp   $ \i ->
+  withCAString struc $ \s ->
+    setCutPoint (-1)
+    >>  eos_temp_p (realToFrac t) i s (fromIntegral verb :: CInt)
+    >>= (return . cf2d)
 
 
 foreign import ccall "ffiwrap_fold_temp" fold_temp_p :: CFloat -> CString -> CString -> IO CFloat
+
+foreign import ccall "ffiwrap_eos_temp" eos_temp_p :: CFloat -> CString -> CString -> CInt -> IO CFloat
 

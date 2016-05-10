@@ -47,6 +47,16 @@ case_eos_001 = do
   e <- V.eos "ACGAUCAGAGAUCAGAGCAUACGACAGCAG" "..((((...))))...((........)).."
   assertBool "eos" $ e =~ (-2.90)
 
+case_eosTemp_37_001 :: Assertion
+case_eosTemp_37_001 = do
+  e <- V.eosTemp 37 "ACGAUCAGAGAUCAGAGCAUACGACAGCAG" "..((((...))))...((........)).."
+  assertBool "eos" $ e =~ (-2.90)
+
+case_eosTemp_20_001 :: Assertion
+case_eosTemp_20_001 = do
+  e <- V.eosTemp 20 "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA" "((((((((((((.....)))))((.(.(((((.......))))).).))(((((.......))))))))))))."
+  assertBool "eos" $ e =~ (-40.86)
+
 -- TODO more on @arr@ checks !
 
 case_part_001 :: Assertion
