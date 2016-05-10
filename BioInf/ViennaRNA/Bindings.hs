@@ -20,6 +20,9 @@ import BioInf.ViennaRNA.Bindings.FFI.PartFunc as FFI
 mfe :: String -> IO (Double,String)
 mfe = ffiFold
 
+mfeTemp :: Double -> String -> IO (Double,String)
+mfeTemp = ffiFoldTemp
+
 circmfe :: String -> IO (Double,String)
 circmfe = ffiCircFold
 

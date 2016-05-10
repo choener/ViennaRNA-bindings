@@ -1,10 +1,5 @@
 
-module BioInf.ViennaRNA.Bindings.FFI.Fold
-  ( ffiFold
-  , ffiEnergyOfStructure
-  , ffiEnergyOfCircStructure
-  , ffiCircFold
-  ) where
+module BioInf.ViennaRNA.Bindings.FFI.Fold where
 
 import Foreign.C.String
 import Foreign.C.Types
@@ -48,4 +43,18 @@ ffiCircFold inp = withCAString inp $ \cinp ->
   e <- {#call circfold #} cinp struc
   s <- peekCAString struc
   return (cf2d e, s)
+
+
+
+ffiFoldTemp :: Double -> String -> IO (Double,String)
+ffiFoldTemp t inp =
+  withCAString inp $ \cinp ->
+  withCAString inp $ \struc -> do
+  e <- fold_temp_p (realToFrac t) cinp struc
+  s <- peekCAString struc
+  return (cf2d e, s)
+
+
+
+foreign import ccall "ffiwrap_fold_temp" fold_temp_p :: CFloat -> CString -> CString -> IO CFloat
 

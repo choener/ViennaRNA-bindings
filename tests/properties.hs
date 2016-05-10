@@ -63,6 +63,30 @@ case_duplexfold_001 = do
   assertBool "energy" $ energy d =~ (-4.10)
   assertBool "structure" $ structure d == ".((...((...((.&.))...))...))."
 
+case_mfeTemp_37_001 :: Assertion
+case_mfeTemp_37_001 = do
+  (e,s) <- V.mfeTemp 37 "cccaaaggg"
+  assertBool "energy" $ e =~ (-1.2)
+  assertBool "structure" $ s == "(((...)))"
+
+case_mfeTemp_37_002 :: Assertion
+case_mfeTemp_37_002 = do
+  (e,s) <- V.mfeTemp 37 "uguagcuagcuagcuagcuacguacguagcuagc"
+  assertBool "energy" $ e =~ (-14.0)
+  assertBool "structure" $ s == "............(((((((((....)))))))))"
+
+case_mfeTemp_37_003 :: Assertion
+case_mfeTemp_37_003 = do
+  (e,s) <- V.mfeTemp 37 "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
+  assertBool "energy" $ e =~ (-29.90)
+  assertBool "structure" $ s == "(((((((..(((.((((.(....(((((.(((((....)))).)..).))))....).)))).))))))))))."
+
+case_mfeTemp_20_001 :: Assertion
+case_mfeTemp_20_001 = do
+  (e,s) <- V.mfeTemp 20 "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
+  assertBool "energy" $ e =~ (-40.86)
+  assertBool "structure" $ s == "((((((((((((.....)))))((.(.(((((.......))))).).))(((((.......))))))))))))."
+
 
 
 main :: IO ()
