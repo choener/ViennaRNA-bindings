@@ -1,5 +1,8 @@
 
 -- | Bindings to important functions in the ViennaRNA library.
+--
+-- TODO Anything here that is not thread-safe should internally use
+-- a mutex!
 
 module BioInf.ViennaRNA.Bindings
   ( module BioInf.ViennaRNA.Bindings
