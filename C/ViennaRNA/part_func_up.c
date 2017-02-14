@@ -1,4 +1,3 @@
-/* Last changed Time-stamp: <2008-07-04 15:57:03 ulim> */
 /*
                   partiton function for RNA secondary structures
 
@@ -52,7 +51,10 @@
   Initial revision
 */
 
-#include <config.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -69,8 +71,7 @@
 #include "ViennaRNA/loop_energies.h"
 #include "ViennaRNA/part_func_up.h"
 #include "ViennaRNA/duplex.h"
-/*@unused@*/
-static char rcsid[] UNUSED = "$Id: part_func_up.c,v 1.4 2008/07/04 14:27:36 ivo Exp $";
+
 
 #define CO_TURN 0
 #define ZERO(A) (fabs(A) < DBL_EPSILON)
@@ -629,11 +630,11 @@ PUBLIC interact *pf_interact( const char *s1,
       if(pos) cj = (int) (pos-i_short)+1; /* j */
 
       if(ck > 0 && ci > 0 && ci-ck+1 > w) {
-        fprintf(stderr, "distance between constrains in longer seq, %d, larger than -w = %d",ci-ck+1,w);
+        vrna_message_warning("distance between constrains in longer seq, %d, larger than -w = %d",ci-ck+1,w);
         vrna_message_error("pf_interact: could not satisfy all constraints");
       }
       if(cj > 0 && cl > 0 && cl-cj+1 > w) {
-        fprintf(stderr, "distance between constrains in shorter seq, %d, larger than -w = %d",cl-cj+1,w);
+        vrna_message_warning("distance between constrains in shorter seq, %d, larger than -w = %d",cl-cj+1,w);
         vrna_message_error("pf_interact: could not satisfy all constraints");
       }
     }
@@ -1101,6 +1102,7 @@ PRIVATE void scale_stru_pf_params(unsigned int length)
     pf_scale = exp(-(-185+(Pf->temperature-37.)*7.27)/kT);
     if (pf_scale<1) pf_scale=1;
   }
+  Pf->pf_scale = pf_scale;
   scale[0] = 1.;
   scale[1] = 1./pf_scale;
   expMLbase[0] = 1;
@@ -1256,7 +1258,7 @@ PUBLIC int plot_free_pu_out(pu_out* res, interact *pint, char *ofile, char *head
   double  kT = Pf->kT;
   wastl = fopen(ofile,"a");
   if (wastl==NULL) {
-    fprintf(stderr, "p_cont: can't open %s for Up_plot\n", ofile);
+    vrna_message_warning("p_cont: can't open %s for Up_plot", ofile);
     return(0);
   }
   sprintf(dg,"dG");
@@ -1418,8 +1420,7 @@ PRIVATE constrain *get_ptypes_up(char *Seq, const char *structure) {
         break;
       case ')':
         if (hx<=0) {
-          fprintf(stderr, "%s\n", structure);
-          vrna_message_error("1. unbalanced brackets in constraints");
+          vrna_message_error("1. unbalanced brackets in constraints\n%s", structure);
         }
         i = stack[--hx];
         type = con->ptype[con->indx[i]-j];
@@ -1435,8 +1436,7 @@ PRIVATE constrain *get_ptypes_up(char *Seq, const char *structure) {
       }
     }
     if (hx!=0) {
-      fprintf(stderr, "%s\n", structure);
-      vrna_message_error("2. unbalanced brackets in constraint string");
+      vrna_message_error("2. unbalanced brackets in constraint string\n%s", structure);
     }
     free(stack);
   }

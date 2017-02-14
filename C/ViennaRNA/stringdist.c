@@ -3,18 +3,20 @@
 		      Peter F Stadler, Ivo Hofacker
 			   Vienna RNA Package
 */
-/* Last changed Time-stamp: <2005-07-23 10:19:40 ivo> */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
-#include  "edit_cost.h"
-#include  "dist_vars.h"
-#include  "utils.h"
+#include "ViennaRNA/edit_cost.h"
+#include "ViennaRNA/dist_vars.h"
+#include "ViennaRNA/utils.h"
 
-static char rcsid[] = "$Id: stringdist.c,v 1.3 2005/07/24 08:37:15 ivo Exp $";
 
 #define PUBLIC
 #define PRIVATE        static
@@ -283,7 +285,7 @@ PRIVATE void DeCode(char *string, int k, int *tp, float *w)
          sscanf(label,"%d",&m);
          *w= (float) m;
          if(m==-1) {
-            fprintf(stderr, "Warning: Non-integer weight in DeCode ignored\n");
+            vrna_message_warning("Non-integer weight in DeCode ignored");
             *w=1.0;
          }
       }
@@ -318,9 +320,10 @@ PRIVATE int decode(char *id)
         n++;
     }
 
-    fprintf(stderr,"Syntax error: node identifier \"%s\" not found "
-		   "in coding string \"%s\"\n", id, coding);
-    fprintf(stderr,"Exiting...");
+    vrna_message_error("Syntax error: node identifier \"%s\" not found "
+                              "in coding string \"%s\"\n"
+                              "Exiting",
+                              id, coding);
     exit(0);
 }
 

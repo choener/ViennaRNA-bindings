@@ -2,12 +2,17 @@
 #define VIENNA_RNA_PACKAGE_FIND_PATH_H
 
 /**
- *  @file findpath.h
- *
+ *  @file     findpath.h
+ *  @ingroup  paths
+ *  @brief    A breadth-first search heuristic for optimal direct folding paths
+ */
+
+/**
  *  @addtogroup   direct_paths
- *  @{
+ *  @brief Heuristics to explore direct, optimal (re-)folding paths between two secondary structures
  *
- *  @brief Implementation of heuristics to explore optimal (re-)folding paths between two secondary structures
+ *  @{
+ *  @ingroup  direct_paths
  */
 
 /* make this interface backward compatible with RNAlib < 2.2.0 */
@@ -88,11 +93,11 @@ int vrna_path_findpath_saddle(vrna_fold_compound_t *vc,
  *
  *  @see vrna_fold_compound(), #vrna_fold_compound_t, vrna_path_findpath_saddle()
  *
- *  @param vc     The #vrna_fold_compound_t with precomputed sequence encoding and model details
- *  @param struc1 The start structure in dot-brakcet notation
- *  @param struc2 The target structure in dot-bracket notation
- *  @param max    A number specifying how many strutures are being kept at each step during the search
- *  @returns      The saddle energy in 10cal/mol
+ *  @param vc       The #vrna_fold_compound_t with precomputed sequence encoding and model details
+ *  @param s1       The start structure in dot-brakcet notation
+ *  @param s2       The target structure in dot-bracket notation
+ *  @param maxkeep  A number specifying how many strutures are being kept at each step during the search
+ *  @returns        The saddle energy in 10cal/mol
  */
 vrna_path_t *vrna_path_findpath(vrna_fold_compound_t *vc,
                                 const char *s1,

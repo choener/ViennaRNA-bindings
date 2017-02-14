@@ -3,7 +3,10 @@
 		Walter Fontana, Ivo L Hofacker, Peter F Stadler
 			     Vienna RNA Package
 */
-/* Last changed Time-stamp: <97/10/27 15:23:48 ivo> */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -379,9 +382,10 @@ PRIVATE int decode(char *id)
       n++;
    }
 
-   fprintf(stderr,"Syntax error: node identifier \"%s\" not found "
-		  "in coding string \"%s\"\n", id, coding);
-   fprintf(stderr, "Exiting...");
+   vrna_message_error( "Syntax error: node identifier \"%s\" not found "
+                              "in coding string \"%s\"\n"
+                              "Exiting...",
+                              id, coding);
    exit(0);
 }
 

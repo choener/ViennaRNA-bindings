@@ -13,12 +13,16 @@
 #endif
 
 /**
- *  @addtogroup   loops
- *
- *  @{
- *
- *  @file gquad.h
+ *  @file       gquad.h
+ *  @ingroup    paired_modules
+ *  @brief      G-quadruplexes
+ */
+
+/**
+ *  @addtogroup gquads
  *  @brief Various functions related to G-quadruplex computations
+ *  @{
+ *  @ingroup gquads
  */
 
 
@@ -76,6 +80,7 @@ FLT_OR_DBL  *get_gquad_pf_matrix( short *S,
 int         **get_gquad_L_matrix( short *S,
                                   int start,
                                   int maxdist,
+                                  int n,
                                   int **g,
                                   vrna_param_t *P);
 

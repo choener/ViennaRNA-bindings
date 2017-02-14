@@ -1,4 +1,3 @@
-/* Last changed Time-stamp: <2007-08-26 11:59:45 ivo> */
 /*
            compute the duplex structure of two RNA strands,
                 allowing only inter-strand base pairs.
@@ -9,7 +8,10 @@
                           Vienna RNA package
 */
 
-#include <config.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -29,9 +31,6 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
-/*@unused@*/
-static char rcsid[] UNUSED = "$Id: duplex.c,v 1.8 2007/08/26 10:08:44 ivo Exp $";
 
 #define STACK_BULGE1  1     /* stacking energies for bulges of size 1 */
 #define NEW_NINIO     1     /* new asymetry penalty */
@@ -189,7 +188,7 @@ PUBLIC duplexT *duplex_subopt(const char *s1, const char *s2, int delta, int w) 
       if (!type) continue;
 
       struc = backtrack(i,j);
-      fprintf(stderr, "%d %d %d\n", i,j,E);
+      vrna_message_info(stderr, "%d %d %d", i,j,E);
       if (n_subopt+1>=n_max) {
         n_max *= 2;
         subopt = (duplexT *) vrna_realloc(subopt, n_max*sizeof(duplexT));
@@ -433,7 +432,7 @@ PUBLIC duplexT *aliduplex_subopt(const char *s1[], const char *s2[], int delta, 
       }
       if (skip) continue;
       struc = alibacktrack(i,j,(const short **)S1, (const short **)S2);
-      fprintf(stderr, "%d %d %d\n", i,j,E);
+      vrna_message_info(stderr, "%d %d %d", i,j,E);
       if (n_subopt+1>=n_max) {
         n_max *= 2;
         subopt = (duplexT *) vrna_realloc(subopt, n_max*sizeof(duplexT));

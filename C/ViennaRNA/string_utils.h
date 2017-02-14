@@ -15,13 +15,17 @@
 #endif
 
 /**
- *  @addtogroup   string_utils
- *  @{
- *
- *  @file string_utils.h
- *  @brief General utility- and helper-functions for RNA sequence and structure strings used throughout the ViennaRNA Package
+ *  @file     string_utils.h
+ *  @ingroup  utils
+ *  @brief    General utility- and helper-functions for RNA sequence and structure strings used throughout the ViennaRNA Package
  */
 
+/**
+ *  @{
+ *  @ingroup   string_utils
+ */
+
+#include <stdarg.h>
 #include <ViennaRNA/data_structures.h>
 
 /**
@@ -62,6 +66,80 @@ char *strdup(const char *s);
 #endif
 
 /**
+ *  @brief Safely create a formatted string
+ *
+ *  This function is a safe implementation for creating a formatted character array,
+ *  similar to @em sprintf.
+ *  Internally, it uses the @em asprintf function if available to dynamically allocate
+ *  a large enough character array to store the supplied content. If @em asprintf is
+ *  not available, mimic it's behavior using @em vsnprintf.
+ *
+ *  @note The returned pointer of this function should always be passed to @em free() to
+ *  release the allocated memory
+ *
+ *  @see vrna_strdup_vprintf(), vrna_strcat_printf()
+ *
+ *  @param  format  The format string (See also asprintf)
+ *  @param  ...     The list of variables used to fill the format string
+ *  @return         The formatted, null-terminated string, or NULL if something has gone wrong
+ */
+char *vrna_strdup_printf(const char *format, ...);
+
+
+/**
+ *  @brief Safely create a formatted string
+ *
+ *  This function is the @em va_list version of vrna_strdup_printf()
+ *
+ *  @note The returned pointer of this function should always be passed to @em free() to
+ *  release the allocated memory
+ *
+ *  @see vrna_strdup_printf(), vrna_strcat_printf(), vrna_strcat_vprintf()
+ *
+ *  @param  format  The format string (See also asprintf)
+ *  @param  ...     The list of variables used to fill the format string
+ *  @return         The formatted, null-terminated string, or NULL if something has gone wrong
+ */
+char *vrna_strdup_vprintf(const char *format, va_list argp);
+
+
+/**
+ *  @brief Safely append a formatted string to another string
+ *
+ *  This function is a safe implementation for appending a formatted character array,
+ *  similar to a cobination of @em strcat and @em sprintf.
+ *  The function automatically allocates enough memory to store both, the previous
+ *  content stored at @p dest and the appended format string. If the @p dest pointer
+ *  is NULL, the function allocate memory only for the format string.
+ *  The function returns the number of characters in the resulting string or -1
+ *  in case of an error.
+ *
+ *  @see vrna_strcat_vprintf(), vrna_strdup_printf(), vrna_strdup_vprintf()
+ *
+ *  @param  dest    The address of a char *pointer where the formatted string is to be appended
+ *  @param  format  The format string (See also sprintf)
+ *  @param  ...     The list of variables used to fill the format string
+ *  @return         The number of characters in the final string, or -1 on error
+ */
+int vrna_strcat_printf(char **dest, const char *format, ...);
+
+
+/**
+ *  @brief Safely append a formatted string to another string
+ *
+ *  This function is the @em va_list version of vrna_strcat_printf()
+ *
+ *  @see vrna_strcat_printf(), vrna_strdup_printf(), vrna_strdup_vprintf()
+ *
+ *  @param  dest    The address of a char *pointer where the formatted string is to be appended
+ *  @param  format  The format string (See also sprintf)
+ *  @param  ...     The list of variables used to fill the format string
+ *  @return         The number of characters in the final string, or -1 on error
+ */
+int vrna_strcat_vprintf(char **dest, const char *format, va_list args);
+
+
+/**
  *  @brief Create a random string using characters from a specified symbol set
  *
  *  @param l        The length of the sequence
@@ -84,8 +162,9 @@ int vrna_hamming_distance(const char *s1, const char *s2);
  *
  *  This function is similar to vrna_hamming_distance() but instead of comparing both sequences
  *  up to their actual length only the first 'n' characters are taken into account
- *  @param s1   The first sequence
- *  @param s2   The second sequence
+ *  @param  s1  The first sequence
+ *  @param  s2  The second sequence
+ *  @param  n   The length of the subsequences to consider (starting from the 5' end)
  *  @return     The hamming distance between s1 and s2
  */
 int vrna_hamming_distance_bound(const char *s1, const char *s2, int n);

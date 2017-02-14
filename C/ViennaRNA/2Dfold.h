@@ -1,9 +1,3 @@
-/*
-      minimum free energy
-      RNA secondary structure with
-      basepair distance d to reference structure prediction
-
-*/
 #ifndef VIENNA_RNA_PACKAGE_TWO_D_FOLD_H
 #define VIENNA_RNA_PACKAGE_TWO_D_FOLD_H
 
@@ -21,14 +15,10 @@
 #endif
 
 /**
- *  @addtogroup kl_neighborhood
- *  @brief Compute Thermodynamic properties for a Distance Class Partitioning of the Secondary Structure Space
+ *  @file 2Dfold.h
+ *  @ingroup kl_neighborhood
+ *  @brief MFE structures for base pair distance classes
  *
- *  All functions related to this group implement the basic recursions for MFE folding, partition function
- *  computation and stochastic backtracking with a @e classified @e dynamic @e programming approach.
- *  The secondary structure space is divided into partitions according to the base pair distance to two
- *  given reference structures and all relevant properties are calculated for each of the resulting partitions
- *  @see For further details, we refer to Lorenz et al. 2009 @cite lorenz:2009
  */
 
 /**
@@ -37,8 +27,9 @@
  *  the secondary structure space according to the base pair distance to two fixed reference structures
  *  basepair distance to two fixed reference structures
  *  @see For further details, we refer to Lorenz et al. 2009 @cite lorenz:2009
+ *
  *  @{
- *  @file 2Dfold.h
+ *  @ingroup  kl_neighborhood_mfe
  *
  */
 
@@ -103,7 +94,7 @@ vrna_mfe_TwoD(vrna_fold_compound_t *vc,
 /**
  * @brief Backtrack a minimum free energy structure from a 5' section of specified length
  *
- * This function allows to backtrack a secondary structure beginning at the 5' end, a specified
+ * This function allows one to backtrack a secondary structure beginning at the 5' end, a specified
  * length and residing in a specific distance class.
  * If the argument 'k' gets a value of -1, the structure that is backtracked is assumed to
  * reside in the distance class where all structures exceeding the maximum basepair distance
@@ -317,7 +308,7 @@ TwoDfoldList( TwoDfold_vars *vars,
 /**
  * @brief Backtrack a minimum free energy structure from a 5' section of specified length
  *
- * This function allows to backtrack a secondary structure beginning at the 5' end, a specified
+ * This function allows one to backtrack a secondary structure beginning at the 5' end, a specified
  * length and residing in a specific distance class.
  * If the argument 'k' gets a value of -1, the structure that is backtracked is assumed to
  * reside in the distance class where all structures exceeding the maximum basepair distance

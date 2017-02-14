@@ -15,26 +15,28 @@
 #define VRNA_BACKWARD_COMPAT
 
 /**
- *  @addtogroup   file_utils
- *
+ *  @file     file_formats.h
+ *  @ingroup  file_utils
+ *  @brief    Read and write different file formats for RNA sequences, structures
+ */
+
+/**
  *  @{
- *
- *  @file file_formats.h
- *  @brief Functions dealing with file formats for RNA sequences, structures, and alignments
- *
- *  @see @ref constraint-formats-file 
+ *  @ingroup  file_utils
  */
 
 #include <stdio.h>
 
 #include <ViennaRNA/data_structures.h>
+#include <ViennaRNA/file_formats_msa.h>
 
 /**
  *  @brief Print a secondary structure as helix list
  *
- *  \param  seq         The RNA sequence
- *  @param  db    The structure in dot-bracket format
- *  @param  file  The file handle used to print to (print defaults to 'stdout' if(file == NULL) )
+ *  @param  seq     The RNA sequence
+ *  @param  db      The structure in dot-bracket format
+ *  @param  energy  Free energy of the structure in kcal/mol
+ *  @param  file    The file handle used to print to (print defaults to 'stdout' if(file == NULL) )
  */
 void vrna_file_helixlist( const char *seq,
                           const char *db,
@@ -224,20 +226,6 @@ int vrna_file_SHAPE_read( const char *file_name,
                           char *sequence,
                           double *values);
 
-/**
- *  @brief  Read constraints from an input file
- *
- *  This function reads constraint definitions from a file and converts them
- *  into an array of #vrna_plist_t data structures. The data fields of each individual
- *  returned plist entry may adopt the following configurations:
- *  - plist.i == plist.j @f$ \rightarrow @f$ single nucleotide constraint
- *  - plist.i != plist.j @f$ \rightarrow @f$ base pair constraint
- *  - plist.i == 0 @f$ \rightarrow @f$ End of list
- *
- */
-vrna_plist_t *vrna_file_constraints_read( const char *filename,
-                                          unsigned int length,
-                                          unsigned int options);
 
 #ifdef  VRNA_BACKWARD_COMPAT
 

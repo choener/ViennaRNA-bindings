@@ -13,12 +13,16 @@
                   Vienna RNA package
 */
 
-#include <config.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
+#include <unistd.h>
 #include <limits.h>
 
 #include "ViennaRNA/utils.h"
@@ -32,6 +36,8 @@
 #include "ViennaRNA/gquad.h"
 #include "ViennaRNA/cofold.h"
 #include "ViennaRNA/eval.h"
+
+#include "ViennaRNA/color_output.inc"
 
 #define ON_SAME_STRAND(I,J,C)  (((I)>=(C))||((J)<(C)))
 
@@ -49,6 +55,9 @@ PUBLIC  int eos_debug = 0;  /* verbose info from energy_of_struct */
 #################################
 */
 PRIVATE vrna_fold_compound_t  *backward_compat_compound = NULL;
+
+PRIVATE int verbosity_default = 1;  /* default verbosity level */
+PRIVATE int verbosity_quiet   = -1; /* verbosity level for quiet operations */
 
 #ifdef _OPENMP
 
@@ -128,32 +137,13 @@ eval_int_loop(vrna_fold_compound_t *vc,
 
 /* consensus structure variants below */
 PRIVATE int
-energy_of_struct_pt_ali(vrna_fold_compound_t *vc,
-                        const short *pt);
+covar_energy_of_struct_pt(vrna_fold_compound_t *vc,
+                          const short *pt);
 
 PRIVATE int
-covar_energy_of_struct_pt_ali(vrna_fold_compound_t *vc,
-                              const short *pt);
-
-PRIVATE int
-stack_energy_pt_ali(vrna_fold_compound_t *vc,
-                    int i,
-                    const short *ptable);
-
-PRIVATE int
-stack_energy_covar_pt_ali(vrna_fold_compound_t *vc,
-                          int i,
-                          const short *ptable);
-
-PRIVATE int
-ML_Energy_pt_ali( vrna_fold_compound_t *vc,
-                  int i,
-                  const short *pt);
-
-PRIVATE int
-EL_Energy_pt_ali( vrna_fold_compound_t *vc,
-                  int i,
-                  const short *pt);
+stack_energy_covar_pt(vrna_fold_compound_t *vc,
+                      int i,
+                      const short *ptable);
 
 PRIVATE int
 en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
@@ -164,12 +154,12 @@ en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
                           const int *loop_idx);
 
 PRIVATE int
-covar_en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
-                      int i,
-                      int j,
-                      const char *structure,
-                      const short *pt,
-                      const int *loop_idx);
+covar_en_corr_of_loop_gquad(vrna_fold_compound_t *vc,
+                            int i,
+                            int j,
+                            const char *structure,
+                            const short *pt,
+                            const int *loop_idx);
 
 /*
 #################################
@@ -182,69 +172,70 @@ PUBLIC float
 vrna_eval_structure_simple( const char *string,
                             const char *structure){
 
-  float e;
-
-  /* create fold_compound with default parameters and without DP matrices */
-  vrna_fold_compound_t *vc = vrna_fold_compound(string, NULL, VRNA_OPTION_EVAL_ONLY);
-
-  /* evaluate structure */
-  e = vrna_eval_structure(vc, structure);
-
-  /* free fold_compound */
-  vrna_fold_compound_free(vc);
-
-  return e;
+  return vrna_eval_structure_simple_v(string, structure, verbosity_quiet, NULL);
 }
+
 
 PUBLIC float
 vrna_eval_structure_simple_verbose( const char *string,
                                     const char *structure,
                                     FILE *file){
 
+  return vrna_eval_structure_simple_v(string, structure, verbosity_default, file);
+}
+
+
+PUBLIC float
+vrna_eval_structure_simple_v( const char *string,
+                              const char *structure,
+                              int verbosity_level,
+                              FILE *file){
+
   float e;
 
   /* create fold_compound with default parameters and without DP matrices */
   vrna_fold_compound_t *vc = vrna_fold_compound(string, NULL, VRNA_OPTION_EVAL_ONLY);
 
   /* evaluate structure */
-  e = vrna_eval_structure_verbose(vc, structure, file);
+  e = vrna_eval_structure_v(vc, structure, verbosity_level, file);
 
   /* free fold_compound */
   vrna_fold_compound_free(vc);
 
   return e;
 }
+
 
 PUBLIC int
 vrna_eval_structure_pt_simple(const char *string,
                               const short *pt){
 
-  int e;
-
-  /* create fold_compound with default parameters and without DP matrices */
-  vrna_fold_compound_t *vc = vrna_fold_compound(string, NULL, VRNA_OPTION_EVAL_ONLY);
-
-  /* evaluate structure */
-  e = vrna_eval_structure_pt(vc, pt);
-
-  /* free fold_compound */
-  vrna_fold_compound_free(vc);
-
-  return e;
+  return vrna_eval_structure_pt_simple_v(string, pt, verbosity_quiet, NULL);
 }
+
 
 PUBLIC int
 vrna_eval_structure_pt_simple_verbose(const char *string,
                                       const short *pt,
                                       FILE *file){
 
+  return vrna_eval_structure_pt_simple_v(string, pt, verbosity_default, file);
+}
+
+
+PUBLIC int
+vrna_eval_structure_pt_simple_v(const char *string,
+                                const short *pt,
+                                int verbosity_level,
+                                FILE *file){
+
   int e;
 
   /* create fold_compound with default parameters and without DP matrices */
   vrna_fold_compound_t *vc = vrna_fold_compound(string, NULL, VRNA_OPTION_EVAL_ONLY);
 
   /* evaluate structure */
-  e = vrna_eval_structure_pt_verbose(vc, pt, file);
+  e = vrna_eval_structure_pt_v(vc, pt, verbosity_level, file);
 
   /* free fold_compound */
   vrna_fold_compound_free(vc);
@@ -252,6 +243,7 @@ vrna_eval_structure_pt_simple_verbose(const char *string,
   return e;
 
 }
+
 
 PUBLIC int
 vrna_eval_move_pt_simple( const char *string,
@@ -274,16 +266,37 @@ vrna_eval_move_pt_simple( const char *string,
 
 }
 
+
 PUBLIC  float
 vrna_eval_structure(vrna_fold_compound_t *vc,
                     const char *structure){
 
+  return vrna_eval_structure_v(vc, structure, verbosity_quiet, NULL);
+}
+
+
+PUBLIC float
+vrna_eval_structure_verbose(vrna_fold_compound_t *vc,
+                            const char *structure,
+                            FILE *file){
+
+  return vrna_eval_structure_v(vc, structure, verbosity_default, file);
+}
+
+
+PUBLIC float
+vrna_eval_structure_v(vrna_fold_compound_t *vc,
+                      const char *structure,
+                      int verbosity_level,
+                      FILE *file){
+
   short *pt = vrna_ptable(structure);
-  float en  = wrap_eval_structure(vc, structure, pt, NULL, -1);
+  float en  = wrap_eval_structure(vc, structure, pt, file, verbosity_level);
 
   free(pt);
   return en;
 }
+
 
 PUBLIC float
 vrna_eval_covar_structure(vrna_fold_compound_t *vc,
@@ -297,14 +310,14 @@ vrna_eval_covar_structure(vrna_fold_compound_t *vc,
   gq                              = vc->params->model_details.gquad;
   vc->params->model_details.gquad = 0;
 
-  if(vc->type == VRNA_VC_TYPE_ALIGNMENT){
-    res = (int)((float)covar_energy_of_struct_pt_ali(vc, pt) / (float)vc->n_seq);
+  if(vc->type == VRNA_FC_TYPE_COMPARATIVE){
+    res = (int)((float)covar_energy_of_struct_pt(vc, pt) / (float)vc->n_seq);
 
     vc->params->model_details.gquad = gq;
 
     if(gq){
       loop_idx  =   vrna_loopidx_from_ptable(pt);
-      res       +=  (int)((float)covar_en_corr_of_loop_gquad_ali(vc, 1, vc->length, structure, pt, (const int *)loop_idx) / (float)vc->n_seq);
+      res       +=  (int)((float)covar_en_corr_of_loop_gquad(vc, 1, vc->length, structure, pt, (const int *)loop_idx) / (float)vc->n_seq);
       free(loop_idx);
     }
   }
@@ -314,52 +327,48 @@ vrna_eval_covar_structure(vrna_fold_compound_t *vc,
   return (float)res/100.;
 }
 
-PUBLIC float
-vrna_eval_structure_verbose(vrna_fold_compound_t *vc,
-                            const char *structure,
-                            FILE *file){
-
-  short *pt = vrna_ptable(structure);
-  float en  = wrap_eval_structure(vc, structure, pt, file, 1);
-
-  free(pt);
-  return en;
-}
 
 PUBLIC int
 vrna_eval_structure_pt( vrna_fold_compound_t *vc,
                         const short *pt){
 
-  if(pt && vc){
-    if(pt[0] != (short)vc->length)
-      vrna_message_error("energy_of_struct: string and structure have unequal length");
-
-    return eval_pt(vc, pt, NULL, -1);
-  } else
-    return INF;
+  return vrna_eval_structure_pt_v(vc, pt, verbosity_quiet, NULL);
 }
+
 
 PUBLIC int
 vrna_eval_structure_pt_verbose( vrna_fold_compound_t *vc,
                                 const short *pt,
                                 FILE *file){
 
+  return vrna_eval_structure_pt_v(vc, pt, verbosity_default, file);
+}
+
+
+PUBLIC int
+vrna_eval_structure_pt_v( vrna_fold_compound_t *vc,
+                          const short *pt,
+                          int verbosity_level,
+                          FILE *file){
+
   if(pt && vc){
     if(pt[0] != (short)vc->length)
-      vrna_message_error("energy_of_struct: string and structure have unequal length");
+      vrna_message_error("vrna_eval_structure_*: string and structure have unequal length");
 
-    return eval_pt(vc, pt, file, 1);
+    return eval_pt(vc, pt, file, verbosity_level);
   } else
     return INF;
 }
+
 
 PUBLIC int
 vrna_eval_loop_pt(vrna_fold_compound_t *vc,
                   int i,
                   const short *pt){
 
-  return wrap_eval_loop_pt(vc, i, pt, -1);
+  return wrap_eval_loop_pt(vc, i, pt, verbosity_quiet);
 }
+
 
 PUBLIC float
 vrna_eval_move( vrna_fold_compound_t *vc,
@@ -381,6 +390,7 @@ vrna_eval_move( vrna_fold_compound_t *vc,
   return  (float)en/100.;
 }
 
+
 PUBLIC int
 vrna_eval_move_pt(vrna_fold_compound_t *vc,
                   short *pt,
@@ -388,9 +398,13 @@ vrna_eval_move_pt(vrna_fold_compound_t *vc,
                   int m2){
 
   /*compute change in energy given by move (m1,m2)*/
-  int en_post, en_pre, i,j,k,l, len;
+  int en_post, en_pre, i,j,k,l, len, cp;
+  vrna_param_t *P;
+  
+  len = vc->length;
+  cp  = vc->cutpoint;
+  P   = vc->params;
 
-  len = pt[0];
   k = (m1>0)?m1:-m1;
   l = (m2>0)?m2:-m2;
   /* first find the enclosing pair i<k<l<j */
@@ -399,8 +413,8 @@ vrna_eval_move_pt(vrna_fold_compound_t *vc,
     if (pt[j]<k) break;   /* found it */
     if (pt[j]>j) j=pt[j]; /* skip substructure */
     else {
-      fprintf(stderr, "%d %d %d %d ", m1, m2, j, pt[j]);
-      vrna_message_error("illegal move or broken pair table in vrna_eval_move_pt()");
+      vrna_message_error( "illegal move or broken pair table in vrna_eval_move_pt()\n"
+                          "%d %d %d %d ", m1, m2, j, pt[j]);
     }
   }
   i = (j<=len) ? pt[j] : 0;
@@ -424,6 +438,25 @@ vrna_eval_move_pt(vrna_fold_compound_t *vc,
     pt[k]=0;
     pt[l]=0;
   }
+
+  /* Cofolding -- Check if move changes COFOLD-Penalty */
+  if (!ON_SAME_STRAND(k, l, cp)) {
+    int p, c; p=c=0;
+    for (p=1; p < cp; ) { /* Count basepairs between two strands */
+      if (pt[p] != 0) {
+        if (ON_SAME_STRAND(p, pt[p], cp)) /* Skip stuff */
+          p=pt[p];
+        else if (++c > 1) break; /* Count a basepair, break if we have more than one */
+      }
+      p++;
+    }
+    if (m1<0 && c==1) /* First and only inserted basepair */
+      return (en_post - en_pre - P->DuplexInit);
+    else
+      if (c==0) /* Must have been a delete move */
+        return (en_post - en_pre + P->DuplexInit);
+  }
+
   return (en_post - en_pre);
 }
 
@@ -467,7 +500,7 @@ eval_int_loop(vrna_fold_compound_t *vc,
   if(type == 0)
     type = 7;
   if(type_2 == 0)
-    type = 7;
+    type_2 = 7;
 
   return ubf_eval_int_loop( i, j, p, q,
                             i + 1, j - 1, p - 1, q + 1,
@@ -484,36 +517,74 @@ eval_ext_int_loop(vrna_fold_compound_t *vc,
                   int p,
                   int q){
 
-  int             u1, u2, length;
+  int             e, u1, u2, length;
+  unsigned int    s, n_seq;
+  short           **SS, **S5, **S3;
+  unsigned short  **a2s;
   unsigned char   type, type_2;
   short           *S, si, sj, sp, sq;
   vrna_param_t    *P;
   vrna_md_t       *md;
-  vrna_sc_t       *sc;
+  vrna_sc_t       *sc, **scs;
 
   length  = vc->length;
   P       = vc->params;
   md      = &(P->model_details);
   S       = vc->sequence_encoding;
-  si      = S[j+1];
-  sj      = S[i-1];
-  sp      = S[p-1];
-  sq      = S[q+1];
-  type    = (unsigned char)md->pair[S[j]][S[i]];
-  type_2  = (unsigned char)md->pair[S[q]][S[p]];
-  sc      = vc->sc;
+  e       = INF;
 
-  if(type == 0)
-    type = 7;
-  if(type_2 == 0)
-    type = 7;
+  switch(vc->type){
+    case VRNA_FC_TYPE_SINGLE:     si      = S[j+1];
+                                  sj      = S[i-1];
+                                  sp      = S[p-1];
+                                  sq      = S[q+1];
+                                  type    = (unsigned char)md->pair[S[j]][S[i]];
+                                  type_2  = (unsigned char)md->pair[S[q]][S[p]];
+                                  sc      = vc->sc;
 
-  return ubf_eval_ext_int_loop( i, j, p, q,
-                                i - 1, j + 1, p - 1, q + 1,
-                                si, sj, sp, sq,
-                                type, type_2,
-                                length,
-                                P, sc);
+                                  if(type == 0)
+                                    type = 7;
+                                  if(type_2 == 0)
+                                    type_2 = 7;
+
+                                  e = ubf_eval_ext_int_loop(i, j, p, q,
+                                                            i - 1, j + 1, p - 1, q + 1,
+                                                            si, sj, sp, sq,
+                                                            type, type_2,
+                                                            length,
+                                                            P, sc);
+                                  break;
+
+    case VRNA_FC_TYPE_COMPARATIVE:  n_seq = vc->n_seq;
+                                  SS      = vc->S;
+                                  S5      = vc->S5; /* S5[s][i] holds next base 5' of i in sequence s */
+                                  S3      = vc->S3; /* Sl[s][i] holds next base 3' of i in sequence s */
+                                  a2s     = vc->a2s;
+                                  n_seq   = vc->n_seq;
+                                  scs     = vc->scs;
+
+                                  for (e = 0, s = 0; s < n_seq; s++) {
+                                    type    = (unsigned char)md->pair[SS[s][j]][SS[s][i]];
+                                    if(type == 0)
+                                      type = 7;
+                                    type_2  = (unsigned char)md->pair[SS[s][q]][SS[s][p]]; /* q,p not p,q! */
+                                    if(type_2 == 0)
+                                      type_2 = 7;
+
+                                    sc = (scs && scs[s]) ? scs[s] : NULL;
+
+                                    e += ubf_eval_ext_int_loop(a2s[s][i], a2s[s][j], a2s[s][p], a2s[s][q],
+                                                                    a2s[s][i - 1], a2s[s][j + 1], a2s[s][p - 1], a2s[s][q + 1],
+                                                                    S3[s][j], S5[s][i], S5[s][p], S3[s][q],
+                                                                    type, type_2,
+                                                                    a2s[s][length],
+                                                                    P, sc);
+                                  }
+
+                                  break;
+  }
+
+  return e;
 }
 
 PRIVATE  vrna_param_t *
@@ -554,13 +625,16 @@ wrap_eval_loop_pt(vrna_fold_compound_t *vc,
     return energy;
   }
   j = pt[i];
-  if (j<i) vrna_message_error("i is unpaired in loop_energy()");
+  if(j < i)
+    vrna_message_error("i is unpaired in loop_energy()");
   type = P->model_details.pair[s[i]][s[j]];
   if (type==0) {
     type=7;
-    if (verbosity>=0)
-      fprintf(stderr,"WARNING: bases %d and %d (%c%c) can't pair!\n", i, j,
-              vrna_nucleotide_decode(s[i], &(P->model_details)), vrna_nucleotide_decode(s[j], &(P->model_details)));
+    if (verbosity > verbosity_quiet)
+      vrna_message_warning( "bases %d and %d (%c%c) can't pair!",
+                            i, j,
+                            vrna_nucleotide_decode(s[i], &(P->model_details)),
+                            vrna_nucleotide_decode(s[j], &(P->model_details)));
   }
   p=i; q=j;
 
@@ -580,9 +654,11 @@ wrap_eval_loop_pt(vrna_fold_compound_t *vc,
     type_2 = P->model_details.pair[s[q]][s[p]];
     if (type_2==0) {
       type_2=7;
-      if (verbosity>=0)
-        fprintf(stderr,"WARNING: bases %d and %d (%c%c) can't pair!\n", p, q,
-              vrna_nucleotide_decode(s[p], &(P->model_details)), vrna_nucleotide_decode(s[q], &(P->model_details)));
+      if (verbosity > verbosity_quiet)
+        vrna_message_warning( "bases %d and %d (%c%c) can't pair!",
+                              p, q,
+                              vrna_nucleotide_decode(s[p], &(P->model_details)),
+                              vrna_nucleotide_decode(s[q], &(P->model_details)));
     }
 
     energy = eval_int_loop(vc, i, j, p, q);
@@ -607,7 +683,7 @@ wrap_eval_structure(vrna_fold_compound_t *vc,
   vc->params->model_details.gquad = 0;
 
   switch(vc->type){
-    case VRNA_VC_TYPE_SINGLE:     if(vc->params->model_details.circ){
+    case VRNA_FC_TYPE_SINGLE:     if(vc->params->model_details.circ){
                                     res = eval_circ_pt(vc, pt, file, verbosity);
                                   } else {
                                     res = eval_pt(vc, pt, file, verbosity);
@@ -619,8 +695,11 @@ wrap_eval_structure(vrna_fold_compound_t *vc,
                                   }
                                   break;
 
-    case VRNA_VC_TYPE_ALIGNMENT:  res = (int)((float)energy_of_struct_pt_ali(vc, pt) / (float)vc->n_seq);
-
+    case VRNA_FC_TYPE_COMPARATIVE:  if(vc->params->model_details.circ){
+                                    res = (int)((float)eval_circ_pt(vc, pt, file, verbosity) / (float)vc->n_seq);
+                                  } else {
+                                    res = (int)((float)eval_pt(vc, pt, file, verbosity) / (float)vc->n_seq);
+                                  }
                                   vc->params->model_details.gquad = gq;
 
                                   if(gq){
@@ -650,11 +729,14 @@ eval_pt(vrna_fold_compound_t *vc,
   cp      = vc->cutpoint;
 
   if(vc->params->model_details.gquad)
-    vrna_message_warning("vrna_eval_*_pt: No gquadruplex support!\nIgnoring potential gquads in structure!\nUse e.g. vrna_eval_structure() instead!");
+    vrna_message_warning( "vrna_eval_*_pt: No gquadruplex support!\n"
+                          "Ignoring potential gquads in structure!\n"
+                          "Use e.g. vrna_eval_structure() instead!");
 
-  energy =  backtrack_type=='M' ? energy_of_ml_pt(vc, 0, pt) : energy_of_extLoop_pt(vc, 0, pt);
+  energy = vc->params->model_details.backtrack_type=='M' ? energy_of_ml_pt(vc, 0, pt) : energy_of_extLoop_pt(vc, 0, pt);
+
   if (verbosity_level>0)
-    fprintf(out, "External loop                           : %5d\n", energy);
+    print_eval_ext_loop(out, energy);
   for (i=1; i<=length; i++) {
     if (pt[i]==0) continue;
     energy += stack_energy(vc, i, pt, out, verbosity_level);
@@ -676,9 +758,11 @@ eval_circ_pt( vrna_fold_compound_t *vc,
               FILE *file,
               int verbosity_level){
 
+  unsigned int      s, n_seq;
   int               i, j, length, energy, en0, degree;
+  unsigned short    **a2s;
   vrna_param_t      *P;
-  vrna_sc_t         *sc;
+  vrna_sc_t         *sc, **scs;
   FILE              *out;
 
   energy        = 0;
@@ -686,11 +770,14 @@ eval_circ_pt( vrna_fold_compound_t *vc,
   degree        = 0;
   length        = vc->length;
   P             = vc->params;
-  sc            = vc->sc;
+  sc            = (vc->type == VRNA_FC_TYPE_SINGLE) ? vc->sc : NULL;
+  scs           = (vc->type == VRNA_FC_TYPE_COMPARATIVE) ? vc->scs : NULL;
   out           = (file) ? file : stdout;
 
   if(P->model_details.gquad)
-    vrna_message_warning("vrna_eval_*_pt: No gquadruplex support!\nIgnoring potential gquads in structure!\nUse e.g. vrna_eval_structure() instead!");
+    vrna_message_warning( "vrna_eval_*_pt: No gquadruplex support!\n"
+                          "Ignoring potential gquads in structure!\n"
+                          "Use e.g. vrna_eval_structure() instead!");
 
   /* evaluate all stems in exterior loop */
   for (i=1; i<=length; i++) {
@@ -707,12 +794,23 @@ eval_circ_pt( vrna_fold_compound_t *vc,
   /* evaluate exterior loop itself */
   switch(degree){
     case 0:   /* unstructured */
-              if(sc){
-                if(sc->energy_up)
-                  en0 += sc->energy_up[1][length];
+              switch(vc->type){
+                case VRNA_FC_TYPE_SINGLE:     if(sc){
+                                                if(sc->energy_up)
+                                                  en0 += sc->energy_up[1][length];
+                                              }
+                                              break;
+
+                case VRNA_FC_TYPE_COMPARATIVE:  n_seq = vc->n_seq;
+                                              a2s   = vc->a2s;
+                                              if(scs)
+                                                for(s = 0; s < n_seq; s++){
+                                                  if(scs[s] && scs[s]->energy_up)
+                                                    en0 += scs[s]->energy_up[1][a2s[s][length]];
+                                                }
+                                              break;
               }
               break;
-
     case 1:   /* hairpin loop */
               en0 = vrna_eval_ext_hp_loop(vc, i, j);
               break;
@@ -729,13 +827,15 @@ eval_circ_pt( vrna_fold_compound_t *vc,
               break;
 
     default:  /* multibranch loop */
-              en0 =   energy_of_ml_pt(vc, 0, (const short *)pt)
-                    - P->MLintern[0];
+              en0 = energy_of_ml_pt(vc, 0, (const short *)pt);
+
+              if(vc->type == VRNA_FC_TYPE_SINGLE)
+                en0 -= E_MLstem(0, -1, -1, P); /* remove virtual closing pair */
               break;
   }
 
   if (verbosity_level>0)
-    fprintf(out, "External loop                           : %5d\n", en0);
+    print_eval_ext_loop(out, en0);
 
   energy += en0;
 
@@ -796,7 +896,8 @@ en_corr_of_loop_gquad(vrna_fold_compound_t *vc,
 
       /* seek for first pairing base located 5' of the g-quad */
       for(r = p - 1; !pt[r] && (r >= i); r--);
-      if(r < i) vrna_message_error("this should not happen");
+      if(r < i)
+        vrna_message_error("this should not happen");
 
       if(r < pt[r]){ /* found the enclosing pair */
         s = pt[r];
@@ -807,7 +908,8 @@ en_corr_of_loop_gquad(vrna_fold_compound_t *vc,
         r = pt[r]-1 ;
         /* seek for next pairing base 5' of r */
         for(; !pt[r] && (r >= i); r--);
-        if(r < i) vrna_message_error("so nich");
+        if(r < i)
+          vrna_message_error("so nich");
         if(r < pt[r]){ /* found the enclosing pair */
           s = pt[r];
         } else {
@@ -816,7 +918,8 @@ en_corr_of_loop_gquad(vrna_fold_compound_t *vc,
             if(pt[r]){ r = pt[r]; num_elem++;}
             r--;
           }
-          if(r < i) vrna_message_error("so nich");
+          if(r < i)
+            vrna_message_error("so nich");
           s = pt[r]; /* found the enclosing pair */
         }
       }
@@ -835,13 +938,15 @@ en_corr_of_loop_gquad(vrna_fold_compound_t *vc,
             num_g++;
           }
         } else { /* we must have found a stem */
-          if(!(u < pt[u])) vrna_message_error("wtf!");
+          if(!(u < pt[u]))
+            vrna_message_error("wtf!");
           num_elem++; elem_i = u; elem_j = pt[u];
           energy += en_corr_of_loop_gquad(vc, u, pt[u], structure, pt);
           u = pt[u] + 1;
         }
       }
-      if(u!=s) vrna_message_error("what the hell");
+      if(u!=s)
+        vrna_message_error("what the heck");
       else{ /* we are done since we've found no other 3' structure element */
         switch(num_elem){
           /* g-quad was misinterpreted as hairpin closed by (r,s) */
@@ -893,85 +998,161 @@ stack_energy( vrna_fold_compound_t *vc,
 
   /* recursively calculate energy of substructure enclosed by (i,j) */
 
-  int               ee, energy, j, p, q, type, *rtype, cp;
-  char              *string;
-  short             *s;
+  int               ee, energy, j, p, q, type, *rtype, *types, cp, ss, n_seq;
+  char              *string, **Ss;
+  short             *s, **S, **S5, **S3;
+  unsigned short    **a2s;
   FILE              *out;
   vrna_param_t      *P;
+  vrna_md_t         *md;
 
-
-  string  = vc->sequence;
   cp      = vc->cutpoint;
   s       = vc->sequence_encoding2;
   P       = vc->params;
-  rtype   = &(P->model_details.rtype[0]);
+  md      = &(P->model_details);
+  rtype   = &(md->rtype[0]);
+  types   = NULL;
   energy  = 0;
   out     = (file) ? file : stdout;
 
-  j=pt[i];
-  type = P->model_details.pair[s[i]][s[j]];
-  if (type==0) {
-    type=7;
-    if (verbosity_level>=0)
-      fprintf(stderr,"WARNING: bases %d and %d (%c%c) can't pair!\n", i, j,
-              string[i-1],string[j-1]);
+  j = pt[i];
+
+  switch(vc->type){
+    case VRNA_FC_TYPE_SINGLE:     string  = vc->sequence;
+                                  type    = md->pair[s[i]][s[j]];
+                                  if(type == 0){
+                                    type = 7;
+                                    if(verbosity_level > verbosity_quiet)
+                                      vrna_message_warning( "bases %d and %d (%c%c) can't pair!",
+                                                            i, j,
+                                                            string[i - 1],
+                                                            string[j - 1]);
+                                  }
+                                  break;
+
+    case VRNA_FC_TYPE_COMPARATIVE:  string  = vc->cons_seq;
+                                  S       = vc->S;
+                                  S5      = vc->S5; /* S5[s][i] holds next base 5' of i in sequence s */
+                                  S3      = vc->S3; /* Sl[s][i] holds next base 3' of i in sequence s */
+                                  Ss      = vc->Ss;
+                                  a2s     = vc->a2s;
+                                  n_seq   = vc->n_seq;
+                                  types   = (int *)vrna_alloc(n_seq * sizeof(int));
+
+                                  for(ss = 0; ss < n_seq; ss++){
+                                    types[ss] = md->pair[S[ss][i]][S[ss][j]];
+                                    if(types[ss] == 0){
+                                      types[ss] = 7;
+                                    }
+                                  }
+                                  break;
+
+    default:                      return INF;
+                                  break;
   }
 
-  p=i; q=j;
-  while (p<q) { /* process all stacks and interior loops */
+  p = i;
+  q = j;
+
+  while(p < q){ /* process all stacks and interior loops */
     int type_2;
-    while (pt[++p]==0);
-    while (pt[--q]==0);
-    if ((pt[q]!=(short)p)||(p>q)) break;
-    type_2 = P->model_details.pair[s[q]][s[p]];
-    if (type_2==0) {
-      type_2=7;
-      if (verbosity_level>=0)
-        fprintf(stderr,"WARNING: bases %d and %d (%c%c) can't pair!\n", p, q,
-                string[p-1],string[q-1]);
+    while(pt[++p] == 0);
+    while(pt[--q] == 0);
+    if((pt[q] != (short)p) || (p > q))
+      break;
+    ee = 0;
+    switch(vc->type){
+      case VRNA_FC_TYPE_SINGLE:     type_2 = md->pair[s[q]][s[p]];
+                                    if(type_2 == 0){
+                                      type_2 = 7;
+                                      if(verbosity_level > verbosity_quiet)
+                                        vrna_message_warning( "bases %d and %d (%c%c) can't pair!",
+                                                              p, q,
+                                                              string[p - 1],
+                                                              string[q - 1]);
+                                    }
+                                    ee = eval_int_loop(vc, i, j, p, q);
+
+                                    type = rtype[type_2];
+                                    break;
+
+      case VRNA_FC_TYPE_COMPARATIVE:  for(ss = 0; ss < n_seq; ss++){
+                                      type_2 = md->pair[S[ss][q]][S[ss][p]];
+                                      if(type_2 == 0){
+                                        type_2 = 7;
+                                      }
+                                      ee += E_IntLoop(a2s[ss][p - 1] - a2s[ss][i],
+                                                      a2s[ss][j - 1] - a2s[ss][q],
+                                                      types[ss],
+                                                      type_2,
+                                                      S3[ss][i],
+                                                      S5[ss][j],
+                                                      S5[ss][p],
+                                                      S3[ss][q],
+                                                      P);
+                                    }
+
+                                    for(ss = 0; ss < n_seq; ss++){
+                                      types[ss] = md->pair[S[ss][p]][S[ss][q]];
+                                      if(types[ss] == 0)
+                                        types[ss] = 7;
+                                    }
+                                    break;
+
+      default:                      break; /* this should never happen */
     }
-    /* energy += LoopEnergy(i, j, p, q, type, type_2); */
 
-    ee = eval_int_loop(vc, i, j, p, q);
-
-    if (verbosity_level>0)
-      fprintf(out, "Interior loop (%3d,%3d) %c%c; (%3d,%3d) %c%c: %5d\n",
-             i,j,string[i-1],string[j-1],p,q,string[p-1],string[q-1], ee);
+    if(verbosity_level > 0)
+      print_eval_int_loop(out, i, j, string[i - 1], string[j - 1],
+                               p, q, string[p - 1], string[q - 1],
+                               ee);
 
     energy += ee;
-    i=p; j=q; type = rtype[type_2];
+    i = p;
+    j = q;
   } /* end while */
 
   /* p,q don't pair must have found hairpin or multiloop */
 
-  if (p>q) {                       /* hairpin */
+  if(p > q){  /* hairpin */
     ee      = vrna_eval_hp_loop(vc, i, j);
     energy  += ee;
 
-    if (verbosity_level>0)
-      fprintf(out, "Hairpin  loop (%3d,%3d) %c%c              : %5d\n",
-             i, j, string[i-1],string[j-1], ee);
+    if(verbosity_level > 0)
+      print_eval_hp_loop(out, i, j, string[i - 1], string[j - 1], ee);
+
+    free(types);
 
     return energy;
   }
 
   /* (i,j) is exterior pair of multiloop */
-  while (p<j) {
+  while(p < j){
     /* add up the contributions of the substructures of the ML */
     energy += stack_energy(vc, p, pt, out, verbosity_level);
     p = pt[p];
     /* search for next base pair in multiloop */
-    while (pt[++p]==0);
+    while(pt[++p] == 0);
   }
-  {
-    int ii;
-    ii = cut_in_loop(i, pt, cp);
-    ee = (ii==0) ? energy_of_ml_pt(vc, i, pt) : energy_of_extLoop_pt(vc, ii, pt);
+  
+  switch(vc->type){
+    case VRNA_FC_TYPE_SINGLE:     {
+                                    int ii = cut_in_loop(i, pt, cp);
+                                    ee = (ii==0) ? energy_of_ml_pt(vc, i, pt) : energy_of_extLoop_pt(vc, ii, pt);
+                                  }
+                                  break;
+
+    case VRNA_FC_TYPE_COMPARATIVE:  ee = energy_of_ml_pt(vc, i, pt);
+                                  break;
+
+    default:                      break; /* this should never happen */
   }
+
   energy += ee;
-  if (verbosity_level>0)
-    fprintf(out, "Multi    loop (%3d,%3d) %c%c              : %5d\n",
-           i,j,string[i-1],string[j-1],ee);
+  if(verbosity_level > 0)
+    print_eval_mb_loop(out, i, j, string[i - 1], string[j - 1], ee);
+
+  free(types);
 
   return energy;
 }
@@ -991,10 +1172,13 @@ energy_of_extLoop_pt( vrna_fold_compound_t *vc,
                       int i,
                       const short *pt){
 
-  int               energy, mm5, mm3, bonus, p, q, q_prev, length, dangle_model, cp;
-  short             *s, *s1;
+  int               energy, mm5, mm3, bonus, p, q, q_prev, length, dangle_model, n_seq, cp, ss, u, start;
+  short             *s, *s1, **S, **S5, **S3;
+  unsigned short    **a2s;
   vrna_param_t      *P;
-  vrna_sc_t         *sc;
+  vrna_md_t         *md;
+  vrna_sc_t         *sc, **scs;
+
 
   /* helper variables for dangles == 1 case */
   int E3_available;  /* energy of 5' part where 5' mismatch is available for current stem */
@@ -1004,18 +1188,16 @@ energy_of_extLoop_pt( vrna_fold_compound_t *vc,
   /* initialize vars */
   length        = vc->length;
   cp            = vc->cutpoint;
-  s             = vc->sequence_encoding2;
-  s1            = vc->sequence_encoding;
   P             = vc->params;
-  dangle_model  = P->model_details.dangles;
-  sc            = vc->sc;
+  md            = &(P->model_details);
+  dangle_model  = md->dangles;
 
   energy        = 0;
   bonus         = 0;
-  p             = (i==0) ? 1 : i;
+  p = start     = (i==0) ? 1 : i;
   q_prev        = -1;
 
-  if(dangle_model%2 == 1){
+  if(dangle_model % 2 == 1){
     E3_available = INF;
     E3_occupied  = 0;
   }
@@ -1023,70 +1205,147 @@ energy_of_extLoop_pt( vrna_fold_compound_t *vc,
   /* seek to opening base of first stem */
   while(p <= length && !pt[p]) p++;
 
-  /* add soft constraints for first unpaired nucleotides */
-  if(sc){
-    if(sc->energy_up)
-      bonus += (i==0) ? sc->energy_up[1][p-1] : sc->energy_up[i][p-1];
-    /* how do we handle generalized soft constraints here ? */
+  switch(vc->type){
+    case VRNA_FC_TYPE_SINGLE:     s  = vc->sequence_encoding2;
+                                  s1 = vc->sequence_encoding;
+                                  sc = vc->sc;
+
+                                  /* add soft constraints for first unpaired nucleotides */
+                                  if(sc){
+                                    if(sc->energy_up)
+                                      bonus += sc->energy_up[start][p - start];
+                                    /* how do we handle generalized soft constraints here ? */
+                                  }
+                                  break;
+
+    case VRNA_FC_TYPE_COMPARATIVE:  S     = vc->S;
+                                  S5    = vc->S5;     /* S5[s][i] holds next base 5' of i in sequence s */
+                                  S3    = vc->S3;     /* Sl[s][i] holds next base 3' of i in sequence s */
+                                  a2s   = vc->a2s;
+                                  n_seq = vc->n_seq;
+                                  scs   = vc->scs;
+
+                                  /* add soft constraints for first unpaired nucleotides */
+                                  if(scs){
+                                    for(ss = 0; ss < n_seq; ss++){
+                                      if(scs[ss]){
+                                        if(scs[ss]->energy_up){
+                                          u      = a2s[ss][p] - a2s[ss][start];
+                                          bonus += scs[ss]->energy_up[a2s[ss][start]][u];
+                                        }
+                                        /* how do we handle generalized soft constraints here ? */
+                                      }
+                                    }
+                                  }
+                                  break;
+
+    default:                      return INF;
+                                  break;
   }
 
   while(p < length){
     int tt;
     /* p must have a pairing partner */
     q  = (int)pt[p];
-    /* get type of base pair (p,q) */
-    tt = P->model_details.pair[s[p]][s[q]];
-    if(tt==0) tt=7;
+    
+    switch(vc->type){
+      case VRNA_FC_TYPE_SINGLE:     /* get type of base pair (p,q) */
+                                    tt = md->pair[s[p]][s[q]];
+                                    if(tt == 0)
+                                      tt = 7;
 
-    switch(dangle_model){
-      /* no dangles */
-      case 0:   energy += E_ExtLoop(tt, -1, -1, P);
-                break;
+                                    switch(dangle_model){
+                                      /* no dangles */
+                                      case 0:   energy += E_ExtLoop(tt, -1, -1, P);
+                                                break;
 
-      /* the beloved double dangles */
-      case 2:   mm5 = ((ON_SAME_STRAND(p - 1, p, cp)) && (p>1))       ? s1[p-1] : -1;
-                mm3 = ((ON_SAME_STRAND(q, q + 1, cp)) && (q<length))  ? s1[q+1] : -1;
-                energy += E_ExtLoop(tt, mm5, mm3, P);
-                break;
+                                      /* the beloved double dangles */
+                                      case 2:   mm5 = ((ON_SAME_STRAND(p - 1, p, cp)) && (p>1))       ? s1[p-1] : -1;
+                                                mm3 = ((ON_SAME_STRAND(q, q + 1, cp)) && (q<length))  ? s1[q+1] : -1;
+                                                energy += E_ExtLoop(tt, mm5, mm3, P);
+                                                break;
 
-      default:  {
-                  int tmp;
-                  if(q_prev + 2 < p){
-                    E3_available = MIN2(E3_available, E3_occupied);
-                    E3_occupied  = E3_available;
-                  }
-                  mm5 = ((ON_SAME_STRAND(p - 1, p, cp)) && (p>1) && !pt[p-1])       ? s1[p-1] : -1;
-                  mm3 = ((ON_SAME_STRAND(q, q + 1, cp)) && (q<length) && !pt[q+1])  ? s1[q+1] : -1;
-                  tmp = MIN2(
-                                                E3_occupied  + E_ExtLoop(tt, -1, mm3, P),
-                                                E3_available + E_ExtLoop(tt, mm5, mm3, P)
-                                              );
-                  E3_available =       MIN2(
-                                                E3_occupied  + E_ExtLoop(tt, -1, -1, P),
-                                                E3_available + E_ExtLoop(tt, mm5, -1, P)
-                                              );
-                  E3_occupied = tmp;
-                }
-                break;
+                                      default:  {
+                                                  int tmp;
+                                                  if(q_prev + 2 < p){
+                                                    E3_available = MIN2(E3_available, E3_occupied);
+                                                    E3_occupied  = E3_available;
+                                                  }
+                                                  mm5 = ((ON_SAME_STRAND(p - 1, p, cp)) && (p>1) && !pt[p-1])       ? s1[p-1] : -1;
+                                                  mm3 = ((ON_SAME_STRAND(q, q + 1, cp)) && (q<length) && !pt[q+1])  ? s1[q+1] : -1;
+                                                  tmp = MIN2(
+                                                                                E3_occupied  + E_ExtLoop(tt, -1, mm3, P),
+                                                                                E3_available + E_ExtLoop(tt, mm5, mm3, P)
+                                                                              );
+                                                  E3_available =       MIN2(
+                                                                                E3_occupied  + E_ExtLoop(tt, -1, -1, P),
+                                                                                E3_available + E_ExtLoop(tt, mm5, -1, P)
+                                                                              );
+                                                  E3_occupied = tmp;
+                                                }
+                                                break;
 
-    } /* end switch dangle_model */
+                                    } /* end switch dangle_model */
+                                    break;
+
+      case VRNA_FC_TYPE_COMPARATIVE:  for(ss = 0; ss < n_seq; ss++){
+                                      /* get type of base pair (p,q) */
+                                      tt = md->pair[S[ss][p]][S[ss][q]];
+                                      if(tt == 0)
+                                        tt = 7;
+
+                                      switch(dangle_model){
+                                        case 0:   energy += E_ExtLoop(tt, -1, -1, P);
+                                                  break;
+                                        
+                                        case 2:   mm5 = (a2s[ss][p] > 1) && (tt != 0) ? S5[ss][p] : -1;
+                                                  mm3 = (a2s[ss][q] < a2s[ss][S[0][0]]) ? S3[ss][q] : -1; /* why S[0][0] ??? */
+                                                  energy += E_ExtLoop(tt, mm5, mm3, P);
+                                                  break;
+
+                                        default:  break; /* odd dangles not implemented yet */
+                                      }
+                                    }
+                                    break;
+
+      default:                      break; /* this should never happen */
+    }
+
     /* seek to the next stem */
     p = q + 1;
     q_prev = q;
     while (p <= length && !pt[p]) p++;
 
-    /* add soft constraints for unpaired region */
-    if(sc && (q_prev + 1 <= length)){
-      if(sc->energy_up){
-        bonus += sc->energy_up[q_prev + 1][p - q_prev - 1];
-      }
-      /* how do we handle generalized soft constraints here ? */
+    switch(vc->type){
+      case VRNA_FC_TYPE_SINGLE:     /* add soft constraints for unpaired region */
+                                    if(sc && (q_prev + 1 <= length)){
+                                      if(sc->energy_up){
+                                        bonus += sc->energy_up[q_prev + 1][p - q_prev - 1];
+                                      }
+                                      /* how do we handle generalized soft constraints here ? */
+                                    }
+                                    break;
+
+      case VRNA_FC_TYPE_COMPARATIVE:  if(scs){
+                                      for(ss = 0; ss < n_seq; ss++){
+                                        if(scs[ss]){
+                                          if(scs[ss]->energy_up){
+                                            u = a2s[ss][p] - a2s[ss][q_prev + 1];
+                                            bonus += scs[ss]->energy_up[a2s[ss][q_prev + 1]][u];
+                                          }
+                                        }
+                                      }
+                                    }
+                                    break;
+
+      default:                      break; /* this should never happen */
     }
 
-    if(p==i) break; /* cut was in loop */
+    if(p == i)
+      break; /* cut was in loop */
   }
 
-  if(dangle_model%2 == 1)
+  if(dangle_model % 2 == 1)
     energy = MIN2(E3_occupied, E3_available);
 
   return energy + bonus;
@@ -1108,13 +1367,15 @@ energy_of_ml_pt(vrna_fold_compound_t *vc,
                 int i,
                 const short *pt){
 
-  int               energy, cx_energy, tmp, tmp2, best_energy=INF, bonus, *idx, cp, dangle_model, *rtype;
-  int               i1, j, p, q, q_prev, q_prev2, u, x, type, count, mm5, mm3, tt, ld5, new_cx, dang5, dang3, dang;
+  int               energy, cx_energy, tmp, tmp2, best_energy=INF, bonus, *idx, cp, dangle_model, logML, circular, *rtype, ss, n, n_seq;
+  int               i1, j, p, q, q_prev, q_prev2, u, uu, x, type, count, mm5, mm3, tt, ld5, new_cx, dang5, dang3, dang;
   int               e_stem, e_stem5, e_stem3, e_stem53;
   int               mlintern[NBPAIRS+1];
-  short             *s, *s1;
+  short             *s, *s1, **S, **S5, **S3;
+  unsigned short    **a2s;
   vrna_param_t      *P;
-  vrna_sc_t         *sc;
+  vrna_md_t         *md;
+  vrna_sc_t         *sc, **scs;
 
   /* helper variables for dangles == 1|5 case */
   int E_mm5_available;  /* energy of 5' part where 5' mismatch of current stem is available */
@@ -1122,35 +1383,68 @@ energy_of_ml_pt(vrna_fold_compound_t *vc,
   int E2_mm5_available; /* energy of 5' part where 5' mismatch of current stem is available with possible 3' dangle for enclosing pair (i,j) */
   int E2_mm5_occupied;  /* energy of 5' part where 5' mismatch of current stem is unavailable with possible 3' dangle for enclosing pair (i,j) */
 
+  n   = vc->length;
   cp  = vc->cutpoint;
-  s   = vc->sequence_encoding2;
-  s1  = vc->sequence_encoding;
   P   = vc->params;
-  sc  = vc->sc;
+  md  = &(P->model_details);
   idx = vc->jindx;
 
-  dangle_model  = P->model_details.dangles;
-  rtype         = &(P->model_details.rtype[0]);
-
+  circular      = md->circ;
+  dangle_model  = md->dangles;
+  logML         = md->logML;
+  rtype         = &(md->rtype[0]);
 
   bonus = 0;
 
-  if(i >= pt[i])
-    vrna_message_error("energy_of_ml_pt: i is not 5' base of a closing pair!");
+  if(i >= pt[i]){
+    vrna_message_warning("energy_of_ml_pt: i is not 5' base of a closing pair!");
+    return INF;
+  }
 
-  if(i == 0){
-    j = (int)pt[0] + 1;
-  } else {
-    j = (int)pt[i];
-    /* (i,j) is closing pair of multibranch loop, add soft constraints */
-    if(sc){
-      if(sc->energy_bp)
-        bonus += sc->energy_bp[idx[j] + i];
-    }
+  j = (i == 0) ? n + 1 : (int)pt[i];
+
+  switch(vc->type){
+    case VRNA_FC_TYPE_SINGLE:     s   = vc->sequence_encoding2;
+                                  s1  = vc->sequence_encoding;
+                                  sc  = vc->sc;
+
+                                  if(i != 0){ /* (i,j) is closing pair of multibranch loop, add soft constraints */
+                                    if(sc){
+                                      if(sc->energy_bp)
+                                        bonus += sc->energy_bp[idx[j] + i];
+                                    }
+                                  }
+                                  break;
+
+    case VRNA_FC_TYPE_COMPARATIVE:  S     = vc->S;
+                                  S5    = vc->S5;
+                                  S3    = vc->S3;
+                                  a2s   = vc->a2s;
+                                  n_seq = vc->n_seq;
+                                  scs   = vc->scs;
+
+                                  if((dangle_model % 2) || (dangle_model > 2) || (dangle_model < 0)){
+                                    vrna_message_warning("consensus structure evaluation for odd dangle models not implemented (yet)!");
+                                    return INF;
+                                  }
+
+                                  if(i != 0){ /* (i,j) is closing pair of multibranch loop, add soft constraints */
+                                    if(scs){
+                                      for(ss = 0; ss < n_seq; ss++){
+                                        if(scs[ss] && scs[ss]->energy_bp)
+                                          bonus += scs[ss]->energy_bp[idx[j] + i];
+                                      }
+                                    }
+                                  }
+                                  break;
+
+    default:                      return INF;
+                                  break;
   }
 
   /* init the variables */
   energy      = 0;
+  u           = 0; /* the total number of unpaired nucleotides */
   p           = i+1;
   q_prev      = i-1;
   q_prev2     = i;
@@ -1163,74 +1457,200 @@ energy_of_ml_pt(vrna_fold_compound_t *vc,
   while(p <= j && !pt[p])
     p++;
 
-  u = p - i - 1;
-
   /* add bonus energies for first stretch of unpaired nucleotides */
-  if(sc){
-    if(sc->energy_up)
-      bonus += sc->energy_up[i+1][u];
+  switch(vc->type){
+    case VRNA_FC_TYPE_SINGLE:     u += p - i - 1;
+                                  if(sc){
+                                    if(sc->energy_up)
+                                      bonus += sc->energy_up[i + 1][u];
+                                  }
+                                  break;
+
+    case VRNA_FC_TYPE_COMPARATIVE:  if(scs){
+                                    for(ss = 0; ss < n_seq; ss++){
+                                      uu = a2s[ss][p] - a2s[ss][i + 1];
+                                      if(scs[ss] && scs[ss]->energy_up){
+                                        bonus += scs[ss]->energy_up[a2s[ss][i + 1]][uu];
+                                      }
+                                      u += uu;
+                                    }
+                                  } else {
+                                    for(ss = 0; ss < n_seq; ss++){
+                                      u += a2s[ss][p] - a2s[ss][i + 1];
+                                    }
+                                  }
+                                  break;
+
+    default:                      break; /* this should never happen */
   }
 
   switch(dangle_model){
-    case 0:   while(p < j){
-                /* p must have a pairing partner */
-                q  = (int)pt[p];
-                /* get type of base pair (p,q) */
-                tt = P->model_details.pair[s[p]][s[q]];
-                if(tt==0) tt=7;
-                energy += E_MLstem(tt, -1, -1, P);
+    case 0:   switch(vc->type){
+                case VRNA_FC_TYPE_SINGLE:     while(p < j){
+                                                /* p must have a pairing partner */
+                                                q  = (int)pt[p];
+                                                /* get type of base pair (p,q) */
+                                                tt = md->pair[s[p]][s[q]];
+                                                if(tt==0) tt=7;
+                                                energy += E_MLstem(tt, -1, -1, P);
 
-                /* seek to the next stem */
-                p = q + 1;
-                q_prev = q_prev2 = q;
-                while (p <= j && !pt[p]) p++;
-                u += p - q - 1; /* add unpaired nucleotides */
+                                                /* seek to the next stem */
+                                                p = q + 1;
+                                                q_prev = q_prev2 = q;
+                                                while (p <= j && !pt[p]) p++;
+                                                u += p - q - 1; /* add unpaired nucleotides */
 
-                if(sc){
-                  if(sc->energy_up)
-                    bonus += sc->energy_up[q+1][p-q-1];
-                }
+                                                if(sc){
+                                                  if(sc->energy_up)
+                                                    bonus += sc->energy_up[q+1][p-q-1];
+                                                }
+                                              }
 
-              }
-              /* now lets get the energy of the enclosing stem */
-              if(i > 0){  /* actual closing pair */
-                type = P->model_details.pair[s[j]][s[i]]; if (type==0) type=7;
-                energy += E_MLstem(type, -1, -1, P);
+                                              /* now lets get the energy of the enclosing stem */
+                                              if(i > 0){  /* actual closing pair */
+                                                tt = md->pair[s[j]][s[i]];
+                                                if(tt == 0)
+                                                  tt = 7;
+                                                energy += E_MLstem(tt, -1, -1, P);
 
-              } else {  /* virtual closing pair */
-                energy += E_MLstem(0, -1, -1, P);
+                                              } else {  /* virtual closing pair */
+                                                energy += E_MLstem(0, -1, -1, P);
+                                              }
+                                              break;
+
+                case VRNA_FC_TYPE_COMPARATIVE:  while(p < j){
+                                                /* p must have a pairing partner */
+                                                q  = (int)pt[p];
+                                                for(ss = 0; ss < n_seq; ss++){
+                                                  /* get type of base pair (p,q) */
+                                                  tt = md->pair[S[ss][p]][S[ss][q]];
+                                                  if(tt == 0)
+                                                    tt = 7;
+                                                  energy += E_MLstem(tt, -1, -1, P);
+                                                }
+
+                                                /* seek to the next stem */
+                                                p = q + 1;
+                                                q_prev = q_prev2 = q;
+                                                while (p <= j && !pt[p]) p++;
+                                                
+                                                /* add unpaired nucleotides and possible soft constraints */
+                                                if(scs){
+                                                  for(ss = 0; ss < n_seq; ss++){
+                                                    uu = a2s[ss][p] - a2s[ss][q + 1]; 
+                                                    if(scs[ss] && scs[ss]->energy_up){
+                                                      bonus += sc->energy_up[a2s[ss][q + 1]][uu];
+                                                    }
+                                                    u += uu;
+                                                  }
+                                                } else {
+                                                  for(ss = 0; ss < n_seq; ss++){
+                                                    u += a2s[ss][p] - a2s[ss][q + 1];
+                                                  }
+                                                }
+                                              }
+
+                                              /* now lets get the energy of the enclosing stem */
+                                              if(i > 0){  /* actual closing pair */
+                                                for(ss = 0; ss < n_seq; ss++){
+                                                  tt = md->pair[S[ss][j]][S[ss][i]];
+                                                  if(tt == 0)
+                                                    tt = 7;
+                                                  energy += E_MLstem(tt, -1, -1, P);
+                                                }
+                                              }
+                                              break;
+
+                default:                      break; /* this should never happen */
               }
               break;
 
-    case 2:   while(p < j){
-                /* p must have a pairing partner */
-                q  = (int)pt[p];
-                /* get type of base pair (p,q) */
-                tt = P->model_details.pair[s[p]][s[q]];
-                if(tt==0) tt=7;
-                mm5 = (ON_SAME_STRAND(p - 1, p, cp))  ? s1[p-1] : -1;
-                mm3 = (ON_SAME_STRAND(q, q + 1, cp))  ? s1[q+1] : -1;
-                energy += E_MLstem(tt, mm5, mm3, P);
+    case 2:   switch(vc->type){
+                case VRNA_FC_TYPE_SINGLE:     while(p < j){
+                                                /* p must have a pairing partner */
+                                                q  = (int)pt[p];
+                                                /* get type of base pair (p,q) */
+                                                tt = md->pair[s[p]][s[q]];
+                                                if(tt == 0)
+                                                  tt = 7;
+                                                mm5 = ON_SAME_STRAND(p - 1, p, cp) ? s1[p-1] : -1;
+                                                mm3 = ON_SAME_STRAND(q, q + 1, cp) ? s1[q+1] : -1;
+                                                energy += E_MLstem(tt, mm5, mm3, P);
 
-                /* seek to the next stem */
-                p = q + 1;
-                q_prev = q_prev2 = q;
-                while (p <= j && !pt[p]) p++;
-                u += p - q - 1; /* add unpaired nucleotides */
+                                                /* seek to the next stem */
+                                                p = q + 1;
+                                                q_prev = q_prev2 = q;
+                                                while (p <= j && !pt[p]) p++;
+                                                u += p - q - 1; /* add unpaired nucleotides */
 
-                if(sc){
-                  if(sc->energy_up)
-                    bonus += sc->energy_up[q+1][p-q-1];
-                }
-              }
-              if(i > 0){  /* actual closing pair */
-                type = P->model_details.pair[s[j]][s[i]]; if (type==0) type=7;
-                mm5 = ((ON_SAME_STRAND(j - 1, j, cp)) && !pt[j-1])  ? s1[j-1] : -1;
-                mm3 = ((ON_SAME_STRAND(i, i + 1, cp)) && !pt[i+1])  ? s1[i+1] : -1;
-                energy += E_MLstem(type, s1[j-1], s1[i+1], P);
+                                                if(sc){
+                                                  if(sc->energy_up)
+                                                    bonus += sc->energy_up[q+1][p-q-1];
+                                                }
+                                              }
+                                              if(i > 0){  /* actual closing pair */
+                                                tt = md->pair[s[j]][s[i]];
+                                                if(tt == 0)
+                                                  tt = 7;
+                                                mm5 = ON_SAME_STRAND(j - 1, j, cp) ? s1[j-1] : -1;
+                                                mm3 = ON_SAME_STRAND(i, i + 1, cp) ? s1[i+1] : -1;
+                                                energy += E_MLstem(tt, mm5, mm3, P);
 
-              } else {  /* virtual closing pair */
-                energy += E_MLstem(0, -1, -1, P);
+                                              } else {  /* virtual closing pair */
+                                                energy += E_MLstem(0, -1, -1, P);
+                                              }
+                                              break;
+
+                case VRNA_FC_TYPE_COMPARATIVE:  while(p < j){
+                                                /* p must have a pairing partner */
+                                                q  = (int)pt[p];
+                                                
+                                                for(ss = 0; ss < n_seq; ss++){
+                                                  /* get type of base pair (p,q) */
+                                                  tt = md->pair[S[ss][p]][S[ss][q]];
+                                                  if(tt == 0)
+                                                    tt = 7;
+
+                                                  mm5 = ((a2s[ss][p] > 1) || circular) ? S5[ss][p] : -1;
+                                                  mm3 = ((a2s[ss][q] < a2s[ss][S[0][0]]) || circular) ? S3[ss][q] : -1;
+                                                  energy += E_MLstem(tt, mm5, mm3, P);
+                                                }
+
+                                                /* seek to the next stem */
+                                                p = q + 1;
+                                                q_prev = q_prev2 = q;
+                                                while (p <= j && !pt[p]) p++;
+
+                                                /* add unpaired nucleotides and possible soft constraints */
+                                                if(scs){
+                                                  for(ss = 0; ss < n_seq; ss++){
+                                                    uu = a2s[ss][p] - a2s[ss][q + 1]; 
+                                                    if(scs[ss] && scs[ss]->energy_up){
+                                                      bonus += sc->energy_up[a2s[ss][q + 1]][uu];
+                                                    }
+                                                    u += uu;
+                                                  }
+                                                } else {
+                                                  for(ss = 0; ss < n_seq; ss++){
+                                                    u += a2s[ss][p] - a2s[ss][q + 1];
+                                                  }
+                                                }
+                                              }
+
+                                              if(i > 0){  /* actual closing pair */
+                                                for(ss = 0; ss < n_seq; ss++){
+                                                  tt = md->pair[S[ss][j]][S[ss][i]];
+                                                  if(tt == 0)
+                                                    tt = 7;
+
+                                                  mm5 = S5[ss][j];
+                                                  mm3 = S3[ss][i];
+                                                  energy += E_MLstem(tt, mm5, mm3, P);
+                                                }
+                                              }
+                                              break;
+
+                default:                      break; /* this should never happen */
               }
               break;
 
@@ -1322,7 +1742,6 @@ energy_of_ml_pt(vrna_fold_compound_t *vc,
                   i1 = q; p=q+1;
                 } while (q!=i);
                 best_energy = MIN2(energy, best_energy); /* don't use cx_energy here */
-                /* fprintf(stderr, "%6.2d\t", energy); */
                 /* skip a helix and start again */
                 while (pt[p]==0) p++;
                 if (i == (unsigned int)pt[p]) break;
@@ -1417,8 +1836,18 @@ energy_of_ml_pt(vrna_fold_compound_t *vc,
               break;
   }/* end switch dangle_model */
 
-  energy += P->MLclosing;
+  switch(vc->type){
+    case VRNA_FC_TYPE_SINGLE:     energy += P->MLclosing;
+                                  break;
+
+    case VRNA_FC_TYPE_COMPARATIVE:  energy += P->MLclosing * n_seq;
+                                  break;
+
+    default:                      break;
+  }
+
   /* logarithmic ML loop energy if logML */
+  /* does this work for comparative predictions as well? */
   if(logML && (u>6))
     energy += 6*P->MLbase+(int)(P->lxc*log((double)u/6.));
   else
@@ -1446,25 +1875,7 @@ cut_in_loop(int i, const short *pt, int cp){
 /* below are the consensus structure evaluation functions */
 
 PRIVATE int
-energy_of_struct_pt_ali(vrna_fold_compound_t *vc,
-                        const short *pt){
-
-  int e;
-  int length        = vc->length;
-  int i;
-
-  e = vc->params->model_details.backtrack_type=='M' ? ML_Energy_pt_ali(vc, 0, pt) : EL_Energy_pt_ali(vc, 0, pt);
-  for (i=1; i<=length; i++) {
-    if (pt[i]==0) continue;
-    e += stack_energy_pt_ali(vc, i, pt);
-    i=pt[i];
-  }
-
-  return e;
-}
-
-PRIVATE int
-covar_energy_of_struct_pt_ali(vrna_fold_compound_t *vc,
+covar_energy_of_struct_pt(vrna_fold_compound_t *vc,
                               const short *pt){
 
   int e       = 0;
@@ -1473,7 +1884,7 @@ covar_energy_of_struct_pt_ali(vrna_fold_compound_t *vc,
 
   for (i=1; i<=length; i++) {
     if (pt[i]==0) continue;
-    e += stack_energy_covar_pt_ali(vc, i, pt);
+    e += stack_energy_covar_pt(vc, i, pt);
     i=pt[i];
   }
 
@@ -1524,7 +1935,8 @@ en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
 
       /* seek for first pairing base located 5' of the g-quad */
       for(r = p - 1; !pt[r] && (r >= i); r--);
-      if(r < i) vrna_message_error("this should not happen");
+      if(r < i)
+        vrna_message_error("this should not happen");
 
       if(r < pt[r]){ /* found the enclosing pair */
         s = pt[r];
@@ -1535,7 +1947,8 @@ en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
         r = pt[r]-1 ;
         /* seek for next pairing base 5' of r */
         for(; !pt[r] && (r >= i); r--);
-        if(r < i) vrna_message_error("so nich");
+        if(r < i)
+          vrna_message_error("so nich");
         if(r < pt[r]){ /* found the enclosing pair */
           s = pt[r];
         } else {
@@ -1544,7 +1957,8 @@ en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
             if(pt[r]){ r = pt[r]; num_elem++;}
             r--;
           }
-          if(r < i) vrna_message_error("so nich");
+          if(r < i)
+            vrna_message_error("so nich");
           s = pt[r]; /* found the enclosing pair */
         }
       }
@@ -1564,7 +1978,8 @@ en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
             num_g++;
           }
         } else { /* we must have found a stem */
-          if(!(u < pt[u])) vrna_message_error("wtf!");
+          if(!(u < pt[u]))
+            vrna_message_error("wtf!");
           num_elem++;
           elem_i = u;
           elem_j = pt[u];
@@ -1577,7 +1992,8 @@ en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
           u = pt[u] + 1;
         }
       }
-      if(u!=s) vrna_message_error("what the ...");
+      if(u!=s)
+        vrna_message_error("what the ...");
       else{ /* we are done since we've found no other 3' structure element */
         switch(num_elem){
           /* g-quad was misinterpreted as hairpin closed by (r,s) */
@@ -1660,12 +2076,12 @@ en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
 }
 
 PRIVATE int
-covar_en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
-                      int i,
-                      int j,
-                      const char *structure,
-                      const short *pt,
-                      const int *loop_idx){
+covar_en_corr_of_loop_gquad(vrna_fold_compound_t *vc,
+                            int i,
+                            int j,
+                            const char *structure,
+                            const short *pt,
+                            const int *loop_idx){
 
   int pos, en_covar, p, q, r, s, u, gq_en[2];
   int num_elem, num_g, up_mis;
@@ -1695,7 +2111,8 @@ covar_en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
 
       /* seek for first pairing base located 5' of the g-quad */
       for(r = p - 1; !pt[r] && (r >= i); r--);
-      if(r < i) vrna_message_error("this should not happen");
+      if(r < i)
+        vrna_message_error("this should not happen");
 
       if(r < pt[r]){ /* found the enclosing pair */
         s = pt[r];
@@ -1704,7 +2121,8 @@ covar_en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
         r = pt[r]-1 ;
         /* seek for next pairing base 5' of r */
         for(; !pt[r] && (r >= i); r--);
-        if(r < i) vrna_message_error("so nich");
+        if(r < i)
+          vrna_message_error("so nich");
         if(r < pt[r]){ /* found the enclosing pair */
           s = pt[r];
         } else {
@@ -1713,7 +2131,8 @@ covar_en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
             if(pt[r]){ r = pt[r]; num_elem++;}
             r--;
           }
-          if(r < i) vrna_message_error("so nich");
+          if(r < i)
+            vrna_message_error("so nich");
           s = pt[r]; /* found the enclosing pair */
         }
       }
@@ -1733,9 +2152,10 @@ covar_en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
             num_g++;
           }
         } else { /* we must have found a stem */
-          if(!(u < pt[u])) vrna_message_error("wtf!");
+          if(!(u < pt[u]))
+            vrna_message_error("wtf!");
           num_elem++;
-          en_covar += covar_en_corr_of_loop_gquad_ali(vc,
+          en_covar += covar_en_corr_of_loop_gquad(vc,
                                 u,
                                 pt[u],
                                 structure,
@@ -1744,7 +2164,8 @@ covar_en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
           u = pt[u] + 1;
         }
       }
-      if(u!=s) vrna_message_error("what the ...");
+      if(u!=s)
+        vrna_message_error("what the ...");
       else{
         /* we are done since we've found no other 3' structure element */
       }
@@ -1755,83 +2176,9 @@ covar_en_corr_of_loop_gquad_ali(vrna_fold_compound_t *vc,
   return en_covar;
 }
 
-PRIVATE int
-stack_energy_pt_ali(vrna_fold_compound_t *vc,
-                    int i,
-                    const short *pt){
-
-  /* calculate energy of substructure enclosed by (i,j) */
-  short           **S         = vc->S;
-  short           **S5        = vc->S5;     /*S5[s][i] holds next base 5' of i in sequence s*/
-  short           **S3        = vc->S3;     /*Sl[s][i] holds next base 3' of i in sequence s*/
-  char            **Ss        = vc->Ss;
-  unsigned short  **a2s       = vc->a2s;
-  vrna_param_t    *P          = vc->params;
-  vrna_md_t       *md         = &(P->model_details);
-  int             n_seq       = vc->n_seq;
-
-  int energy = 0;
-  int ee= 0;
-  int j, p, q, s;
-  int *type = (int *) vrna_alloc(n_seq*sizeof(int));
-
-  j = pt[i];
-  for (s=0; s<n_seq; s++) {
-    type[s] = md->pair[S[s][i]][S[s][j]];
-    if (type[s]==0) {
-    type[s]=7;
-    }
-  }
-  p=i; q=j;
-  while (p<q) { /* process all stacks and interior loops */
-    int type_2;
-    while (pt[++p]==0);
-    while (pt[--q]==0);
-    if ((pt[q]!=(short)p)||(p>q)) break;
-    ee=0;
-    for (s=0; s<n_seq; s++) {
-      type_2 = md->pair[S[s][q]][S[s][p]];
-      if (type_2==0) {
-        type_2=7;
-      }
-      ee += E_IntLoop(a2s[s][p-1]-a2s[s][i], a2s[s][j-1]-a2s[s][q], type[s], type_2, S3[s][i], S5[s][j], S5[s][p], S3[s][q], P);
-    }
-    energy += ee;
-    i=p; j=q;
-    for (s=0; s<n_seq; s++) {
-      type[s] = md->pair[S[s][i]][S[s][j]];
-      if (type[s]==0) type[s]=7;
-    }
-  }  /* end while */
-
-  /* p,q don't pair must have found hairpin or multiloop */
-
-  if (p>q) {
-    ee=0;/* hair pin */
-    for (s=0; s< n_seq; s++) {
-      if ((a2s[s][j-1]-a2s[s][i])<3) ee+=600;
-      else ee += E_Hairpin(a2s[s][j-1]-a2s[s][i], type[s], S3[s][i], S5[s][j], Ss[s]+(a2s[s][i-1]), P);
-    }
-    energy += ee;
-    free(type);
-    return energy;
-  }
-  /* (i,j) is exterior pair of multiloop */
-  while (p<j) {
-    /* add up the contributions of the substructures of the ML */
-    energy += stack_energy_pt_ali(vc, p, pt);
-    p = pt[p];
-    /* search for next base pair in multiloop */
-    while (pt[++p]==0);
-  }
-  energy += ML_Energy_pt_ali(vc, i, pt);
-  free(type);
-
-  return energy;
-}
 
 PRIVATE int
-stack_energy_covar_pt_ali(vrna_fold_compound_t *vc,
+stack_energy_covar_pt(vrna_fold_compound_t *vc,
                       int i,
                       const short *pt){
 
@@ -1863,7 +2210,7 @@ stack_energy_covar_pt_ali(vrna_fold_compound_t *vc,
   energy += pscore[indx[j]+i];
   while (p<j) {
     /* add up the contributions of the substructures of the ML */
-    energy += stack_energy_covar_pt_ali(vc, p, pt);
+    energy += stack_energy_covar_pt(vc, p, pt);
     p = pt[p];
     /* search for next base pair in multiloop */
     while (pt[++p]==0);
@@ -1872,116 +2219,6 @@ stack_energy_covar_pt_ali(vrna_fold_compound_t *vc,
   return energy;
 }
 
-
-PRIVATE int
-ML_Energy_pt_ali( vrna_fold_compound_t *vc,
-                  int i,
-                  const short *pt){
-
-  /* i is the 5'-base of the closing pair */
-
-  int   energy, tt, i1, j, p, q, u, s;
-  short d5, d3;
-
-  short           **S           = vc->S;
-  short           **S5          = vc->S5;     /*S5[s][i] holds next base 5' of i in sequence s*/
-  short           **S3          = vc->S3;     /*Sl[s][i] holds next base 3' of i in sequence s*/
-  unsigned short  **a2s         = vc->a2s;
-  vrna_param_t    *P            = vc->params;
-  vrna_md_t       *md           = &(P->model_details);
-  int             n_seq         = vc->n_seq;
-  int             dangle_model  = md->dangles;
-
-  j = pt[i];
-  i1  = i;
-  p   = i+1;
-  u   = 0;
-  energy = 0;
-
-  do{ /* walk around the multi-loop */
-    /* hop over unpaired positions */
-    while (p < j && pt[p]==0) p++;
-    if(p >= j) break;
-    /* get position of pairing partner */
-    q  = pt[p];
-    /* memorize number of unpaired positions? no, we just approximate here */
-    u += p-i1-1;
-
-    for (s=0; s< n_seq; s++) {
-      /* get type of base pair P->q */
-      tt = md->pair[S[s][p]][S[s][q]];
-      if (tt==0) tt=7;
-      d5 = dangle_model && (a2s[s][p]>1) && (tt!=0) ? S5[s][p] : -1;
-      d3 = dangle_model && (a2s[s][q]<a2s[s][S[0][0]]) ? S3[s][q] : -1;
-      energy += E_MLstem(tt, d5, d3, P);
-    }
-    i1  = q;
-    p   = q + 1;
-  }while(1);
-
-  if(i > 0){
-    energy  += P->MLclosing * n_seq;
-    if(dangle_model){
-      for (s=0; s<n_seq; s++){
-        tt = md->pair[S[s][j]][S[s][i]];
-        if (tt==0) tt=7;
-        energy += E_MLstem(tt, S5[s][j], S3[s][i], P);
-      }
-    }
-    else{
-      for (s=0; s<n_seq; s++){
-        tt = md->pair[S[s][j]][S[s][i]];
-        if (tt==0) tt=7;
-        energy += E_MLstem(tt, -1, -1, P);
-      }
-    }
-  }
-  u += j - i1 - 1;
-  energy += u * P->MLbase * n_seq;
-  return energy;
-}
-
-PRIVATE int
-EL_Energy_pt_ali( vrna_fold_compound_t *vc,
-                  int i,
-                  const short *pt){
-
-  int   energy, tt, j, p, q, s;
-  short d5, d3;
-
-  short           **S           = vc->S;
-  short           **S5          = vc->S5;     /*S5[s][i] holds next base 5' of i in sequence s*/
-  short           **S3          = vc->S3;     /*Sl[s][i] holds next base 3' of i in sequence s*/
-  unsigned short  **a2s         = vc->a2s;
-  vrna_param_t    *P            = vc->params;
-  vrna_md_t       *md           = &(P->model_details);
-  int             n_seq         = vc->n_seq;
-  int             dangle_model  = md->dangles;
-
-  j = pt[0];
-
-  p   = i+1;
-  energy = 0;
-
-  do{ /* walk along the backbone */
-    /* hop over unpaired positions */
-    while (p < j && pt[p]==0) p++;
-    if(p == j) break; /* no more stems */
-    /* get position of pairing partner */
-    q  = pt[p];
-    for (s=0; s< n_seq; s++) {
-      /* get type of base pair P->q */
-      tt = md->pair[S[s][p]][S[s][q]];
-      if (tt==0) tt=7;
-      d5 = dangle_model && (a2s[s][p]>1) && (tt!=0) ? S5[s][p] : -1;
-      d3 = dangle_model && (a2s[s][q]<a2s[s][S[0][0]]) ? S3[s][q] : -1;
-      energy += E_ExtLoop(tt, d5, d3, P);
-    }
-    p   = q + 1;
-  }while(p < j);
-
-  return energy;
-}
 
 /*
 #################################
@@ -2106,12 +2343,7 @@ energy_of_structure(const char *string,
 
   vc = recycle_last_call(string, NULL);
 
-  if(verbosity_level > 0)
-    en = vrna_eval_structure_verbose(vc, structure, NULL);
-  else
-    en = vrna_eval_structure(vc, structure);
-
-  return en;
+  return vrna_eval_structure_v(vc, structure, verbosity_level, NULL);
 }
 
 PUBLIC float
@@ -2125,12 +2357,7 @@ energy_of_struct_par( const char *string,
 
   vc = recycle_last_call(string, parameters);
 
-  if(verbosity_level > 0)
-    en = vrna_eval_structure_verbose(vc, structure, NULL);
-  else
-    en = vrna_eval_structure(vc, structure);
-
-  return en;
+  return vrna_eval_structure_v(vc, structure, verbosity_level, NULL);
 }
 
 
@@ -2146,12 +2373,7 @@ energy_of_gquad_structure(const char *string,
 
   vc->params->model_details.gquad = 1;
 
-  if(verbosity_level > 0)
-    en = vrna_eval_structure_verbose(vc, structure, NULL);
-  else
-    en = vrna_eval_structure(vc, structure);
-
-  return en;
+  return vrna_eval_structure_v(vc, structure, verbosity_level, NULL);
 }
 
 PUBLIC float
@@ -2168,12 +2390,7 @@ energy_of_gquad_struct_par( const char *string,
 
   vc->params->model_details.gquad = 1;
 
-  if(verbosity_level > 0)
-    en = vrna_eval_structure_verbose(vc, structure, NULL);
-  else
-    en = vrna_eval_structure(vc, structure);
-
-  return en;
+  return vrna_eval_structure_v(vc, structure, verbosity_level, NULL);
 }
 
 PUBLIC int
@@ -2233,12 +2450,7 @@ energy_of_circ_structure( const char *string,
 
   vc->params->model_details.circ = 1;
 
-  if(verbosity_level > 0)
-    en = vrna_eval_structure_verbose(vc, structure, NULL);
-  else
-    en = vrna_eval_structure(vc, structure);
-
-  return en;
+  return vrna_eval_structure_v(vc, structure, verbosity_level, NULL);
 }
 
 PUBLIC float
@@ -2254,12 +2466,7 @@ energy_of_circ_struct_par(const char *string,
 
   vc->params->model_details.circ = 1;
 
-  if(verbosity_level > 0)
-    en = vrna_eval_structure_verbose(vc, structure, NULL);
-  else
-    en = vrna_eval_structure(vc, structure);
-
-  return en;
+  return vrna_eval_structure_v(vc, structure, verbosity_level, NULL);
 }
 
 PUBLIC int

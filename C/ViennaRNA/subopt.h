@@ -13,20 +13,30 @@
 #endif
 
 /**
- *  @addtogroup subopt_fold Enumerating Suboptimal Structures
- *  @ingroup folding_routines
- *  @{
- *    @file subopt.h
- *    @brief RNAsubopt and density of states declarations
- *
- *  @}
+ *  @file subopt.h
+ *  @ingroup subopt_and_representatives
+ *  @brief RNAsubopt and density of states declarations
  */
+
 #define VRNA_BACKWARD_COMPAT
 
+/**
+ *  @brief Typename for the subopt solution list repesenting data structure #vrna_subopt_sol_s
+ */
 typedef struct vrna_subopt_sol_s   vrna_subopt_solution_t;
+
+/**
+ *  @brief  Callback for vrna_subopt_cb()
+ *  @ingroup subopt_wuchty
+ */
+typedef void (vrna_subopt_callback)(const char *stucture, float energy, void *data);
 
 #ifdef VRNA_BACKWARD_COMPAT
 
+/**
+ *  @brief  Backward compatibility typedef for #vrna_subopt_sol_s
+ *  @deprecated Use #vrna_subopt_solution_t instead!
+ */
 typedef struct vrna_subopt_sol_s   SOLUTION;
 
 #endif
@@ -66,7 +76,19 @@ struct vrna_subopt_sol_s {
  *
  *  @ingroup subopt_wuchty
  *
- *  @see vrna_subopt_zuker()
+ *  @note This function requires all multibranch loop DP matrices for unique
+ *        multibranch loop backtracing. Therefore, the supplied #vrna_fold_compound_t
+ *        @p vc (argument 1) must be initialized with #vrna_md_t.uniq_ML = 1, for
+ *        instance like this:
+ *        @code
+  vrna_md_t md;
+  vrna_md_set_default(&md);
+  md.uniq_ML = 1;
+
+  vrna_fold_compound_t *vc=vrna_fold_compound("GGGGGGAAAAAACCCCCC", &md, VRNA_OPTION_DEFAULT);
+ *        @endcode
+ *
+ *  @see vrna_subopt_cb(), vrna_subopt_zuker()
  *  @param  vc
  *  @param  delta
  *  @param  sorted  Sort results by energy in ascending order
@@ -78,6 +100,46 @@ vrna_subopt(vrna_fold_compound_t *vc,
             int delta,
             int sorted,
             FILE *fp);
+
+/**
+ *  @brief  Generate suboptimal structures within an energy band arround the MFE
+ *
+ *  This is the most generic implementation of the suboptimal structure generator
+ *  according to Wuchty et al. 1999 @cite wuchty:1999. Identical to vrna_subopt(), it computes all
+ *  secondary structures within an energy band @p delta arround the MFE. However,
+ *  this function does not print the resulting structures and their corresponding
+ *  free energies to a file pointer, or returns them as a list. Instead, it calls
+ *  a user-provided callback function which it passes the structure in dot-bracket
+ *  format, the corresponding free energy in kcal/mol, and a user-provided data
+ *  structure each time a structure was backtracked successfully. This function
+ *  indicates the final output, i.e. the end of the backtracking procedure by
+ *  passing NULL instead of an actual dot-bracket string to the callback.
+ *
+ *  @ingroup subopt_wuchty
+ *
+ *  @note This function requires all multibranch loop DP matrices for unique
+ *        multibranch loop backtracing. Therefore, the supplied #vrna_fold_compound_t
+ *        @p vc (argument 1) must be initialized with #vrna_md_t.uniq_ML = 1, for
+ *        instance like this:
+ *        @code
+  vrna_md_t md;
+  vrna_md_set_default(&md);
+  md.uniq_ML = 1;
+
+  vrna_fold_compound_t *vc=vrna_fold_compound("GGGGGGAAAAAACCCCCC", &md, VRNA_OPTION_DEFAULT);
+ *        @endcode
+ *
+ *  @see vrna_subopt_callback, vrna_subopt(), vrna_subopt_zuker()
+ *  @param  vc      fold compount with the sequence data
+ *  @param  delta   Energy band arround the MFE in 10cal/mol, i.e. deka-calories
+ *  @param  cb      Pointer to a callback function that handles the backtracked structure and its free energy in kcal/mol
+ *  @param  data    Pointer to some data structure that is passed along to the callback
+ */
+void
+vrna_subopt_cb( vrna_fold_compound_t *vc,
+                int delta,
+                vrna_subopt_callback *cb,
+                void *data);
 
 /**
  *  @brief Compute Zuker type suboptimal structures

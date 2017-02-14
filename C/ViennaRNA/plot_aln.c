@@ -4,7 +4,11 @@
                  c  Ivo Hofacker, Peter F Stadler, Ronny Lorenz
                           Vienna RNA package
 */
-#include <config.h>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -102,8 +106,7 @@ int PS_color_aln(const char *structure, const char *filename,
   outfile = fopen(filename, "w");
 
   if (outfile == NULL) {
-    fprintf(stderr, "can't open file %s - not doing alignment plot\n",
-            filename);
+    vrna_message_warning("can't open file %s - not doing alignment plot\n", filename);
     return 0;
   }
 
@@ -369,8 +372,7 @@ int aliPS_color_aln(const char *structure, const char *filename,
 
   outfile = fopen(filename, "w");
   if (outfile == NULL) {
-    fprintf(stderr, "can't open file %s - not doing alignment plot\n", 
-            filename);
+    vrna_message_warning("can't open file %s - not doing alignment plot\n", filename);
     return 0;
   }
   

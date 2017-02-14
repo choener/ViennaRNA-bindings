@@ -7,6 +7,7 @@
 #include <ViennaRNA/data_structures.h>
 #include <ViennaRNA/params.h>
 #include <ViennaRNA/centroid.h>
+#include <ViennaRNA/equilibrium_probs.h>
 #include <ViennaRNA/boltzmann_sampling.h>
 
 #ifdef DEPRECATION_WARNINGS
@@ -20,21 +21,12 @@
 #endif
 
 /**
- *  @addtogroup pf_fold
- *  @brief This section provides information about all functions and variables related to
- *  the calculation of the partition function and base pair probabilities.
- *
- *  Instead of the minimum free energy structure the partition function of all possible structures
- *  and from that the pairing probability for every possible pair can be calculated, using a dynamic
- *  programming algorithm as described in @cite mccaskill:1990. 
- *
- *  @{
- *    @file part_func.h
- *    @brief Partition function of single RNA sequences
+ *  @file     part_func.h
+ *  @ingroup  pf_fold
+ *  @brief    Partition function implementations
  * 
- *    This file includes (almost) all function declarations within the <b>RNAlib</b> that are related to
- *    Partion function folding...
- *  @}
+ *  This file includes (almost) all function declarations within the <b>RNAlib</b> that are related to
+ *  Partion function folding...
  */
 
 /*
@@ -58,7 +50,7 @@
  *  @ingroup pf_fold
  *
  *  @note This function is polymorphic. It accepts #vrna_fold_compound_t of type
- *        #VRNA_VC_TYPE_SINGLE, and #VRNA_VC_TYPE_ALIGNMENT.
+ *        #VRNA_FC_TYPE_SINGLE, and #VRNA_FC_TYPE_COMPARATIVE.
  *
  *  @see #vrna_fold_compound_t, vrna_fold_compound(), vrna_pf_fold(), vrna_pf_circfold(),
  *        vrna_fold_compound_comparative(), vrna_pf_alifold(), vrna_pf_circalifold(),
@@ -88,13 +80,13 @@ float vrna_pf(vrna_fold_compound_t *vc, char *structure);
  *
  *  @see vrna_pf_circfold(), vrna_pf(), vrna_fold_compound(), #vrna_fold_compound_t
  *
- *  @param sequences  RNA sequence
+ *  @param sequence   RNA sequence
  *  @param structure  A pointer to the character array where position-wise pairing propensity
  *                    will be stored. (Maybe NULL)
  *  @param pl         A pointer to a list of #vrna_plist_t to store pairing probabilities (Maybe NULL)
  *  @return The Gibbs free energy of the ensemble (@f$G = -RT \cdot \log(Q) @f$) in kcal/mol
  */
-float vrna_pf_fold(const char *seq, char *structure, vrna_plist_t **pl);
+float vrna_pf_fold(const char *sequence, char *structure, vrna_plist_t **pl);
 
 /**
  *  @brief  Compute Partition function @f$Q@f$ (and base pair probabilities) for a circular
@@ -116,13 +108,13 @@ float vrna_pf_fold(const char *seq, char *structure, vrna_plist_t **pl);
  *
  *  @see vrna_pf_fold(), vrna_pf(), vrna_fold_compound(), #vrna_fold_compound_t
  *
- *  @param sequences  A circular RNA sequence
+ *  @param sequence  A circular RNA sequence
  *  @param structure  A pointer to the character array where position-wise pairing propensity
  *                    will be stored. (Maybe NULL)
  *  @param pl         A pointer to a list of #vrna_plist_t to store pairing probabilities (Maybe NULL)
  *  @return The Gibbs free energy of the ensemble (@f$G = -RT \cdot \log(Q) @f$) in kcal/mol
  */
-float vrna_pf_circfold(const char *seq, char *structure, vrna_plist_t **pl);
+float vrna_pf_circfold(const char *sequence, char *structure, vrna_plist_t **pl);
 
 /*
 #################################################
@@ -138,49 +130,6 @@ float vrna_pf_circfold(const char *seq, char *structure, vrna_plist_t **pl);
  *  @return  1 if single precision is used, 0 otherwise
  */
 int vrna_pf_float_precision(void);
-
-/**
- *  @brief Get the mean base pair distance in the thermodynamic ensemble from a probability matrix
- * 
- *  @f$<d> = \sum_{a,b} p_a p_b d(S_a,S_b)@f$\n
- *  this can be computed from the pair probs @f$p_ij@f$ as\n
- *  @f$<d> = \sum_{ij} p_{ij}(1-p_{ij})@f$
- * 
- *  @ingroup pf_fold
- *
- *  @param length The length of the sequence
- *  @param pr     The matrix containing the base pair probabilities
- *  @return       The mean pair distance of the structure ensemble
- */
-double vrna_mean_bp_distance_pr(int length, FLT_OR_DBL *pr);
-
-/**
- *  @brief Get the mean base pair distance in the thermodynamic ensemble
- * 
- *  @f$<d> = \sum_{a,b} p_a p_b d(S_a,S_b)@f$\n
- *  this can be computed from the pair probs @f$p_ij@f$ as\n
- *  @f$<d> = \sum_{ij} p_{ij}(1-p_{ij})@f$
- * 
- *  @ingroup pf_fold
- *
- *  @param vc     The fold compound data structure
- *  @return       The mean pair distance of the structure ensemble
- */
-double vrna_mean_bp_distance(vrna_fold_compound_t *vc);
-
-/**
- *  @brief  Compute stacking probabilities
- *
- *  For each possible base pair @f$(i,j)@f$, compute the probability of a stack
- *  @f$(i,j)@f$, @f$(i+1, j-1)@f$.
- *
- *  @ingroup pf_fold
- *
- *  @param  vc      The fold compound data structure with precomputed base pair probabilities
- *  @param  cutoff  A cutoff value that limits the output to stacks with @f$ p > \textrm{cutoff} @f$.
- *  @return         A list of stacks with enclosing base pair @f$(i,j)@f$ and probabiltiy @f$ p @f$
- */
-vrna_plist_t *vrna_stack_prob(vrna_fold_compound_t *vc, double cutoff);
 
 #ifdef  VRNA_BACKWARD_COMPAT
 

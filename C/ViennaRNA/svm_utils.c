@@ -1,4 +1,8 @@
-#include <config.h>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -25,7 +29,7 @@ PRIVATE char**  splitLines(char* string);
 PUBLIC float get_z(char *sequence, double energy) {
   double average_free_energy;
   double sd_free_energy;
-  float my_z;
+  float my_z = 0.;
   int info_avg;
   make_pair_matrix();
   short *S      = encode_sequence(sequence, 0);
@@ -41,7 +45,7 @@ PUBLIC float get_z(char *sequence, double energy) {
     my_z              = difference / sd_free_energy;
   }
   else{
-    fprintf(stderr,"warning: sequence out of bounds\n");
+    vrna_message_warning("sequence out of bounds");
 #if 0
     my_z = shuffle_score(sequence, energy);
 #endif
@@ -180,7 +184,7 @@ PUBLIC struct svm_model  *svm_load_model_string(char *modelString){
   /* Read header until support vectors start */
   lines=splitLines(modelString);
   i=0;
-  while (strcmp(lines[i],"SV")!=0){
+  while (lines[i] && (strcmp(lines[i],"SV")!=0)){
         fields=splitFields(lines[i]);
 
         key=fields[0];
@@ -194,7 +198,7 @@ PUBLIC struct svm_model  *svm_load_model_string(char *modelString){
                 }
           }
           if(svm_type_table[i] == NULL){
-                fprintf(stderr,"unknown svm type.\n");
+                vrna_message_warning("unknown svm type.");
                 free(model->rho);
                 free(model->label);
                 free(model->nSV);
@@ -212,7 +216,7 @@ PUBLIC struct svm_model  *svm_load_model_string(char *modelString){
                 }
           }
           if(kernel_type_table[i] == NULL){
-                fprintf(stderr,"unknown kernel type.\n");
+                vrna_message_warning("unknown kernel type.");
                 free(model->rho);
                 free(model->label);
                 free(model->nSV);

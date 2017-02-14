@@ -1,4 +1,3 @@
-/* Last changed Time-stamp: <2009-02-18 14:19:51 ivo> */
 /*
   local pair probabilities for RNA secondary structures
 
@@ -9,7 +8,11 @@
   todo: compute energy z-score for each window
 
 */
-#include <config.h>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,9 +33,6 @@
 #include <omp.h>
 #endif
 
-
-/*@unused@*/
-PRIVATE char rcsid[] UNUSED = "$Id: LPfold.c,v 1.8 2009/02/18 20:34:38 ivo Exp $";
 
 #define ISOLATED  256.0
 
@@ -251,14 +251,46 @@ PUBLIC plist *pfl_fold_par( char *sequence,
   if(spup !=NULL) simply_putout = 1; /*can't have one without the other*/
   if(pUfp!=NULL)  pUoutput      = 1;
   else if((pUoutput)&&(ulength!=0)){
-    fprintf(stderr, "There was a problem with non existing File Pointer for unpaireds, terminating process\n");
+    vrna_message_warning("There was a problem with non existing File Pointer for unpaireds, terminating process\n");
     return pl;
   }
   dpp = *dpp2;
   if(dpp !=NULL)  do_dpp=1;
 
+  /*here, I allocate memory for pU, if has to be saved, I allocate all in one go,
+    if pU is put out and freed, I only allocate what I really need*/
+
   n = (int) strlen(sequence);
-  if (n<TURN+2) return 0;
+
+  /* allocate memory and initialize unpaired probabilities */
+  if (ulength > 0) {
+    if (pUoutput) {
+      for (i = 1; i <= ulength; i++)
+        pU[i] = (double *)vrna_alloc((MAX2(MAXLOOP,ulength)+2)*sizeof(double));
+    }
+    else {
+      for (i = 1; i <= n; i++)
+        pU[i]=(double *)vrna_alloc((MAX2(MAXLOOP,ulength)+2)*sizeof(double));
+    }
+  }
+
+  if (n < TURN + 2) {
+    if (ulength > 0) {
+      if (pUoutput) {
+        for (i = 1; i <= ulength; i++) {
+          for (j = 0; j < MAX2(MAXLOOP,ulength) + 1; j++)
+            pU[i][j] = 1.;
+        }
+      }
+      else {
+        for (i = 1; i <= n; i++) {
+          for (j = 0; j < MAX2(MAXLOOP,ulength) + 1; j++)
+            pU[i][j] = 1.;
+        }
+      }
+    }
+    return pl;
+  }
 
   /* always init everything since all global static variables are uninitialized when entering a thread */
   init_partfunc_L(n, parameters);
@@ -273,18 +305,6 @@ PUBLIC plist *pfl_fold_par( char *sequence,
   S1  = encode_sequence(sequence, 1);
 
   /*  make_ptypes(S, structure); das machmadochlieber lokal, ey!*/
-
-  /*here, I allocate memory for pU, if has to be saved, I allocate all in one go,
-    if pU is put out and freed, I only allocate what I really need*/
-
-  if (ulength>0){
-    if (pUoutput) {
-      for (i=1; i<=ulength; i++) pU[i]=(double *)vrna_alloc((MAX2(MAXLOOP,ulength)+2)*sizeof(double));
-    }
-    else {
-      for (i=1; i<=n; i++) pU[i]=(double *)vrna_alloc((MAX2(MAXLOOP,ulength)+2)*sizeof(double));
-     }
-  }
 
   /*array initialization ; qb,qm,q
     qb,qm,q (i,j) are stored as ((n+1-i)*(n-i) div 2 + n+1-j */
@@ -372,13 +392,11 @@ PUBLIC plist *pfl_fold_par( char *sequence,
         if (temp>Qmax) {
           Qmax = temp;
           if (Qmax>max_real/10.)
-            fprintf(stderr, "Q close to overflow: %d %d %g\n", i,j,temp);
+            vrna_message_warning("Q close to overflow: %d %d %g\n", i,j,temp);
         }
         if (temp>=max_real) {
-          PRIVATE char msg[128];
-          snprintf(msg, 128, "overflow in pf_fold while calculating q[%d,%d]\n"
-                  "use larger pf_scale", i,j);
-          vrna_message_error(msg);
+          vrna_message_error("overflow in pf_fold while calculating q[%d,%d]\n"
+                                    "use larger pf_scale", i,j);
         }
       } /*end for i*/
       tmp = qq1;  qq1 =qq;  qq =tmp;
@@ -499,8 +517,8 @@ PUBLIC plist *pfl_fold_par( char *sequence,
           if (pR[k][l]>Qmax) {
             Qmax = pR[k][l];
             if (Qmax>max_real/10.)
-              fprintf(stderr, "P close to overflow: %d %d %g %g\n",
-                      i, m, pR[k][l], qb[k][l]);
+              vrna_message_warning("P close to overflow: %d %d %g %g\n",
+                                          i, m, pR[k][l], qb[k][l]);
           }
           if (pR[k][l]>=max_real) {
             ov++;
@@ -588,9 +606,10 @@ PUBLIC plist *pfl_fold_par( char *sequence,
   free(S);
   free(S1);
   S = S1 = NULL;
-  if (ov>0) fprintf(stderr, "%d overflows occurred while backtracking;\n"
-                    "you might try a smaller pf_scale than %g\n",
-                    ov, pf_params->pf_scale);
+  if(ov > 0)
+    vrna_message_warning("%d overflows occurred while backtracking;\n"
+                                "you might try a smaller pf_scale than %g\n",
+                                ov, pf_params->pf_scale);
   *dpp2=dpp;
 
   return pl;

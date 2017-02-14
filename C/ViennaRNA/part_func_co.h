@@ -15,6 +15,12 @@
 #define VRNA_BACKWARD_COMPAT
 
 /**
+ *  @file     part_func_co.h
+ *  @ingroup  pf_fold cofold pf_cofold
+ *  @brief    Partition function for two RNA sequences
+ */
+
+/**
  *  @addtogroup pf_cofold
  *  @brief Partition Function Cofolding
  *
@@ -26,10 +32,6 @@
  *  corrected to include the dimerization penalty, and the pair probabilities
  *  can be divided into the conditional pair probabilities given that a re
  *  dimer is formed or not formed. See @cite bernhart:2006 for further details.
- *  @{
- *  @file part_func_co.h
- *
- *  @brief Partition function for two RNA sequences
  *
  *  As for folding one RNA molecule, this computes the partition function
  *  of all possible structures and the base pair probabilities. Uses the
@@ -52,6 +54,9 @@
  *  energies of the monomers A and B and dimers AB, AA, and BB one can compute
  *  the equilibrium concentrations, given input concentrations of A and B, see
  *  e.g. Dimitrov & Zuker (2004)
+ *
+ *  @{
+ *  @ingroup  pf_cofold
  */
 
 /** @brief Typename for the data structure that stores the dimer partition functions, #vrna_dimer_pf_s, as returned by vrna_pf_dimer() */
@@ -63,7 +68,14 @@ typedef struct vrna_dimer_conc_s  vrna_dimer_conc_t;
 
 #ifdef VRNA_BACKWARD_COMPAT
 
+/**
+ *  @brief Backward compatibility typedef for #vrna_dimer_pf_s
+ */
 typedef struct vrna_dimer_pf_s    cofoldF;
+
+/**
+ *  @brief Backward compatibility typedef for #vrna_dimer_conc_s
+ */
 typedef struct vrna_dimer_conc_s  ConcEnt;
 
 #endif
@@ -82,7 +94,7 @@ extern int    mirnatog;
 extern double F_monomer[2];
 
 /**
- *  @brief
+ *  @brief  Data structure returned by vrna_pf_dimer()
  */
 struct vrna_dimer_pf_s {
   /* free energies for: */
@@ -94,7 +106,7 @@ struct vrna_dimer_pf_s {
 };
 
 /**
- *  @brief
+ *  @brief  Data structure for concentration dependency computations
  */
 struct vrna_dimer_conc_s {
   double A0;    /**< @brief start concentration A */
@@ -133,8 +145,8 @@ vrna_pf_dimer(vrna_fold_compound_t *vc,
  *  vrna_plist_from_probs(), the dimer probabilities 'prAB' are modified in place.
  *
  *  @param FAB        free energy of dimer AB
- *  @param FEA        free energy of monomer A
- *  @param FEB        free energy of monomer B
+ *  @param FA         free energy of monomer A
+ *  @param FB         free energy of monomer B
  *  @param prAB       pair probabilities for dimer
  *  @param prA        pair probabilities monomer
  *  @param prB        pair probabilities monomer
@@ -160,9 +172,9 @@ void  vrna_pf_dimer_probs(double FAB,
  *  from the free energies for the dimers. Dimer free energies should be the
  *  dimer-only free energies, i.e. the FcAB entries from the #vrna_dimer_pf_t struct.
  *
- *  @param FEAB       Free energy of AB dimer (FcAB entry)
- *  @param FEAA       Free energy of AA dimer (FcAB entry)
- *  @param FEBB       Free energy of BB dimer (FcAB entry)
+ *  @param FcAB       Free energy of AB dimer (FcAB entry)
+ *  @param FcAA       Free energy of AA dimer (FcAB entry)
+ *  @param FcBB       Free energy of BB dimer (FcAB entry)
  *  @param FEA        Free energy of monomer A
  *  @param FEB        Free energy of monomer B
  *  @param startconc  List of start concentrations [a0],[b0],[a1],[b1],...,[an][bn],[0],[0]

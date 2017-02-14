@@ -1,6 +1,9 @@
-#include "perturbation_fold.h"
 
-#include <config.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "perturbation_fold.h"
 #include "eval.h"
 #include "fold_vars.h"
 #include "constraints.h"
@@ -130,7 +133,7 @@ static double evaluate_perturbation_vector_score(vrna_fold_compound_t *vc, const
       ret2 += evaluate_objective_function_contribution(p_prob_unpaired[i] - q_prob_unpaired[i], objective_function) / sigma_squared;
   }
 
-  fprintf(stderr, "Score: pertubation: %g\tdiscrepancy: %g\n", ret, ret2);
+  vrna_message_info(stderr, "Score: pertubation: %g\tdiscrepancy: %g", ret, ret2);
   free(p_prob_unpaired);
 
   return ret + ret2;
@@ -152,7 +155,9 @@ static void pairing_probabilities_from_restricted_pf(vrna_fold_compound_t *vc, c
 
   calculate_probability_unpaired(vc, prob_unpaired);
 
+#ifdef _OPENMP
   #pragma omp parallel for private(i)
+#endif
   for (i = 1; i <= length; ++i)
   {
     vrna_fold_compound_t *restricted_vc;
@@ -202,12 +207,16 @@ static void pairing_probabilities_from_sampling(vrna_fold_compound_t *vc, const 
   vrna_pf(vc, NULL);
 
 
+#ifdef _OPENMP
   #pragma omp parallel for private(s)
+#endif
   for (s = 0; s < sample_size; ++s)
   {
     char *sample = vrna_pbacktrack(vc);
 
+#ifdef _OPENMP
     #pragma omp critical
+#endif
     {
       for (i = 1; i <= length; ++i)
       {

@@ -1,5 +1,3 @@
-
-/* Last changed Time-stamp: <2007-10-30 14:06:22 htafer> */
 /*
            compute the duplex structure of two RNA strands,
                 allowing only inter-strand base pairs.
@@ -17,13 +15,13 @@
   Lduplexfold: finds high scoring segments
   it stores the end-position of these segments in an array
   and call then for each of these positions the duplexfold function
-  which allows to make backtracking for each of the high scoring position
-  It allows to find suboptimal partially overlapping (depends on a a parameter)
+  which allows one to make backtracking for each of the high scoring position
+  It allows one to find suboptimal partially overlapping (depends on a a parameter)
   duplexes between a long RNA and a shorter one.
   Contrarly to RNAduplex, the energy model is not in E~log(N),
   where N is the length of an interial loop but used an affine model,
   where the extension and begin parameter are fitted to the energy
-  parameter used by RNAduplex. This allows to check for duplex between a short RNA(20nt)
+  parameter used by RNAduplex. This allows one to check for duplex between a short RNA(20nt)
   and a long one at the speed of 1Mnt/s. At this speed the whole genome (3Gnt) can be analyzed for one siRNA
   in about 50 minutes.
   The algorithm is based on an idea by Durbin and Eddy:when the alginment reach a value larger than a
@@ -33,7 +31,10 @@
   For more information check "durbin, biological sequence analysis"
 */
 
-#include <config.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -50,8 +51,6 @@
 #include "ViennaRNA/loop_energies.h"
 /* #################SIMD############### */
 
-/*@unused@*/
-static char rcsid[] UNUSED = "$Id: plex.c,v 1.14 2007/06/12 12:50:16 htafer Exp $";
 /* int subopt_sorted=0; */
 
 #define PUBLIC
@@ -109,9 +108,6 @@ PRIVATE char * fbacktrack_XS(int i, int j, const int **access_s1, const int **ac
 
 #define MAXSECTORS      500     /* dimension for a backtrack array */
 #define LOCALITY        0.      /* locality parameter for base-pairs */
-
-#define MIN2(A, B)      ((A) < (B) ? (A) : (B))
-#define MAX2(A, B)      ((A) > (B) ? (A) : (B))
 
 PRIVATE vrna_param_t *P = NULL;
 
@@ -314,12 +310,9 @@ PRIVATE char *backtrack_XS(int i, int j, const int **access_s1,const int **acces
     }
     if (!traced) {
 #if 0
-      /**
-      ***if (i<n3) E -= P->dangle3[rtype[type]][SS1[i+1]];/* +access_s1[1][i+1]; */
-      ***if (j>1)  E -= P->dangle5[rtype[type]][SS2[j-1]];/* +access_s2[1][j+1]; */
-      ***if (type>2) E -= P->TerminalAU;
-      *** Changes with line below
-      **/
+      if (i<n3) E -= P->dangle3[rtype[type]][SS1[i+1]];/* +access_s1[1][i+1]; */
+      if (j>1)  E -= P->dangle5[rtype[type]][SS2[j-1]];/* +access_s2[1][j+1]; */
+      if (type>2) E -= P->TerminalAU;
 #endif
       E -= E_ExtLoop(rtype[type], SS2[j-1] , SS1[i+1], P);
       break;
@@ -410,7 +403,7 @@ PRIVATE duplexT fduplexfold_XS(const char *s1, const char *s2, const int **acces
   by = (int**) vrna_alloc(sizeof(int *) * (n3+1));
   inx= (int**) vrna_alloc(sizeof(int *) * (n3+1));
   iny= (int**) vrna_alloc(sizeof(int *) * (n3+1));
-  #pragma omp
+  /* #pragma omp parallel for */
   for (i=0; i<=n3; i++){
     c[i]  = (int *) vrna_alloc(sizeof(int) * (n4+1));
     in[i] = (int *) vrna_alloc(sizeof(int) * (n4+1));
@@ -1602,7 +1595,7 @@ PRIVATE void find_max_XS(const int *position, const int *position_j,const int de
                  begin_t-10+test.i-l1-10,
                  begin_t-10+test.i-1-10,
                  begin_q-10 + test.j-1-10 ,
-                 (begin_q -11) + test.j + strlen(test.structure)-l1-2-10,
+                 (begin_q -11) + test.j + (int)strlen(test.structure)-l1-2-10,
                  test.ddG, test.energy, test.opening_backtrack_x, test.opening_backtrack_y, test.energy_backtrack,
                  pos-10, max_pos_j-10, ((double) position[pos+delta])/100);
           pos=MAX2(10,pos+temp_min-delta);
@@ -1694,7 +1687,7 @@ PRIVATE void plot_max_XS(const int max, const int max_pos, const int max_pos_j, 
            begin_t-10+test.i-l1-10,
            begin_t-10+test.i-1-10,
            begin_q-10 + test.j-1-10 ,
-           (begin_q -11) + test.j + strlen(test.structure)-l1-2-10,
+           (begin_q -11) + test.j + (int)strlen(test.structure)-l1-2-10,
            test.ddG, test.energy, test.opening_backtrack_x, test.opening_backtrack_y, test.energy_backtrack,
            max_pos-10, max_pos_j-10, (double) max/100);
 
@@ -2776,7 +2769,7 @@ PRIVATE void find_max(const int *position, const int *position_j,const int delta
                  begin_t-10+test.i-l1-10,
                  begin_t-10+test.i-1-10,
                  begin_q-10 + test.j-1-10 ,
-                 (begin_q -11) + test.j + strlen(test.structure)-l1-2-10,
+                 (begin_q -11) + test.j + (int)strlen(test.structure)-l1-2-10,
                  test.energy,test.energy_backtrack, pos-10, max_pos_j-10, ((double) position[pos+delta])/100);
           pos=MAX2(10,pos+temp_min-delta);
         }
@@ -2911,7 +2904,7 @@ PRIVATE void find_max(const int *position, const int *position_j,const int delta
                  begin_t-10+test.i-l1,
                  begin_t-10+test.i-1,
                  begin_q-10 + test.j-1 ,
-                 (begin_q -11) + test.j + strlen(test.structure)-l1-2,
+                 (begin_q -11) + test.j + (int)strlen(test.structure)-l1-2,
                  test.energy, pos-10, max_pos_j-10, ((double) position[pos+delta])/100);
           pos=MAX2(10,pos+temp_min-delta);
         }
@@ -2947,7 +2940,7 @@ PRIVATE void plot_max(const int max, const int max_pos, const int max_pos_j, con
            begin_t-10+test.i-l1-10,
            begin_t-10+test.i-1-10,
            begin_q-10 + test.j-1-10 ,
-           (begin_q -11) + test.j + strlen(test.structure)-l1-2-10,
+           (begin_q -11) + test.j + (int)strlen(test.structure)-l1-2-10,
            test.energy, test.energy_backtrack,max_pos-10, max_pos_j-10,((double) max)/100);
     free(s3);free(s4);free(test.structure);
   }
@@ -2970,7 +2963,7 @@ PRIVATE void plot_max(const int max, const int max_pos, const int max_pos_j, con
            begin_t-10+test.i-l1,
            begin_t-10+test.i-1,
            begin_q-10 +test.j-1 ,
-           (begin_q -11) + test.j + strlen(test.structure)-l1-2,
+           (begin_q -11) + test.j + (int)strlen(test.structure)-l1-2,
            test.energy, max_pos-10, max_pos_j -10, ((double) max)/100);
     free(s3);free(s4);free(test.structure);
   }

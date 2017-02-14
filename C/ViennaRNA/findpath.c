@@ -1,4 +1,9 @@
 /* gcc -fopenmp -g3 -DTEST_FINDPATH findpath.c -o FINDpath -lRNA -lm -I ../H/ -L ./ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -506,13 +511,13 @@ int main(int argc, char *argv[]) {
   }
 
   cut_point = -1;
-  line = get_line(stdin);
+  line = vrna_read_line(stdin);
   seq = vrna_cut_point_remove(line, &cut_point);
   free(line);   
-  line = get_line(stdin);
+  line = vrna_read_line(stdin);
   s1 = vrna_cut_point_remove(line, &cut_point);
   free(line);
-  line = get_line(stdin);
+  line = vrna_read_line(stdin);
   s2 = vrna_cut_point_remove(line, &cut_point);
   free(line);
 

@@ -1,5 +1,3 @@
-
-/* Last changed Time-stamp: <2007-12-05 14:05:51 ivo> */
 /*
                   minimum free energy
                   RNA secondary structure prediction
@@ -11,7 +9,10 @@
                   Vienna RNA package
 */
 
-#include <config.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -25,8 +26,7 @@
 #include "ViennaRNA/params.h"
 #include "ViennaRNA/snofold.h"
 #include "ViennaRNA/loop_energies.h"
-/*@unused@*/
-static char rcsid[] UNUSED = "$Id: fold.c,v 1.38 2007/12/19 10:27:42 ivo Exp $";
+
 #ifdef __GNUC__
 #define INLINE inline
 #else
@@ -372,16 +372,14 @@ PRIVATE void make_pscores(const short *const* S, const char *const* AS,
         break;
       case ']':
         if (hx2<=0) {
-          fprintf(stderr, "%s\n", structure);
-          vrna_message_error("unbalanced brackets in constraints");
+          vrna_message_error("unbalanced brackets in constraints\n%s", structure);
         }
         i = stack2[--hx2];
         pscore[indx[j]+i]=NONE;
         break;
       case ')':
         if (hx<=0) {
-          fprintf(stderr, "%s\n", structure);
-          vrna_message_error("unbalanced brackets in constraints");
+          vrna_message_error("unbalanced brackets in constraints\n%s", structure);
         }
         i = stack[--hx];
         psij = pscore[indx[j]+i]; /* store for later */
@@ -401,8 +399,7 @@ PRIVATE void make_pscores(const short *const* S, const char *const* AS,
       }
     }
     if (hx!=0) {
-      fprintf(stderr, "%s\n", structure);
-      vrna_message_error("unbalanced brackets in constraint string");
+      vrna_message_error("unbalanced brackets in constraint string\n%s", structure);
     }
     free(stack); free(stack2);
   }

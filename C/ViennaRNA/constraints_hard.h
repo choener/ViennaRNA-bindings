@@ -255,8 +255,14 @@ typedef char (vrna_callback_hc_evaluate)(int i, int j, int k, int l, char d, voi
  */
 #define VRNA_CONSTRAINT_CONTEXT_MB_LOOP_ENC   (char)0x20
 
+/**
+ *  @brief  Hard constraint flag to indicate enforcement of constraints
+ */
 #define VRNA_CONSTRAINT_CONTEXT_ENFORCE       (char)0x40
 
+/**
+ *  @brief  Hard constraint flag to indicate not to remove base pairs that conflict with a given constraint
+ */
 #define VRNA_CONSTRAINT_CONTEXT_NO_REMOVE     (char)0x80
 
 /**
@@ -278,7 +284,7 @@ typedef char (vrna_callback_hc_evaluate)(int i, int j, int k, int l, char d, voi
  *  The content of this data structure determines the decomposition pattern
  *  used in the folding recursions. Attribute 'matrix' is used as source for
  *  the branching pattern of the decompositions during all folding recursions.
- *  Any entry in matrix[i,j] consists of the 6 LSB that allows to distinguish the
+ *  Any entry in matrix[i,j] consists of the 6 LSB that allows one to distinguish the
  *  following types of base pairs:
  *  - in the exterior loop (#VRNA_CONSTRAINT_CONTEXT_EXT_LOOP)
  *  - enclosing a hairpin (#VRNA_CONSTRAINT_CONTEXT_HP_LOOP)
@@ -292,8 +298,7 @@ typedef char (vrna_callback_hc_evaluate)(int i, int j, int k, int l, char d, voi
  *
  *  @see  vrna_hc_init(), vrna_hc_free(), #VRNA_CONSTRAINT_CONTEXT_EXT_LOOP,
  *        #VRNA_CONSTRAINT_CONTEXT_HP_LOOP, #VRNA_CONSTRAINT_CONTEXT_INT_LOOP,
- *        #VRNA_CONSTRAINT_CONTEXT_EXT_LOOP_ENC, #VRNA_CONSTRAINT_CONTEXT_MB_LOOP,
- *        #VRNA_CONSTRAINT_CONTEXT_MB_LOOP_ENC
+ *        #VRNA_CONSTRAINT_CONTEXT_MB_LOOP, #VRNA_CONSTRAINT_CONTEXT_MB_LOOP_ENC
  *
  *  @ingroup hard_constraints
  */
@@ -484,7 +489,6 @@ void vrna_hc_add_bp_nonspecific(vrna_fold_compound_t *vc,
  */
 void vrna_hc_free(vrna_hc_t *hc);
 
-#ifdef WITH_GEN_HC
 
 /**
  *  @brief  Add a function pointer pointer for the generic hard constraint
@@ -508,7 +512,6 @@ void vrna_hc_add_data(vrna_fold_compound_t *vc,
                       void *data,
                       vrna_callback_free_auxdata *f);
 
-#endif
 
 /**
  *  @brief Add hard constraints from pseudo dot-bracket notation

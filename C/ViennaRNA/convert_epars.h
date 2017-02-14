@@ -2,16 +2,21 @@
 #define VIENNA_RNA_PACKAGE_CONVERT_EPARS_H
 
 /**
+ *  @file convert_epars.h
+ *  @ingroup energy_parameters
+ *  @brief Functions and definitions for energy parameter file format conversion
+ */
+
+/**
  *  @addtogroup energy_parameters_convert
- *  @brief  Convert energy parameter files into the latest format
+ *  @brief      Convert energy parameter files into the latest format
  *
  *  To preserve some backward compatibility the RNAlib also provides
  *  functions to convert energy parameter files from the format used
  *  in version 1.4-1.8 into the new format used since version 2.0
  *
  *  @{
- *  @file convert_epars.h
- *  @brief Functions and definitions for energy parameter file format conversion
+ *  @ingroup energy_parameters_convert
  */
 
 /** Flag to indicate printing of a complete parameter set */
@@ -62,7 +67,7 @@
 /**
  *  Convert/dump a Vienna 1.8.4 formatted energy parameter file
  * 
- *  The options argument allows to control the different output modes.\n
+ *  The options argument allows one to control the different output modes.\n
  *  Currently available options are:\n
  *  #VRNA_CONVERT_OUTPUT_ALL, #VRNA_CONVERT_OUTPUT_HP, #VRNA_CONVERT_OUTPUT_STACK\n
  *  #VRNA_CONVERT_OUTPUT_MM_HP, #VRNA_CONVERT_OUTPUT_MM_INT, #VRNA_CONVERT_OUTPUT_MM_INT_1N\n

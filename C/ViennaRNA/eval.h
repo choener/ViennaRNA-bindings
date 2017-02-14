@@ -19,19 +19,18 @@
 #define VRNA_BACKWARD_COMPAT
 
 /**
- *  @file eval.h
- *  @brief Functions and variables related to energy evaluation
- *  of sequence/structure pairs.
+ *  @file     eval.h
+ *  @ingroup  eval
+ *  @brief    Functions and variables related to energy evaluation of sequence/structure pairs.
  */
 
 
 /**
- *  @addtogroup eval Functions to Evaluate Free Energies for given Sequence / Structure Pairs
+ *  @addtogroup eval
+ *  @brief Functions and variables related to free energy evaluation of sequence/structure pairs.
  *
  *  @{
- *    @brief This module contains all functions and variables related to energy evaluation
- *    of sequence/structure pairs.
- *
+ *  @ingroup  eval
  */
 
 /** @brief set to first pos of second seq for cofolding  */
@@ -54,7 +53,7 @@ extern  int eos_debug;
  vc = vrna_fold_compound(sequence, NULL, VRNA_OPTION_EVAL_ONLY);
     @endcode
  *
- *  @note Accepts vrna_fold_compound_t of type #VRNA_VC_TYPE_SINGLE and #VRNA_VC_TYPE_ALIGNMENT
+ *  @note Accepts vrna_fold_compound_t of type #VRNA_FC_TYPE_SINGLE and #VRNA_FC_TYPE_COMPARATIVE
  *
  *  @see  vrna_eval_structure_pt(), vrna_eval_structure_verbose(), vrna_eval_structure_pt_verbose(),
  *        vrna_fold_compound(), vrna_fold_compound_comparative(), vrna_eval_covar_structure()
@@ -70,7 +69,7 @@ float vrna_eval_structure(vrna_fold_compound_t *vc,
  *  @brief Calculate the pseudo energy derived by the covariance scores of a set of aligned sequences
  *
  *  Consensus structure prediction is driven by covariance scores of base pairs in rows of the
- *  provided alignment. This function allows to retrieve the total amount of this covariance pseudo
+ *  provided alignment. This function allows one to retrieve the total amount of this covariance pseudo
  *  energy scores.
  *  The #vrna_fold_compound_t does not need to contain any DP matrices, but requires all most basic
  *  init values as one would get from a call like this:
@@ -78,7 +77,7 @@ float vrna_eval_structure(vrna_fold_compound_t *vc,
  vc = vrna_fold_compound_comparative(alignment, NULL, VRNA_OPTION_EVAL_ONLY);
     @endcode
  *
- *  @note Accepts vrna_fold_compound_t of type #VRNA_VC_TYPE_ALIGNMENT only!
+ *  @note Accepts vrna_fold_compound_t of type #VRNA_FC_TYPE_COMPARATIVE only!
  *
  *  @see  vrna_fold_compound_comparative(), vrna_eval_structure()
  *
@@ -110,17 +109,9 @@ float vrna_eval_structure_simple( const char *string,
 /**
  *  @brief Calculate the free energy of an already folded RNA and print contributions on a per-loop base.
  *
- *  This function allows for detailed energy evaluation of a given sequence/structure pair.
- *  In contrast to vrna_eval_structure() this function prints detailed energy contributions
- *  based on individual loops to a file handle. If NULL is passed as file handle, this function
- *  defaults to print to stdout.
- *  Model details, energy parameters, and possibly soft constraints are used as provided
- *  via the parameter 'vc'. The fold_compound does not need to contain any DP matrices,
- *  but all the most basic init values as one would get from a call like this:
- *  @code{.c}
- vc = vrna_fold_compound(sequence, NULL, VRNA_OPTION_EVAL_ONLY);
-    @endcode
- *
+ *  This function is a simplyfied version of vrna_eval_structure_v() that uses the @em default
+ *  verbosity level.
+ (
  *  @see vrna_eval_structure_pt(), vrna_eval_structure_verbose(), vrna_eval_structure_pt_verbose(),
  *
  *  @param vc               A vrna_fold_compound_t containing the energy parameters and model details
@@ -133,18 +124,43 @@ float vrna_eval_structure_verbose(vrna_fold_compound_t *vc,
                                   FILE *file);
 
 /**
- *  @brief Calculate the free energy of an already folded RNA and print contributions per loop.
+ *  @brief Calculate the free energy of an already folded RNA and print contributions on a per-loop base.
  *
  *  This function allows for detailed energy evaluation of a given sequence/structure pair.
  *  In contrast to vrna_eval_structure() this function prints detailed energy contributions
  *  based on individual loops to a file handle. If NULL is passed as file handle, this function
- *  defaults to print to stdout.
- *  In contrast to vrna_eval_structure_verbose() this function assumes default model details
- *  and default energy parameters in order to evaluate the free energy of the secondary
- *  structure. Threefore, it serves as a simple interface function for energy evaluation
- *  for situations where no changes on the energy model are required.
+ *  defaults to print to stdout. Any positive @p verbosity_level activates potential warning message
+ *  of the energy evaluting functions, while values @f$ \ge 1 @f$ allow for detailed control of what
+ *  data is printed. A negative parameter @p verbosity_level turns off printing all together.
  *
- *  @see vrna_eval_structure_verbose(), vrna_eval_structure_pt(), vrna_eval_structure_verbose(), vrna_eval_structure_pt_verbose(),
+ *  Model details, energy parameters, and possibly soft constraints are used as provided
+ *  via the parameter 'vc'. The fold_compound does not need to contain any DP matrices,
+ *  but all the most basic init values as one would get from a call like this:
+ *  @code{.c}
+ vc = vrna_fold_compound(sequence, NULL, VRNA_OPTION_EVAL_ONLY);
+    @endcode
+ *
+ *  @see vrna_eval_structure_pt(), vrna_eval_structure_verbose(), vrna_eval_structure_pt_verbose(),
+ *
+ *  @param vc               A vrna_fold_compound_t containing the energy parameters and model details
+ *  @param structure        Secondary structure in dot-bracket notation
+ *  @param verbosity_level  The level of verbosity of this function
+ *  @param file             A file handle where this function should print to (may be NULL).
+ *  @return                 The free energy of the input structure given the input sequence in kcal/mol
+ */
+float vrna_eval_structure_v(vrna_fold_compound_t *vc,
+                            const char *structure,
+                            int verbosity_level,
+                            FILE *file);
+
+/**
+ *  @brief Calculate the free energy of an already folded RNA and print contributions per loop.
+ *
+ *  This function is a simplyfied version of vrna_eval_structure_simple_v() that uses the @em default
+ *  verbosity level.
+ *
+ *  @see  vrna_eval_structure_simple_v(), vrna_eval_structure_verbose(), vrna_eval_structure_pt(),
+ *        vrna_eval_structure_verbose(), vrna_eval_structure_pt_verbose()
  *
  *  @param string           RNA sequence in uppercase letters
  *  @param structure        Secondary structure in dot-bracket notation
@@ -154,6 +170,35 @@ float vrna_eval_structure_verbose(vrna_fold_compound_t *vc,
 float vrna_eval_structure_simple_verbose( const char *string,
                                           const char *structure,
                                           FILE *file);
+
+
+/**
+ *  @brief Calculate the free energy of an already folded RNA and print contributions per loop.
+ *
+ *  This function allows for detailed energy evaluation of a given sequence/structure pair.
+ *  In contrast to vrna_eval_structure() this function prints detailed energy contributions
+ *  based on individual loops to a file handle. If NULL is passed as file handle, this function
+ *  defaults to print to stdout. Any positive @p verbosity_level activates potential warning message
+ *  of the energy evaluting functions, while values @f$ \ge 1 @f$ allow for detailed control of what
+ *  data is printed. A negative parameter @p verbosity_level turns off printing all together.
+ *
+ *  In contrast to vrna_eval_structure_verbose() this function assumes default model details
+ *  and default energy parameters in order to evaluate the free energy of the secondary
+ *  structure. Threefore, it serves as a simple interface function for energy evaluation
+ *  for situations where no changes on the energy model are required.
+ *
+ *  @see vrna_eval_structure_verbose(), vrna_eval_structure_pt(), vrna_eval_structure_verbose(), vrna_eval_structure_pt_verbose(),
+ *
+ *  @param string           RNA sequence in uppercase letters
+ *  @param structure        Secondary structure in dot-bracket notation
+ *  @param verbosity_level  The level of verbosity of this function
+ *  @param file             A file handle where this function should print to (may be NULL).
+ *  @return                 The free energy of the input structure given the input sequence in kcal/mol
+ */
+float vrna_eval_structure_simple_v( const char *string,
+                                    const char *structure,
+                                    int verbosity_level,
+                                    FILE *file);
 
 
 /**
@@ -197,19 +242,10 @@ int vrna_eval_structure_pt_simple(const char *string,
 /**
  *  @brief Calculate the free energy of an already folded RNA
  *
- *  This function allows for energy evaluation of a given sequence/structure pair where
- *  the structure is provided in pair_table format as obtained from vrna_ptable().
- *  Model details, energy parameters, and possibly soft constraints are used as provided
- *  via the parameter 'vc'. The fold_compound does not need to contain any DP matrices,
- *  but all the most basic init values as one would get from a call like this:
- *  @code{.c}
- vc = vrna_fold_compound(sequence, NULL, VRNA_OPTION_EVAL_ONLY);
-    @endcode
- *  In contrast to vrna_eval_structure_pt() this function prints detailed energy contributions
- *  based on individual loops to a file handle. If NULL is passed as file handle, this function
- *  defaults to print to stdout.
+ *  This function is a simplyfied version of vrna_eval_structure_simple_v() that uses the @em default
+ *  verbosity level.
  *
- *  @see vrna_ptable(), vrna_eval_structure_pt(), vrna_eval_structure_verbose()
+ *  @see vrna_eval_structure_pt_v(), vrna_ptable(), vrna_eval_structure_pt(), vrna_eval_structure_verbose()
  *
  *  @param vc               A vrna_fold_compound_t containing the energy parameters and model details
  *  @param pt               Secondary structure as pair_table
@@ -231,12 +267,32 @@ int vrna_eval_structure_pt_verbose( vrna_fold_compound_t *vc,
  *  @code{.c}
  vc = vrna_fold_compound(sequence, NULL, VRNA_OPTION_EVAL_ONLY);
     @endcode
- *  In contrast to vrna_eval_structure_pt_verbose() this function assumes default model details
- *  and default energy parameters in order to evaluate the free energy of the secondary
- *  structure. Threefore, it serves as a simple interface function for energy evaluation
- *  for situations where no changes on the energy model are required.
+ *  In contrast to vrna_eval_structure_pt() this function prints detailed energy contributions
+ *  based on individual loops to a file handle. If NULL is passed as file handle, this function
+ *  defaults to print to stdout. Any positive @p verbosity_level activates potential warning message
+ *  of the energy evaluting functions, while values @f$ \ge 1 @f$ allow for detailed control of what
+ *  data is printed. A negative parameter @p verbosity_level turns off printing all together.
  *
- *  @see vrna_ptable(), vrna_eval_structure_pt_verbose(), vrna_eval_structure_simple()
+ *  @see vrna_ptable(), vrna_eval_structure_pt(), vrna_eval_structure_verbose()
+ *
+ *  @param vc               A vrna_fold_compound_t containing the energy parameters and model details
+ *  @param pt               Secondary structure as pair_table
+ *  @param verbosity_level  The level of verbosity of this function
+ *  @param file             A file handle where this function should print to (may be NULL).
+ *  @return                 The free energy of the input structure given the input sequence in 10cal/mol
+ */
+int vrna_eval_structure_pt_v( vrna_fold_compound_t *vc,
+                              const short *pt,
+                              int verbosity_level,
+                              FILE *file);
+
+/**
+ *  @brief Calculate the free energy of an already folded RNA
+ *
+ *  This function is a simplyfied version of vrna_eval_structure_pt_simple_v() that uses the @em default
+ *  verbosity level.
+ *
+ *  @see vrna_eval_structure_pt_simple_v(), vrna_ptable(), vrna_eval_structure_pt_verbose(), vrna_eval_structure_simple()
  *
  *  @param string           RNA sequence in uppercase letters
  *  @param pt               Secondary structure as pair_table
@@ -246,6 +302,35 @@ int vrna_eval_structure_pt_verbose( vrna_fold_compound_t *vc,
 int vrna_eval_structure_pt_simple_verbose(const char *string,
                                           const short *pt,
                                           FILE *file);
+
+/**
+ *  @brief Calculate the free energy of an already folded RNA
+ *
+ *  This function allows for energy evaluation of a given sequence/structure pair where
+ *  the structure is provided in pair_table format as obtained from vrna_ptable().
+ *  Model details, energy parameters, and possibly soft constraints are used as provided
+ *  via the parameter 'vc'. The fold_compound does not need to contain any DP matrices,
+ *  but all the most basic init values as one would get from a call like this:
+ *  @code{.c}
+ vc = vrna_fold_compound(sequence, NULL, VRNA_OPTION_EVAL_ONLY);
+    @endcode
+ *  In contrast to vrna_eval_structure_pt_verbose() this function assumes default model details
+ *  and default energy parameters in order to evaluate the free energy of the secondary
+ *  structure. Threefore, it serves as a simple interface function for energy evaluation
+ *  for situations where no changes on the energy model are required.
+ *
+ *  @see vrna_ptable(), vrna_eval_structure_pt_v(), vrna_eval_structure_simple()
+ *
+ *  @param string           RNA sequence in uppercase letters
+ *  @param pt               Secondary structure as pair_table
+ *  @param verbosity_level  The level of verbosity of this function
+ *  @param file             A file handle where this function should print to (may be NULL).
+ *  @return                 The free energy of the input structure given the input sequence in 10cal/mol
+ */
+int vrna_eval_structure_pt_simple_v(const char *string,
+                                    const short *pt,
+                                    int verbosity_level,
+                                    FILE *file);
 
 /**
  * @brief Calculate energy of a loop

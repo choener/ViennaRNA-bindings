@@ -4,7 +4,11 @@
 
                   Vienna RNA package
 */
-#include <config.h>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -135,9 +139,9 @@ vrna_params_subst( vrna_fold_compound_t *vc,
       vc->params = vrna_params_copy(parameters);
     } else {
       switch(vc->type){
-        case VRNA_VC_TYPE_SINGLE:     /* fall through */
+        case VRNA_FC_TYPE_SINGLE:     /* fall through */
 
-        case VRNA_VC_TYPE_ALIGNMENT:  vc->params = vrna_params(NULL);
+        case VRNA_FC_TYPE_COMPARATIVE:  vc->params = vrna_params(NULL);
                                       break;
 
         default:                      break;
@@ -152,9 +156,9 @@ vrna_params_reset(vrna_fold_compound_t *vc,
 
   if(vc){
     switch(vc->type){
-      case VRNA_VC_TYPE_SINGLE:     /* fall through */
+      case VRNA_FC_TYPE_SINGLE:     /* fall through */
 
-      case VRNA_VC_TYPE_ALIGNMENT:  if(vc->params)
+      case VRNA_FC_TYPE_COMPARATIVE:  if(vc->params)
                                       free(vc->params);
                                     vc->params = vrna_params(md_p);
                                     break;
@@ -170,9 +174,9 @@ vrna_exp_params_reset(vrna_fold_compound_t *vc,
 
   if(vc){
     switch(vc->type){
-      case VRNA_VC_TYPE_SINGLE:     /* fall through */
+      case VRNA_FC_TYPE_SINGLE:     /* fall through */
 
-      case VRNA_VC_TYPE_ALIGNMENT:  if(vc->exp_params)
+      case VRNA_FC_TYPE_COMPARATIVE:  if(vc->exp_params)
                                       free(vc->exp_params);
                                     vc->exp_params = vrna_exp_params(md_p);
                                     break;
@@ -193,12 +197,12 @@ vrna_exp_params_subst(vrna_fold_compound_t *vc,
       vc->exp_params = vrna_exp_params_copy(params);
     } else {
       switch(vc->type){
-        case VRNA_VC_TYPE_SINGLE:     vc->exp_params = vrna_exp_params(NULL);
+        case VRNA_FC_TYPE_SINGLE:     vc->exp_params = vrna_exp_params(NULL);
                                       if(vc->cutpoint > 0)
                                         vc->exp_params->model_details.min_loop_size = 0;
                                       break;
 
-        case VRNA_VC_TYPE_ALIGNMENT:  vc->exp_params = vrna_exp_params_comparative(vc->n_seq, NULL);
+        case VRNA_FC_TYPE_COMPARATIVE:  vc->exp_params = vrna_exp_params_comparative(vc->n_seq, NULL);
                                       break;
 
         default:                      break;
@@ -213,23 +217,39 @@ PUBLIC void
 vrna_exp_params_rescale(vrna_fold_compound_t *vc,
                         double *mfe){
 
-  if(vc){
-    vrna_exp_param_t *pf = vc->exp_params;
-    if(pf){
-      double kT = pf->kT;
+  vrna_exp_param_t  *pf;
+  double            kT;
+  vrna_md_t         *md;
 
-      if(vc->type == VRNA_VC_TYPE_ALIGNMENT)
+  if(vc){
+    
+    if(!vc->exp_params){
+      switch(vc->type){
+        case VRNA_FC_TYPE_SINGLE:
+          vc->exp_params = vrna_exp_params(&(vc->params->model_details));
+          break;
+        case VRNA_FC_TYPE_COMPARATIVE:
+          vc->exp_params = vrna_exp_params_comparative(vc->n_seq, &(vc->params->model_details));
+          break;
+      }
+    }
+
+    pf = vc->exp_params;
+    if(pf){
+      kT = pf->kT;
+      md = &(pf->model_details);
+
+      if(vc->type == VRNA_FC_TYPE_COMPARATIVE)
         kT /= vc->n_seq;
 
-      vrna_md_t *md = &(pf->model_details);
       if(mfe){
         kT /= 1000.;
         pf->pf_scale = exp(-(md->sfact * *mfe)/ kT / vc->length);
       } else if(pf->pf_scale < 1.){  /* mean energy for random sequences: 184.3*length cal */
         pf->pf_scale = exp(-(-185+(pf->temperature-37.)*7.27)/kT);
-        if(pf->pf_scale < 1.)
-          pf->pf_scale = 1.;
       }
+      if(pf->pf_scale < 1.)
+        pf->pf_scale = 1.;
       rescale_params(vc);
     }
   }
@@ -716,13 +736,15 @@ rescale_params(vrna_fold_compound_t *vc){
   vrna_exp_param_t  *pf = vc->exp_params;
   vrna_mx_pf_t      *m  = vc->exp_matrices;
 
-  m->scale[0] = 1.;
-  m->scale[1] = (FLT_OR_DBL)(1./pf->pf_scale);
-  m->expMLbase[0] = 1;
-  m->expMLbase[1] = (FLT_OR_DBL)(pf->expMLbase / pf->pf_scale);
-  for (i=2; i<=vc->length; i++) {
-    m->scale[i] = m->scale[i/2]*m->scale[i-(i/2)];
-    m->expMLbase[i] = (FLT_OR_DBL)pow(pf->expMLbase, (double)i) * m->scale[i];
+  if(m && pf){
+    m->scale[0] = 1.;
+    m->scale[1] = (FLT_OR_DBL)(1./pf->pf_scale);
+    m->expMLbase[0] = 1;
+    m->expMLbase[1] = (FLT_OR_DBL)(pf->expMLbase / pf->pf_scale);
+    for (i=2; i<=vc->length; i++) {
+      m->scale[i] = m->scale[i/2]*m->scale[i-(i/2)];
+      m->expMLbase[i] = (FLT_OR_DBL)pow(pf->expMLbase, (double)i) * m->scale[i];
+    }
   }
 }
 

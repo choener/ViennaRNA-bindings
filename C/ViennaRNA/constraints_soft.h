@@ -10,16 +10,6 @@
  */
 
 
-/**
- *  @addtogroup soft_constraints
- *  @brief      Functions and data structures for secondary structure soft constraints
- *
- *  Soft-constraints are used to change position specific contributions
- *  in the recursions by adding bonuses/penalties in form of pseudo free energies
- *  to certain loop configurations.
- *
- */
-
 /** @brief Typename for the soft constraints data structure #vrna_sc_s
  *  @ingroup  soft_constraints
  */
@@ -149,11 +139,11 @@ struct vrna_sc_s {
  *  to the #vrna_fold_compound_t data structure.
  *  If soft constraints already exist within the fold compound, they are removed.
  *
- *  \note Accepts vrna_fold_compound_t of type #VRNA_VC_TYPE_SINGLE and #VRNA_VC_TYPE_ALIGNMENT
+ *  \note Accepts vrna_fold_compound_t of type #VRNA_FC_TYPE_SINGLE and #VRNA_FC_TYPE_COMPARATIVE
  *
  *  @ingroup  soft_constraints
  *
- *  @see  vrna_sc_add_bp(), vrna_sc_add_up(), vrna_sc_add_SHAPE_deigan(),
+ *  @see  vrna_sc_set_bp(), vrna_sc_set_up(), vrna_sc_add_SHAPE_deigan(),
  *        vrna_sc_add_SHAPE_zarringhalam(), vrna_sc_remove(), vrna_sc_add_f(),
  *        vrna_sc_add_exp_f(), vrna_sc_add_pre(), vrna_sc_add_post()
  *  @param  vc  The #vrna_fold_compound_t where an empty soft constraint feature is to be added to
@@ -161,16 +151,58 @@ struct vrna_sc_s {
 void vrna_sc_init(vrna_fold_compound_t *vc);
 
 /**
- *  @brief  Add soft constraints for paired nucleotides
+ *  @brief  Set soft constraints for paired nucleotides
+ *
+ *  @note     This function replaces any pre-exisitng soft constraints with the ones supplied
+ *            in @p constraints.
  *
  *  @ingroup  soft_constraints
+ *
+ *  @see      vrna_sc_add_bp(), vrna_sc_set_up(), vrna_sc_add_up()
  *
  *  @param  vc          The #vrna_fold_compound_t the soft constraints are associated with
  *  @param  constraints A two-dimensional array of pseudo free energies in @f$ kcal / mol @f$
  *  @param  options     The options flag indicating how/where to store the soft constraints
  */
-void vrna_sc_add_bp(vrna_fold_compound_t *vc,
+void vrna_sc_set_bp(vrna_fold_compound_t *vc,
                     const FLT_OR_DBL **constraints,
+                    unsigned int options);
+
+/**
+ *  @brief  Add soft constraints for paired nucleotides
+ *
+ *  @ingroup  soft_constraints
+ *
+ *  @see      vrna_sc_set_bp(), vrna_sc_set_up(), vrna_sc_add_up()
+ *
+ *  @param  vc          The #vrna_fold_compound_t the soft constraints are associated with
+ *  @param  i           The 5' position of the base pair the soft constraint is added for
+ *  @param  j           The 3' position of the base pair the soft constraint is added for
+ *  @param  energy      The free energy (soft-constraint) in @f$ kcal / mol @f$
+ *  @param  options     The options flag indicating how/where to store the soft constraints
+ */
+void vrna_sc_add_bp(vrna_fold_compound_t *vc,
+                   int i,
+                   int j,
+                   FLT_OR_DBL energy,
+                   unsigned int options);
+
+/**
+ *  @brief  Set soft constraints for unpaired nucleotides
+ *
+ *  @note     This function replaces any pre-exisitng soft constraints with the ones supplied
+ *            in @p constraints.
+ *
+ *  @ingroup  soft_constraints
+ *
+ *  @see      vrna_sc_add_up(), vrna_sc_set_bp(), vrna_sc_add_bp()
+ *
+ *  @param  vc          The #vrna_fold_compound_t the soft constraints are associated with
+ *  @param  constraints A vector of pseudo free energies in @f$ kcal / mol @f$
+ *  @param  options     The options flag indicating how/where to store the soft constraints
+ */
+void vrna_sc_set_up(vrna_fold_compound_t *vc,
+                    const FLT_OR_DBL *constraints,
                     unsigned int options);
 
 /**
@@ -178,18 +210,22 @@ void vrna_sc_add_bp(vrna_fold_compound_t *vc,
  *
  *  @ingroup  soft_constraints
  *
+ *  @see      vrna_sc_set_up(), vrna_sc_add_bp(), vrna_sc_set_bp()
+ *
  *  @param  vc          The #vrna_fold_compound_t the soft constraints are associated with
- *  @param  constraints A vector of pseudo free energies in @f$ kcal / mol @f$
+ *  @param  i           The nucleotide position the soft constraint is added for
+ *  @param  energy      The free energy (soft-constraint) in @f$ kcal / mol @f$
  *  @param  options     The options flag indicating how/where to store the soft constraints
  */
-void vrna_sc_add_up(vrna_fold_compound_t *vc,
-                    const FLT_OR_DBL *constraints,
-                    unsigned int options);
+void vrna_sc_add_up( vrna_fold_compound_t *vc,
+                            int i,
+                            FLT_OR_DBL energy,
+                            unsigned int options);
 
 /**
  *  @brief  Remove soft constraints from #vrna_fold_compound_t
  *
- *  \note Accepts vrna_fold_compound_t of type #VRNA_VC_TYPE_SINGLE and #VRNA_VC_TYPE_ALIGNMENT
+ *  \note Accepts vrna_fold_compound_t of type #VRNA_FC_TYPE_SINGLE and #VRNA_FC_TYPE_COMPARATIVE
  *
  *  @ingroup  soft_constraints
  *
@@ -215,7 +251,7 @@ void vrna_sc_free(vrna_sc_t *sc);
  *
  *  @param  vc        The fold compound the generic soft constraint function should be bound to
  *  @param  data      A pointer to the data structure that holds required data for function 'f'
- *  @param  free_data A pointer to a function that free's the memory occupied by @data (Maybe NULL)
+ *  @param  free_data A pointer to a function that free's the memory occupied by @p data (Maybe NULL)
  */
 void vrna_sc_add_data(vrna_fold_compound_t *vc,
                       void *data,
@@ -224,7 +260,7 @@ void vrna_sc_add_data(vrna_fold_compound_t *vc,
 /**
  *  @brief  Bind a function pointer for generic soft constraint feature (MFE version)
  *
- *  This function allows to easily bind a function pointer and corresponding data structure
+ *  This function allows one to easily bind a function pointer and corresponding data structure
  *  to the soft constraint part #vrna_sc_t of the #vrna_fold_compound_t.
  *  The function for evaluating the generic soft constraint feature has to return
  *  a pseudo free energy @f$ \hat{E} @f$ in @f$ dacal/mol @f$, where @f$ 1 dacal/mol = 10 cal/mol @f$.
@@ -242,7 +278,7 @@ void vrna_sc_add_f( vrna_fold_compound_t *vc,
 /**
  *  @brief  Bind a backtracking function pointer for generic soft constraint feature
  *
- *  This function allows to easily bind a function pointer to the soft constraint part
+ *  This function allows one to easily bind a function pointer to the soft constraint part
  *  #vrna_sc_t of the #vrna_fold_compound_t.
  *  The provided function should be used for backtracking purposes in loop regions
  *  that were altered via the generic soft constraint feature. It has to return
@@ -262,7 +298,7 @@ void vrna_sc_add_bt(vrna_fold_compound_t *vc,
 /**
  *  @brief  Bind a function pointer for generic soft constraint feature (PF version)
  *
- *  This function allows to easily bind a function pointer and corresponding data structure
+ *  This function allows one to easily bind a function pointer and corresponding data structure
  *  to the soft constraint part #vrna_sc_t of the #vrna_fold_compound_t.
  *  The function for evaluating the generic soft constraint feature has to return
  *  a pseudo free energy @f$ \hat{E} @f$ as Boltzmann factor, i.e. @f$ exp(- \hat{E} / kT) @f$.

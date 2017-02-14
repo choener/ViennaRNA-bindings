@@ -1,6 +1,9 @@
 /* config.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define to 1 if you have the `asprintf' function. */
+#define HAVE_ASPRINTF 1
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
 
@@ -17,10 +20,10 @@
 #define HAVE_INTTYPES_H 1
 
 /* Define to 1 if you have the `gsl' library (-lgsl). */
-/* #undef HAVE_LIBGSL */
+#define HAVE_LIBGSL 1
 
 /* Define to 1 if you have the `gslcblas' library (-lgslcblas). */
-/* #undef HAVE_LIBGSLCBLAS */
+#define HAVE_LIBGSLCBLAS 1
 
 /* Define to 1 if you have the `m' library (-lm). */
 #define HAVE_LIBM 1
@@ -47,6 +50,9 @@
 /* Define to 1 if you have the `memset' function. */
 #define HAVE_MEMSET 1
 
+/* Define if OpenMP is enabled */
+#define HAVE_OPENMP 1
+
 /* Define to 1 if you have the `pow' function. */
 #define HAVE_POW 1
 
@@ -59,6 +65,9 @@
 
 /* Define to 1 if you have the `sqrt' function. */
 #define HAVE_SQRT 1
+
+/* Define to 1 if you have the <stdarg.h> header file. */
+#define HAVE_STDARG_H 1
 
 /* Define to 1 if stdbool.h conforms to C99. */
 #define HAVE_STDBOOL_H 1
@@ -102,6 +111,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
+/* Define to 1 if you have the `vasprintf' function. */
+#define HAVE_VASPRINTF 1
+
 /* Define to 1 if the system has the type `_Bool'. */
 #define HAVE__BOOL 1
 
@@ -118,7 +130,7 @@
 #define PACKAGE_NAME "ViennaRNA"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "ViennaRNA 2.2.5"
+#define PACKAGE_STRING "ViennaRNA 2.3.3"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "ViennaRNA"
@@ -127,7 +139,7 @@
 #define PACKAGE_URL "http://www.tbi.univie.ac.at/RNA"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.2.5"
+#define PACKAGE_VERSION "2.3.3"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
@@ -139,10 +151,35 @@
 /* #undef USE_FLOAT_PF */
 
 /* Compute z-scores for RNALfold */
-/* #undef USE_SVM */
+#define USE_SVM 1
+
+/* Enable extensions on AIX 3, Interix.  */
+#ifndef _ALL_SOURCE
+# define _ALL_SOURCE 1
+#endif
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE 1
+#endif
+/* Enable threading extensions on Solaris.  */
+#ifndef _POSIX_PTHREAD_SEMANTICS
+# define _POSIX_PTHREAD_SEMANTICS 1
+#endif
+/* Enable extensions on HP NonStop.  */
+#ifndef _TANDEM_SOURCE
+# define _TANDEM_SOURCE 1
+#endif
+/* Enable general extensions on Solaris.  */
+#ifndef __EXTENSIONS__
+# define __EXTENSIONS__ 1
+#endif
+
 
 /* Version number of package */
-#define VERSION "2.2.5"
+#define VERSION "2.3.3"
+
+/* Do not use colors for TTY output */
+/* #undef WITHOUT_TTY_COLORS */
 
 /* Use Boustrophedon scheme for stochastic backtracking */
 #define WITH_BOUSTROPHEDON 1
@@ -159,23 +196,30 @@
 /* Define if using the dmalloc debugging malloc package */
 /* #undef WITH_DMALLOC */
 
-/* Provide generic hard constraints */
-/* #undef WITH_GEN_HC */
-
 /* Use GNU Scientific Library */
-/* #undef WITH_GSL */
+#define WITH_GSL 1
 
 /* Add JSON support for input and output functions */
-/* #undef WITH_JSON_SUPPORT */
+#define WITH_JSON_SUPPORT 1
 
 /* Create the perl interface to RNAlib */
-/* #undef WITH_PERL_INTERFACE */
+#define WITH_PERL_INTERFACE 1
 
 /* Create the python2 interface to RNAlib */
-/* #undef WITH_PYTHON2_INTERFACE */
+#define WITH_PYTHON2_INTERFACE 1
 
 /* Create the Python3 interface to RNAlib */
-/* #undef WITH_PYTHON3_INTERFACE */
+#define WITH_PYTHON3_INTERFACE 1
+
+/* Define to 1 if on MINIX. */
+/* #undef _MINIX */
+
+/* Define to 2 if the system does not provide POSIX.1 features except with
+   this defined. */
+/* #undef _POSIX_1_SOURCE */
+
+/* Define to 1 if you need to in order for `stat' and other things to work. */
+/* #undef _POSIX_SOURCE */
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */

@@ -14,7 +14,10 @@
 
 	  C Ivo L Hofacker, Vienna RNA Package
 */
-/* Last changed Time-stamp: <2004-08-02 10:11:13 ivo> */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,9 +32,6 @@
 #include "ViennaRNA/profiledist.h"
 #include "ViennaRNA/ProfileAln.h"
 
-
-/*@unused@*/
-static char rcsid[] = "$Id: ProfileAln.c,v 1.5 2006/01/18 13:00:30 ivo Exp $";
 
 #define EQUAL(x,y)     (fabs((x)-(y)) <= fabs(x)*2*FLT_EPSILON)
 
@@ -254,16 +254,17 @@ PUBLIC int set_paln_params(double gap_open, double gap_ext,
 			   double seq_weight, int freeends) {
   open = (gap_open>0) ? -gap_open : gap_open;
   ext = (gap_ext>0) ? -gap_ext : gap_ext;
-  if (open > ext) fprintf(stderr, "Gap extension penalty is smaller than "
-			  "gap open. Do you realy want this?\n");
+  if (open > ext)
+    vrna_message_warning( "Gap extension penalty is smaller than "
+                          "gap open. Do you realy want this?");
   seqw = seq_weight;
   if (seqw<0) {
     seqw = 0;
-    fprintf(stderr, "Sequence weight set to 0 (must be in [0..1])\n");
+    vrna_message_warning("Sequence weight set to 0 (must be in [0..1])");
   } else
   if (seqw>1) {
     seqw = 1;
-    fprintf(stderr, "Sequence weight set to 1 (must be in [0..1])\n");
+    vrna_message_warning("Sequence weight set to 1 (must be in [0..1])");
   }
   free_ends = (freeends) ? 1 : 0;
   return 0;

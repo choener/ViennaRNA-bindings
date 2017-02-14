@@ -104,7 +104,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_rna.m4 \
 	$(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/ax_check_link_flag.m4 \
 	$(top_srcdir)/m4/ax_compiler_vendor.m4 \
-	$(top_srcdir)/m4/ax_perl_ext.m4 \
+	$(top_srcdir)/m4/ax_openmp.m4 $(top_srcdir)/m4/ax_perl_ext.m4 \
 	$(top_srcdir)/m4/ax_perl_ext_flags.m4 \
 	$(top_srcdir)/m4/ax_pkg_swig.m4 \
 	$(top_srcdir)/m4/ax_python2_devel.m4 \
@@ -160,44 +160,56 @@ am__v_lt_1 =
 libRNA_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libRNA_la_LDFLAGS) $(LDFLAGS) -o $@
-libRNA_conv_la_LIBADD =
+libRNA_constraints_la_LIBADD =
+am_libRNA_constraints_la_OBJECTS = constraints.lo constraints_SHAPE.lo \
+	constraints_hard.lo constraints_soft.lo constraints_ligand.lo
+libRNA_constraints_la_OBJECTS = $(am_libRNA_constraints_la_OBJECTS)
+libRNA_conv_la_DEPENDENCIES = libRNA_constraints.la libRNA_utils.la \
+	libRNA_plotting.la libRNA_params.la libRNA_loops.la
 am__libRNA_conv_la_SOURCES_DIST = dist_vars.c data_structures.c \
-	part_func.c read_epars.c treedist.c energy_par.c inverse.c \
-	ProfileDist.c RNAstruct.c utils.c mfe.c fold.c naview.c \
-	PS_dot.c stringdist.c params.c subopt.c list.c Lfold.c \
-	cofold.c part_func_co.c ProfileAln.c duplex.c alifold.c \
-	alipfold.c aln_util.c LPfold.c string_utils.c part_func_up.c \
-	ribo.c findpath.c convert_epars.c MEA.c aliLfold.c mm.c \
-	2Dfold.c 2Dpfold.c plex_functions.c plot_layouts.c ali_plex.c \
-	c_plex.c plex.c snofold.c snoop.c move_set.c gquad.c eval.c \
-	constraints.c ligand.c perturbation_fold.c centroid.c \
-	structure_utils.c model.c file_formats.c dp_matrices.c \
-	plot_structure.c plot_aln.c exterior_loops.c hairpin_loops.c \
-	interior_loops.c multibranch_loops.c boltzmann_sampling.c \
-	../@LIBSVM_DIR@/svm.cpp svm_utils.c ../json/json.c \
-	constraints_SHAPE.c constraints_hard.c constraints_soft.c \
-	alphabet.c
+	part_func.c treedist.c inverse.c ProfileDist.c RNAstruct.c \
+	mfe.c fold.c stringdist.c subopt.c list.c Lfold.c cofold.c \
+	part_func_co.c ProfileAln.c duplex.c alifold.c alipfold.c \
+	LPfold.c part_func_up.c ribo.c findpath.c MEA.c aliLfold.c \
+	mm.c 2Dfold.c 2Dpfold.c plex_functions.c ali_plex.c c_plex.c \
+	plex.c snofold.c snoop.c move_set.c gquad.c eval.c \
+	perturbation_fold.c centroid.c model.c dp_matrices.c \
+	boltzmann_sampling.c equilibrium_probs.c \
+	../@LIBSVM_DIR@/svm.cpp svm_utils.c ../json/json.c alphabet.c \
+	unstructured_domains.c
 am__dirstamp = $(am__leading_dot)dirstamp
 @WITH_LIBSVM_TRUE@am__objects_1 = ../@LIBSVM_DIR@/svm.lo
 @WITH_LIBSVM_TRUE@am__objects_2 = svm_utils.lo
 @WITH_JSON_TRUE@am__objects_3 = ../json/json.lo
 am_libRNA_conv_la_OBJECTS = dist_vars.lo data_structures.lo \
-	part_func.lo read_epars.lo treedist.lo energy_par.lo \
-	inverse.lo ProfileDist.lo RNAstruct.lo utils.lo mfe.lo fold.lo \
-	naview.lo PS_dot.lo stringdist.lo params.lo subopt.lo list.lo \
+	part_func.lo treedist.lo inverse.lo ProfileDist.lo \
+	RNAstruct.lo mfe.lo fold.lo stringdist.lo subopt.lo list.lo \
 	Lfold.lo cofold.lo part_func_co.lo ProfileAln.lo duplex.lo \
-	alifold.lo alipfold.lo aln_util.lo LPfold.lo string_utils.lo \
-	part_func_up.lo ribo.lo findpath.lo convert_epars.lo MEA.lo \
-	aliLfold.lo mm.lo 2Dfold.lo 2Dpfold.lo plex_functions.lo \
-	plot_layouts.lo ali_plex.lo c_plex.lo plex.lo snofold.lo \
-	snoop.lo move_set.lo gquad.lo eval.lo constraints.lo ligand.lo \
-	perturbation_fold.lo centroid.lo structure_utils.lo model.lo \
-	file_formats.lo dp_matrices.lo plot_structure.lo plot_aln.lo \
-	exterior_loops.lo hairpin_loops.lo interior_loops.lo \
-	multibranch_loops.lo boltzmann_sampling.lo $(am__objects_1) \
-	$(am__objects_2) $(am__objects_3) constraints_SHAPE.lo \
-	constraints_hard.lo constraints_soft.lo alphabet.lo
+	alifold.lo alipfold.lo LPfold.lo part_func_up.lo ribo.lo \
+	findpath.lo MEA.lo aliLfold.lo mm.lo 2Dfold.lo 2Dpfold.lo \
+	plex_functions.lo ali_plex.lo c_plex.lo plex.lo snofold.lo \
+	snoop.lo move_set.lo gquad.lo eval.lo perturbation_fold.lo \
+	centroid.lo model.lo dp_matrices.lo boltzmann_sampling.lo \
+	equilibrium_probs.lo $(am__objects_1) $(am__objects_2) \
+	$(am__objects_3) alphabet.lo unstructured_domains.lo
 libRNA_conv_la_OBJECTS = $(am_libRNA_conv_la_OBJECTS)
+libRNA_loops_la_LIBADD =
+am_libRNA_loops_la_OBJECTS = exterior_loops.lo hairpin_loops.lo \
+	interior_loops.lo multibranch_loops.lo
+libRNA_loops_la_OBJECTS = $(am_libRNA_loops_la_OBJECTS)
+libRNA_params_la_LIBADD =
+am_libRNA_params_la_OBJECTS = read_epars.lo energy_par.lo params.lo \
+	convert_epars.lo
+libRNA_params_la_OBJECTS = $(am_libRNA_params_la_OBJECTS)
+libRNA_plotting_la_LIBADD =
+am_libRNA_plotting_la_OBJECTS = plot_aln.lo plot_layouts.lo \
+	plot_structure.lo naview.lo PS_dot.lo
+libRNA_plotting_la_OBJECTS = $(am_libRNA_plotting_la_OBJECTS)
+libRNA_utils_la_LIBADD =
+am_libRNA_utils_la_OBJECTS = utils.lo aln_util.lo string_utils.lo \
+	structure_utils.lo file_utils.lo file_formats.lo \
+	file_formats_msa.lo commands.lo units.lo combinatorics.lo
+libRNA_utils_la_OBJECTS = $(am_libRNA_utils_la_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -251,8 +263,13 @@ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libRNA_la_SOURCES) $(nodist_EXTRA_libRNA_la_SOURCES) \
-	$(libRNA_conv_la_SOURCES)
-DIST_SOURCES = $(libRNA_la_SOURCES) $(am__libRNA_conv_la_SOURCES_DIST)
+	$(libRNA_constraints_la_SOURCES) $(libRNA_conv_la_SOURCES) \
+	$(libRNA_loops_la_SOURCES) $(libRNA_params_la_SOURCES) \
+	$(libRNA_plotting_la_SOURCES) $(libRNA_utils_la_SOURCES)
+DIST_SOURCES = $(libRNA_la_SOURCES) $(libRNA_constraints_la_SOURCES) \
+	$(am__libRNA_conv_la_SOURCES_DIST) $(libRNA_loops_la_SOURCES) \
+	$(libRNA_params_la_SOURCES) $(libRNA_plotting_la_SOURCES) \
+	$(libRNA_utils_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -273,9 +290,11 @@ am__pkginclude_HEADERS_DIST = energy_par.h pair_mat.h RNAstruct.h \
 	ali_plex.h plex.h snofold.h snoop.h move_set.h gquad.h \
 	constraints.h eval.h perturbation_fold.h centroid.h \
 	structure_utils.h string_utils.h model.h file_formats.h \
-	dp_matrices.h plot_structure.h plot_aln.h ligand.h \
-	boltzmann_sampling.h constraints_SHAPE.h constraints_hard.h \
-	constraints_soft.h alphabet.h svm_utils.h \
+	dp_matrices.h plot_structure.h plot_aln.h boltzmann_sampling.h \
+	equilibrium_probs.h constraints_ligand.h constraints_SHAPE.h \
+	constraints_hard.h constraints_soft.h alphabet.h grammar.h \
+	structured_domains.h unstructured_domains.h file_formats_msa.h \
+	file_utils.h commands.h units.h combinatorics.h svm_utils.h \
 	../@LIBSVM_DIR@/svm.h ../json/json.h
 HEADERS = $(noinst_HEADERS) $(pkginclude_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
@@ -301,11 +320,11 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/config/depcomp
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
-AM_CFLAGS = $(OPENMP_CFLAGS)
-AM_CPPFLAGS = -I$(top_srcdir)/src ${SVM_INC} ${JSON_INC} @FLOAT_PF_FLAG@ @DEPRECATION_WARNING@
-AM_CXXFLAGS = $(OPENMP_CFLAGS)
+AM_CFLAGS = $(RNA_CFLAGS)
+AM_CPPFLAGS = $(RNA_CPPFLAGS) -I$(top_srcdir)/src ${SVM_INC} ${JSON_INC}
+AM_CXXFLAGS = $(RNA_CXXFLAGS)
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
-AM_LDFLAGS = @AM_LDFLAGS@
+AM_LDFLAGS = $(RNA_LDFLAGS)
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
@@ -327,6 +346,7 @@ CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATION_WARNING = @DEPRECATION_WARNING@
+DISABLE_C11_FEATURES = @DISABLE_C11_FEATURES@
 DLLTOOL = @DLLTOOL@
 DOXYGEN_CMD_LATEX = @DOXYGEN_CMD_LATEX@
 DOXYGEN_CMD_MAKEINDEX = @DOXYGEN_CMD_MAKEINDEX@
@@ -347,8 +367,8 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 FLOAT_PF_FLAG = @FLOAT_PF_FLAG@
-GENERIC_HC_DEF = @GENERIC_HC_DEF@
 GREP = @GREP@
+GSL_LIBS = @GSL_LIBS@
 HDIUTIL = @HDIUTIL@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -367,7 +387,8 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-LTO_FLAGS = @LTO_FLAGS@
+LTO_CFLAGS = @LTO_CFLAGS@
+LTO_CXXFLAGS = @LTO_CXXFLAGS@
 LTO_LDFLAGS = @LTO_LDFLAGS@
 LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 MACOSX_INSTALLER = @MACOSX_INSTALLER@
@@ -379,6 +400,7 @@ NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OPENMP_CFLAGS = @OPENMP_CFLAGS@
+OPENMP_CXXFLAGS = @OPENMP_CXXFLAGS@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 OUR_AR = @OUR_AR@
@@ -427,6 +449,7 @@ PYTHON2_DIR = @PYTHON2_DIR@
 PYTHON2_EXECDIR = @PYTHON2_EXECDIR@
 PYTHON2_INCLUDES = @PYTHON2_INCLUDES@
 PYTHON2_INTERFACE = @PYTHON2_INTERFACE@
+PYTHON2_LDFLAGS = @PYTHON2_LDFLAGS@
 PYTHON2_LIBS = @PYTHON2_LIBS@
 PYTHON2_SO = @PYTHON2_SO@
 PYTHON3 = @PYTHON3@
@@ -438,11 +461,16 @@ PYTHON3_DIR = @PYTHON3_DIR@
 PYTHON3_EXECDIR = @PYTHON3_EXECDIR@
 PYTHON3_INCLUDES = @PYTHON3_INCLUDES@
 PYTHON3_INTERFACE = @PYTHON3_INTERFACE@
+PYTHON3_LDFLAGS = @PYTHON3_LDFLAGS@
 PYTHON3_LIBS = @PYTHON3_LIBS@
 PYTHON3_SO = @PYTHON3_SO@
 RANLIB = @RANLIB@
 REFERENCE_MANUAL_PDF_NAME = @REFERENCE_MANUAL_PDF_NAME@
 REFERENCE_MANUAL_TAGFILE = @REFERENCE_MANUAL_TAGFILE@
+RNA_CFLAGS = @RNA_CFLAGS@
+RNA_CPPFLAGS = @RNA_CPPFLAGS@
+RNA_CXXFLAGS = @RNA_CXXFLAGS@
+RNA_LDFLAGS = @RNA_LDFLAGS@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -529,7 +557,13 @@ AUTOMAKE_OPTIONS = subdir-objects
 lib_LTLIBRARIES = libRNA.la
 
 # convenience library
-noinst_LTLIBRARIES = libRNA_conv.la
+noinst_LTLIBRARIES = libRNA_conv.la \
+                      libRNA_constraints.la \
+                      libRNA_utils.la \
+                      libRNA_plotting.la \
+                      libRNA_params.la \
+                      libRNA_loops.la
+
 
 # where to install the headers on the system
 libRNA_ladir = $(includedir)/ViennaRNA
@@ -537,7 +571,14 @@ libRNA_la_SOURCES =
 
 # ldflags to avoid version information
 libRNA_la_LIBADD = libRNA_conv.la
-libRNA_la_LDFLAGS = -avoid-version -static
+libRNA_la_LDFLAGS = -avoid-version -static $(LTO_LDFLAGS)
+libRNA_conv_la_LIBADD = \
+    libRNA_constraints.la \
+    libRNA_utils.la \
+    libRNA_plotting.la \
+    libRNA_params.la \
+    libRNA_loops.la
+
 @WITH_LIBSVM_FALSE@nodist_EXTRA_libRNA_la_SOURCES = 
 
 # Dummy C++ source to cause C++ linking.
@@ -550,38 +591,172 @@ libRNA_la_LDFLAGS = -avoid-version -static
 @WITH_JSON_TRUE@JSON_SRC = ../json/json.c
 @WITH_JSON_TRUE@JSON_H = ../json/json.h
 @WITH_JSON_TRUE@JSON_INC = -I$(top_srcdir)/src/json
-pkginclude_HEADERS = energy_par.h pair_mat.h RNAstruct.h dist_vars.h mfe.h \
-                      fold.h part_func.h stringdist.h edit_cost.h fold_vars.h \
-                      profiledist.h treedist.h energy_const.h inverse.h PS_dot.h \
-                      utils.h params.h subopt.h cofold.h duplex.h alifold.h aln_util.h \
-                      part_func_co.h ProfileAln.h LPfold.h Lfold.h part_func_up.h ribo.h \
-                      findpath.h data_structures.h MEA.h mm.h loop_energies.h \
-                      exterior_loops.h hairpin_loops.h interior_loops.h multibranch_loops.h \
-                      naview.h 2Dfold.h 2Dpfold.h read_epars.h convert_epars.h PKplex.h\
-                      plot_layouts.h ali_plex.h plex.h snofold.h snoop.h move_set.h\
-                      gquad.h constraints.h eval.h perturbation_fold.h centroid.h\
-                      structure_utils.h string_utils.h model.h file_formats.h dp_matrices.h \
-                      plot_structure.h plot_aln.h ligand.h boltzmann_sampling.h \
-                      constraints_SHAPE.h constraints_hard.h constraints_soft.h \
-                      alphabet.h \
-                      ${SVM_UTILS_H} ${SVM_H} ${JSON_H}
+pkginclude_HEADERS = \
+    energy_par.h \
+    pair_mat.h \
+    RNAstruct.h \
+    dist_vars.h \
+    mfe.h \
+    fold.h \
+    part_func.h \
+    stringdist.h \
+    edit_cost.h \
+    fold_vars.h \
+    profiledist.h \
+    treedist.h \
+    energy_const.h \
+    inverse.h \
+    PS_dot.h \
+    utils.h \
+    params.h \
+    subopt.h \
+    cofold.h \
+    duplex.h \
+    alifold.h \
+    aln_util.h \
+    part_func_co.h \
+    ProfileAln.h \
+    LPfold.h \
+    Lfold.h \
+    part_func_up.h \
+    ribo.h \
+    findpath.h \
+    data_structures.h \
+    MEA.h \
+    mm.h \
+    loop_energies.h \
+    exterior_loops.h \
+    hairpin_loops.h \
+    interior_loops.h \
+    multibranch_loops.h \
+    naview.h \
+    2Dfold.h \
+    2Dpfold.h \
+    read_epars.h \
+    convert_epars.h \
+    PKplex.h\
+    plot_layouts.h \
+    ali_plex.h \
+    plex.h \
+    snofold.h \
+    snoop.h \
+    move_set.h\
+    gquad.h \
+    constraints.h \
+    eval.h \
+    perturbation_fold.h \
+    centroid.h\
+    structure_utils.h \
+    string_utils.h \
+    model.h \
+    file_formats.h \
+    dp_matrices.h \
+    plot_structure.h \
+    plot_aln.h \
+    boltzmann_sampling.h \
+    equilibrium_probs.h \
+    constraints_ligand.h \
+    constraints_SHAPE.h \
+    constraints_hard.h \
+    constraints_soft.h \
+    alphabet.h \
+    grammar.h \
+    structured_domains.h \
+    unstructured_domains.h \
+    file_formats_msa.h \
+    file_utils.h \
+    commands.h \
+    units.h \
+    combinatorics.h \
+    ${SVM_UTILS_H} \
+    ${SVM_H} \
+    ${JSON_H}
 
-libRNA_conv_la_SOURCES = dist_vars.c data_structures.c part_func.c read_epars.c\
-                    treedist.c energy_par.c inverse.c ProfileDist.c \
-                    RNAstruct.c utils.c mfe.c fold.c naview.c PS_dot.c \
-                    stringdist.c params.c subopt.c list.c Lfold.c \
-                    cofold.c part_func_co.c ProfileAln.c duplex.c \
-                    alifold.c alipfold.c aln_util.c LPfold.c string_utils.c \
-                    part_func_up.c ribo.c findpath.c convert_epars.c\
-                    MEA.c aliLfold.c mm.c 2Dfold.c 2Dpfold.c plex_functions.c \
-                    plot_layouts.c ali_plex.c c_plex.c plex.c snofold.c \
-                    snoop.c move_set.c gquad.c eval.c constraints.c ligand.c \
-                    perturbation_fold.c centroid.c structure_utils.c model.c \
-                    file_formats.c dp_matrices.c plot_structure.c plot_aln.c \
-                    exterior_loops.c hairpin_loops.c interior_loops.c multibranch_loops.c \
-                    boltzmann_sampling.c ${SVM_SRC} ${SVM_UTILS} ${JSON_SRC} \
-                    constraints_SHAPE.c constraints_hard.c constraints_soft.c \
-                    alphabet.c
+libRNA_conv_la_SOURCES = \
+    dist_vars.c \
+    data_structures.c \
+    part_func.c \
+    treedist.c \
+    inverse.c \
+    ProfileDist.c \
+    RNAstruct.c \
+    mfe.c \
+    fold.c \
+    stringdist.c \
+    subopt.c \
+    list.c \
+    Lfold.c \
+    cofold.c \
+    part_func_co.c \
+    ProfileAln.c \
+    duplex.c \
+    alifold.c \
+    alipfold.c \
+    LPfold.c \
+    part_func_up.c \
+    ribo.c \
+    findpath.c \
+    MEA.c \
+    aliLfold.c \
+    mm.c \
+    2Dfold.c \
+    2Dpfold.c \
+    plex_functions.c \
+    ali_plex.c \
+    c_plex.c \
+    plex.c \
+    snofold.c \
+    snoop.c \
+    move_set.c \
+    gquad.c \
+    eval.c \
+    perturbation_fold.c \
+    centroid.c \
+    model.c \
+    dp_matrices.c \
+    boltzmann_sampling.c \
+    equilibrium_probs.c \
+    ${SVM_SRC} ${SVM_UTILS} ${JSON_SRC} \
+    alphabet.c \
+    unstructured_domains.c
+
+libRNA_constraints_la_SOURCES = \
+    constraints.c \
+    constraints_SHAPE.c \
+    constraints_hard.c \
+    constraints_soft.c \
+    constraints_ligand.c
+
+libRNA_utils_la_SOURCES = \
+    utils.c \
+    aln_util.c \
+    string_utils.c \
+    structure_utils.c \
+    file_utils.c \
+    file_formats.c \
+    file_formats_msa.c \
+    commands.c \
+    units.c \
+    combinatorics.c
+
+libRNA_plotting_la_SOURCES = \
+    plot_aln.c \
+    plot_layouts.c \
+    plot_structure.c \
+    naview.c \
+    PS_dot.c
+
+libRNA_loops_la_SOURCES = \
+    exterior_loops.c \
+    hairpin_loops.c \
+    interior_loops.c \
+    multibranch_loops.c
+
+libRNA_params_la_SOURCES = \
+    read_epars.c \
+    energy_par.c \
+    params.c \
+    convert_epars.c
 
 
 # static library for subpackages
@@ -590,7 +765,15 @@ noinst_HEADERS = intl11.h intl11dH.h intl21.h intl21dH.h \
                   intl22.h intl22dH.h list.h\
                   1.8.4_epars.h 1.8.4_intloops.h ${SVM_H} ${JSON_H}
 
-EXTRA_DIST = $(pkginclude_HEADERS) circfold.inc alicircfold.inc model_avg.inc model_sd.inc ${SVM_H} ${JSON_H}
+EXTRA_DIST = $(pkginclude_HEADERS) \
+              circfold.inc \
+              alicircfold.inc \
+              model_avg.inc \
+              model_sd.inc \
+              ${SVM_H} \
+              ${JSON_H} \
+              color_output.inc
+
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -674,6 +857,9 @@ clean-noinstLTLIBRARIES:
 
 libRNA.la: $(libRNA_la_OBJECTS) $(libRNA_la_DEPENDENCIES) $(EXTRA_libRNA_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(libRNA_la_LINK) -rpath $(libdir) $(libRNA_la_OBJECTS) $(libRNA_la_LIBADD) $(LIBS)
+
+libRNA_constraints.la: $(libRNA_constraints_la_OBJECTS) $(libRNA_constraints_la_DEPENDENCIES) $(EXTRA_libRNA_constraints_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK)  $(libRNA_constraints_la_OBJECTS) $(libRNA_constraints_la_LIBADD) $(LIBS)
 ../@LIBSVM_DIR@/$(am__dirstamp):
 	@$(MKDIR_P) ../@LIBSVM_DIR@
 	@: > ../@LIBSVM_DIR@/$(am__dirstamp)
@@ -693,6 +879,18 @@ libRNA.la: $(libRNA_la_OBJECTS) $(libRNA_la_DEPENDENCIES) $(EXTRA_libRNA_la_DEPE
 
 libRNA_conv.la: $(libRNA_conv_la_OBJECTS) $(libRNA_conv_la_DEPENDENCIES) $(EXTRA_libRNA_conv_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(CXXLINK)  $(libRNA_conv_la_OBJECTS) $(libRNA_conv_la_LIBADD) $(LIBS)
+
+libRNA_loops.la: $(libRNA_loops_la_OBJECTS) $(libRNA_loops_la_DEPENDENCIES) $(EXTRA_libRNA_loops_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK)  $(libRNA_loops_la_OBJECTS) $(libRNA_loops_la_LIBADD) $(LIBS)
+
+libRNA_params.la: $(libRNA_params_la_OBJECTS) $(libRNA_params_la_DEPENDENCIES) $(EXTRA_libRNA_params_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK)  $(libRNA_params_la_OBJECTS) $(libRNA_params_la_LIBADD) $(LIBS)
+
+libRNA_plotting.la: $(libRNA_plotting_la_OBJECTS) $(libRNA_plotting_la_DEPENDENCIES) $(EXTRA_libRNA_plotting_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK)  $(libRNA_plotting_la_OBJECTS) $(libRNA_plotting_la_LIBADD) $(LIBS)
+
+libRNA_utils.la: $(libRNA_utils_la_OBJECTS) $(libRNA_utils_la_DEPENDENCIES) $(EXTRA_libRNA_utils_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK)  $(libRNA_utils_la_OBJECTS) $(libRNA_utils_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -725,9 +923,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_plex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/centroid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cofold.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/combinatorics.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/commands.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/constraints.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/constraints_SHAPE.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/constraints_hard.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/constraints_ligand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/constraints_soft.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/convert_epars.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/data_structures.Plo@am__quote@
@@ -736,16 +937,18 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/duplex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/energy_par.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/equilibrium_probs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eval.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exterior_loops.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file_formats.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file_formats_msa.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file_utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/findpath.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fold.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gquad.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hairpin_loops.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interior_loops.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inverse.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ligand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mm.Plo@am__quote@
@@ -773,6 +976,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/subopt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/svm_utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/treedist.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/units.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unstructured_domains.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utils.Plo@am__quote@
 
 .c.o:
@@ -1095,9 +1300,11 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS
 
 
 libRNA.a: libRNA.la
-	$(LIBTOOL) --config > libtoolconfig.tmp
-	. ./libtoolconfig.tmp; cp "$$objdir/libRNA.a" ./
-	rm -f libtoolconfig.tmp
+	$(AM_V_GEN)( \
+    $(LIBTOOL) --config > libtoolconfig.tmp && \
+    ( \. ./libtoolconfig.tmp; cp "$$objdir/libRNA.a" ./ ) && \
+    rm -f libtoolconfig.tmp \
+  )
 
 clean-local:
 	-rm -f libRNA.a

@@ -23,32 +23,10 @@
 #endif
 
 /**
- *  @addtogroup consensus_fold
- *  @brief compute various properties (consensus MFE structures, partition function,
- *  Boltzmann distributed stochastic samples, ...) for RNA sequence alignments
- *
- *  Consensus structures can be predicted by a modified version of the
- *  fold() algorithm that takes a set of aligned sequences instead
- *  of a single sequence. The energy function consists of the mean energy
- *  averaged over the sequences, plus a covariance term that favors pairs
- *  with consistent and compensatory mutations and penalizes pairs that
- *  cannot be formed by all structures. For details see @cite hofacker:2002 and
- *  @cite bernhart:2008.
- *  @{
- *    @file alifold.h
- *    @brief compute various properties (consensus MFE structures, partition function, Boltzmann
- *    distributed stochastic samples, ...) for RNA sequence alignments
- *
- *  @}
- */
-
-
-/**
- *  @addtogroup consensus_mfe_fold
+ *  @file alifold.h
  *  @ingroup consensus_fold
- *  @{
+ *  @brief Functions for comparative structure prediction using RNA sequence alignments
  *
- *  @}
  */
 
 /*
@@ -81,7 +59,7 @@
  *  @return the minimum free energy (MFE) in kcal/mol
  */
 float
-vrna_alifold( const char **ssequences,
+vrna_alifold( const char **sequences,
               char *structure);
 
 /**
@@ -111,7 +89,7 @@ vrna_alifold( const char **ssequences,
  *  @return the minimum free energy (MFE) in kcal/mol
  */
 float
-vrna_circalifold( const char **ssequences,
+vrna_circalifold( const char **sequences,
                   char *structure);
 
 /*
@@ -119,15 +97,6 @@ vrna_circalifold( const char **ssequences,
 # PARTITION FUNCTION VARIANTS OF THE ALIFOLD IMPLEMENTATION #
 #############################################################
 */
-
-
-/**
- *  @addtogroup consensus_pf_fold
- *  @ingroup consensus_fold
- *  @{
- *
- *  @}
- */
 
 /**
  *  @brief  Compute Partition function @f$Q@f$ (and base pair probabilities) for an RNA
@@ -152,7 +121,7 @@ vrna_circalifold( const char **ssequences,
  *  @param pl         A pointer to a list of #vrna_plist_t to store pairing probabilities (Maybe NULL)
  *  @return The Gibbs free energy of the ensemble (@f$G = -RT \cdot \log(Q) @f$) in kcal/mol
  */
-float vrna_pf_alifold(const char **strings, char *structure, vrna_plist_t **pl);
+float vrna_pf_alifold(const char **sequences, char *structure, vrna_plist_t **pl);
 
 /**
  *  @brief  Compute Partition function @f$Q@f$ (and base pair probabilities) for an alignment
@@ -413,6 +382,7 @@ DEPRECATED(char  *alipbacktrack(double *prob));
  *  @param qm_p     A pointer to the Q<sup>M</sup> matrix
  *  @param q1k_p    A pointer to the 5' slice of the Q matrix (@f$q1k(k) = Q(1, k)@f$)
  *  @param qln_p    A pointer to the 3' slice of the Q matrix (@f$qln(l) = Q(l, n)@f$)
+ *  @param pscore   A pointer to the start of a pscore list
  *  @return         Non Zero if everything went fine, 0 otherwise
  */
 DEPRECATED(int get_alipf_arrays(short ***S_p,

@@ -1,7 +1,10 @@
 /* constraints handling */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <assert.h>
-#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -296,17 +299,27 @@ vrna_hc_add_bp_nonspecific( vrna_fold_compound_t *vc,
         return;
       }
 
-      /* force position i to pair with some other nucleotide */
+      /* position i may pair in provided contexts */
       type  = option & VRNA_CONSTRAINT_CONTEXT_ALL_LOOPS;
-      /* force direction */
+      /* acknowledge pairing direction */
       t1    = (d <= 0) ? type : (char)0;
       t2    = (d >= 0) ? type : (char)0;
-      for(p = 1; p < i; p++)
-        vc->hc->matrix[vc->jindx[i] + p] &= t1;
-      for(p = i+1; p <= vc->length; p++)
-        vc->hc->matrix[vc->jindx[p] + i] &= t2;
 
-      vc->hc->matrix[vc->jindx[i] + i] = (char)0;
+      if(option & VRNA_CONSTRAINT_CONTEXT_NO_REMOVE){
+        /* only allow for possibly non-canonical pairs, do not enforce them */
+        for(p = 1; p < i; p++)
+          vc->hc->matrix[vc->jindx[i] + p] |= t1;
+        for(p = i+1; p <= vc->length; p++)
+          vc->hc->matrix[vc->jindx[p] + i] |= t2;
+      } else {
+        /* force pairing direction */
+        for(p = 1; p < i; p++)
+          vc->hc->matrix[vc->jindx[i] + p] &= t1;
+        for(p = i+1; p <= vc->length; p++)
+          vc->hc->matrix[vc->jindx[p] + i] &= t2;
+        /* nucleotide mustn't be unpaired */
+        vc->hc->matrix[vc->jindx[i] + i] = (char)0;
+      }
 
       hc_update_up(vc);
     }
@@ -389,15 +402,14 @@ vrna_hc_free(vrna_hc_t *hc){
   }
 }
 
-#ifdef WITH_GEN_HC
 
 PUBLIC void
 vrna_hc_add_f(vrna_fold_compound_t *vc,
-              vrna_callback_hc_evaluate *f){
-
-  if(vc && f){
-    if(vc->type == VRNA_VC_TYPE_SINGLE){
-      if(!vc->hc)
+              vrna_callback_hc_evaluate *f)
+{
+  if (vc && f) {
+    if (vc->type == VRNA_FC_TYPE_SINGLE) {
+      if (!vc->hc)
         vrna_hc_init(vc);
 
       vc->hc->f = f;
@@ -405,14 +417,15 @@ vrna_hc_add_f(vrna_fold_compound_t *vc,
   }
 }
 
+
 PUBLIC void
 vrna_hc_add_data( vrna_fold_compound_t *vc,
                   void *data,
-                  vrna_callback_free_auxdata *f){
-
-  if(vc && data){
-    if(vc->type == VRNA_VC_TYPE_SINGLE){
-      if(!vc->hc)
+                  vrna_callback_free_auxdata *f)
+{
+  if (vc && data) {
+    if (vc->type == VRNA_FC_TYPE_SINGLE) {
+      if (!vc->hc)
         vrna_hc_init(vc);
 
       vc->hc->data        = data;
@@ -421,7 +434,6 @@ vrna_hc_add_data( vrna_fold_compound_t *vc,
   }
 }
 
-#endif
 
 PUBLIC  int
 vrna_hc_add_from_db(vrna_fold_compound_t *vc,
@@ -457,9 +469,6 @@ vrna_hc_add_from_db(vrna_fold_compound_t *vc,
 
   return ret;
 }
-
-
-
 
 
 PRIVATE void
@@ -511,8 +520,7 @@ apply_DB_constraint(const char *constraint,
       /* weak enforced pair 'close' */
       case ')':   if(options & VRNA_CONSTRAINT_DB_RND_BRACK){
                     if (hx<=0) {
-                      fprintf(stderr, "%s\n", constraint);
-                      vrna_message_error("unbalanced brackets in constraints");
+                      vrna_message_error("%s\nunbalanced brackets in constraints", constraint);
                     }
                     i = stack[--hx];
                     if(options & VRNA_CONSTRAINT_DB_ENFORCE_BP)
@@ -552,14 +560,14 @@ apply_DB_constraint(const char *constraint,
 
       case '.':   break;
 
-      default:    vrna_message_warning("unrecognized character in pseudo dot-bracket notation constraint string\n");
+      default:    vrna_message_warning("Unrecognized character '%c' in pseudo dot-bracket notation constraint string",
+                                              constraint[j-1]);
                   break;
     }
   }
 
   if (hx!=0) {
-    fprintf(stderr, "%s\n", constraint);
-    vrna_message_error("unbalanced brackets in constraint string");
+    vrna_message_error("%s\nunbalanced brackets in constraint string", constraint);
   }
   /* clean up */
   free(index);
@@ -740,6 +748,7 @@ hc_reset_to_default(vrna_fold_compound_t *vc){
   vrna_hc_t         *hc;
   short             *S;
 
+  md  = NULL;
   n   = vc->length;
   hc  = vc->hc;
   idx = vc->jindx;
@@ -771,7 +780,7 @@ hc_reset_to_default(vrna_fold_compound_t *vc){
 
   /* 2. all base pairs with pscore above threshold are allowed in all contexts */
   switch(vc->type){
-    case VRNA_VC_TYPE_ALIGNMENT:  for(j = n; j > min_loop_size + 1; j--){
+    case VRNA_FC_TYPE_COMPARATIVE:  for(j = n; j > min_loop_size + 1; j--){
                                     ij = idx[j]+1;
                                     for(i=1; i < j - min_loop_size; i++, ij++){
                                       char opt = (char)0;
@@ -784,7 +793,7 @@ hc_reset_to_default(vrna_fold_compound_t *vc){
                                   }
                                   break;
 
-    case VRNA_VC_TYPE_SINGLE:     for(j = n; j > min_loop_size + 1; j--){
+    case VRNA_FC_TYPE_SINGLE:     for(j = n; j > min_loop_size + 1; j--){
                                     ij = idx[j]+1;
                                     for(i=1; i < j - min_loop_size; i++, ij++){
                                       char opt = (char)0;
@@ -973,8 +982,7 @@ constrain_ptypes( const char *constraint,
                       ptype[index[j]+l] = 0;
                     break;
         case ')':   if (hx<=0) {
-                      fprintf(stderr, "%s\n", constraint);
-                      vrna_message_error("unbalanced brackets in constraint");
+                      vrna_message_error("%s\nunbalanced brackets in constraint", constraint);
                     }
                     i = stack[--hx];
                     type = ptype[index[j]+i];
@@ -1017,8 +1025,7 @@ constrain_ptypes( const char *constraint,
                       ptype[index[l]-j] = 0;
                     break;
         case ')':   if (hx<=0) {
-                      fprintf(stderr, "%s\n", constraint);
-                      vrna_message_error("unbalanced brackets in constraints");
+                      vrna_message_error("%s\nunbalanced brackets in constraints", constraint);
                     }
                     i = stack[--hx];
                     type = ptype[index[i]-j];
@@ -1040,8 +1047,7 @@ constrain_ptypes( const char *constraint,
     }
   }
   if (hx!=0) {
-    fprintf(stderr, "%s\n", constraint);
-    vrna_message_error("unbalanced brackets in constraint string");
+    vrna_message_error("%s\nunbalanced brackets in constraint string", constraint);
   }
   free(index);
   free(stack);

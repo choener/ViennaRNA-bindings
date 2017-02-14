@@ -1,3 +1,9 @@
+0.233.1.1
+---------
+
+- track ViennaRNA version numbers in 2nd component
+- bump to v 2.3.3
+
 0.1.6.0
 -------
 
