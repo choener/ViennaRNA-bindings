@@ -86,6 +86,7 @@ library
     C/ViennaRNA/eval.c
     C/ViennaRNA/exterior_loops.c
     C/ViennaRNA/file_formats.c
+    C/ViennaRNA/file_formats_msa.c
     C/ViennaRNA/file_utils.c
     C/ViennaRNA/fold.c
     C/ViennaRNA/gquad.c
