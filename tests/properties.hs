@@ -7,6 +7,7 @@ import Test.Tasty.Silver as S
 import Test.Tasty.Silver.Interactive as SI
 import Test.Tasty.TH
 import Data.Array ((!))
+import Debug.Trace
 
 import BioInf.ViennaRNA.Bindings as V
 
@@ -104,6 +105,12 @@ case_centroidTemp_37_001 = do
   (e,s) <- V.centroidTemp 37 "cccaaaggg"
   assertBool "energy" $ e =~ (-1.2)
   assertBool "structure" $ s == "(((...)))"
+
+case_centroidTemp_37_003 :: Assertion
+case_centroidTemp_37_003 = do
+  (e,s) <- V.centroidTemp 37 "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
+  assertBool "energy" $ e =~ (-23.70)
+  assertBool "structure" $ s == "(((((((..(((.((((.(....(((((((..((....)).)))....))))....).)))).))))))))))."
 
 
 

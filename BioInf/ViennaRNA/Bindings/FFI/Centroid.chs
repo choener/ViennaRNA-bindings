@@ -22,9 +22,9 @@ ffiCentroidTemp t inp =
   withCAString inp $ \struc -> do
   e <- fold_centroid_p (realToFrac t) cinp struc
   s <- peekCAString struc
-  return (cf2d e, s)
+  return (cd2d e, s)
 
 
 
-foreign import ccall "ffiwrap_centroid_temp" fold_centroid_p :: CFloat -> CString -> CString -> IO CFloat
+foreign import ccall "ffiwrap_centroid_temp" fold_centroid_p :: CDouble -> CString -> CString -> IO CDouble
 

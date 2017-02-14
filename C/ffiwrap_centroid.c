@@ -13,7 +13,7 @@
 #include "ViennaRNA/alifold.h"
 #include "ViennaRNA/fold.h"
 
-float ffiwrap_centroid_temp (float temp, const char *sequence, char *structure)
+double ffiwrap_centroid_temp (double temp, const char *sequence, char *structure)
 {
   double                dist, e;
   char*                 cent;

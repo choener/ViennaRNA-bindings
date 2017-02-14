@@ -12,6 +12,9 @@ import Foreign.Storable
 cf2d :: CFloat -> Double
 cf2d = float2Double . unsafeCoerce
 
+cd2d :: CDouble -> Double
+cd2d = unsafeCoerce
+
 foreign import ccall "fold.h &cut_point" cut_point :: Ptr CInt
 
 setCutPoint :: Int -> IO ()
