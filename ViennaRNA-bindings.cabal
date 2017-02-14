@@ -48,6 +48,7 @@ library
     -- public interfaces
     BioInf.ViennaRNA.Bindings
     -- the FFI
+    BioInf.ViennaRNA.Bindings.FFI.Centroid
     BioInf.ViennaRNA.Bindings.FFI.CoFold
     BioInf.ViennaRNA.Bindings.FFI.Duplex
     BioInf.ViennaRNA.Bindings.FFI.Fold
@@ -67,6 +68,7 @@ library
   c-sources:
     C/ffiwrap_part_func.c
     C/ffiwrap_fold.c
+    C/ffiwrap_centroid.c
     -- remove all of these, then @stack build --test@ and include files that have the missing definitions
     C/ViennaRNA/aln_util.c
     C/ViennaRNA/alphabet.c

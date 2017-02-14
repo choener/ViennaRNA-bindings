@@ -99,6 +99,14 @@ case_mfeTemp_20_001 = do
 
 
 
+case_centroidTemp_37_001 :: Assertion
+case_centroidTemp_37_001 = do
+  (e,s) <- V.centroidTemp 37 "cccaaaggg"
+  assertBool "energy" $ e =~ (-1.2)
+  assertBool "structure" $ s == "(((...)))"
+
+
+
 main :: IO ()
 main = $(defaultMainGenerator)
 

@@ -12,6 +12,7 @@ module BioInf.ViennaRNA.Bindings
 
 import qualified Data.Array.IArray as A
 
+import BioInf.ViennaRNA.Bindings.FFI.Centroid as FFI
 import BioInf.ViennaRNA.Bindings.FFI.CoFold   as FFI
 import BioInf.ViennaRNA.Bindings.FFI.Duplex   as FFI
 import BioInf.ViennaRNA.Bindings.FFI.Fold     as FFI
@@ -60,6 +61,10 @@ circPart = ffi_pf_circ_fold
 circPartConstrained :: String -> String -> IO (Double, String, A.Array (Int,Int) Double)
 circPartConstrained = ffi_pf_circ_fold_constrained
 
+-- | Centroid structure
+
+centroidTemp :: Double -> String -> IO (Double,String)
+centroidTemp t i = ffiCentroidTemp t i
 
 -- * RNAcofold
 
