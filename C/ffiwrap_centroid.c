@@ -24,6 +24,8 @@ double ffiwrap_centroid_temp (double temp, const char *sequence, char *structure
 
   vrna_md_set_default(&md);
   md.noLP = 1;
+  md.dangles = 2;
+//  md.noGUclosure = 1;
   md.temperature = temp;
   vc  = vrna_fold_compound(sequence, &md, 0);
   e = vrna_pf(vc, pf_struc);
