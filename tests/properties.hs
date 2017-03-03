@@ -89,14 +89,14 @@ case_mfeTemp_37_002 = do
 case_mfeTemp_37_003 :: Assertion
 case_mfeTemp_37_003 = do
   (e,s) <- V.mfeTemp 37 "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
-  assertBool "energy" $ e =~ (-29.90)
-  assertBool "structure" $ s == "(((((((..(((.((((.(....(((((.(((((....)))).)..).))))....).)))).))))))))))."
+  assertBool "energy" $ e =~ (-28.90)
+  assertBool "structure" $ s == "(((((((..((((.........)))).(((((.......))))).....(((((.......))))))))))))."
 
 case_mfeTemp_20_001 :: Assertion
 case_mfeTemp_20_001 = do
   (e,s) <- V.mfeTemp 20 "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
-  assertBool "energy" $ e =~ (-40.86)
-  assertBool "structure" $ s == "((((((((((((.....)))))((.(.(((((.......))))).).))(((((.......))))))))))))."
+  assertBool "energy" $ e =~ (-39.29)
+  assertBool "structure" $ s == "(((((((..((((.........)))).(((((.......))))).....(((((.......))))))))))))."
 
 
 
@@ -109,8 +109,8 @@ case_centroidTemp_37_001 = do
 case_centroidTemp_37_003 :: Assertion
 case_centroidTemp_37_003 = do
   (e,s) <- V.centroidTemp 37 "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
-  assertBool "energy" $ e =~ (-23.70)
-  assertBool "structure" $ s == "(((((((..(((.((((.(....(((((((..((....)).)))....))))....).)))).))))))))))."
+  assertBool "energy" $ e =~ (-28.10)
+  assertBool "structure" $ s == "(((((((..((((.........)))).(((((.(....)))))).....(((((.......))))))))))))."
 
 
 
