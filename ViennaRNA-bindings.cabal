@@ -1,5 +1,5 @@
 name:           ViennaRNA-bindings
-version:        0.233.1.1
+version:        0.233.1.2
 maintainer:     choener@tbi.univie.ac.at
 homepage:       https://github.com/choener/ViennaRNA-bindings
 bug-reports:    https://github.com/choener/ViennaRNA-bindings/issues
@@ -37,6 +37,8 @@ extra-source-files:
   C/ViennaRNA/*.h
   C/ViennaRNA/*.c
   C/ViennaRNA/*.inc
+  C/config.h
+  C/*.c
 
   changelog.md
   README.md

@@ -1,3 +1,7 @@
+0.233.1.2
+
+- included C/$ALL.c C/config.h in distribution
+
 0.233.1.1
 ---------
 
