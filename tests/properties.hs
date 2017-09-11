@@ -1,5 +1,9 @@
 
+{-# Language OverloadedStrings #-}
+
 module Main where
+
+import Data.ByteString.Char8
 
 import Test.Tasty
 import Test.Tasty.HUnit

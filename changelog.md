@@ -1,3 +1,8 @@
+0.233.2.0
+---------
+
+- use ByteString.Char8 instead of String
+
 0.233.1.2
 
 - included C/$ALL.c C/config.h in distribution

@@ -10,38 +10,39 @@ module BioInf.ViennaRNA.Bindings
   , Duplex (..)
   ) where
 
+import           Data.ByteString.Char8
 import qualified Data.Array.IArray as A
 
-import BioInf.ViennaRNA.Bindings.FFI.Centroid as FFI
-import BioInf.ViennaRNA.Bindings.FFI.CoFold   as FFI
-import BioInf.ViennaRNA.Bindings.FFI.Duplex   as FFI
-import BioInf.ViennaRNA.Bindings.FFI.Fold     as FFI
-import BioInf.ViennaRNA.Bindings.FFI.PartFunc as FFI
+import           BioInf.ViennaRNA.Bindings.FFI.Centroid as FFI
+import           BioInf.ViennaRNA.Bindings.FFI.CoFold   as FFI
+import           BioInf.ViennaRNA.Bindings.FFI.Duplex   as FFI
+import           BioInf.ViennaRNA.Bindings.FFI.Fold     as FFI
+import           BioInf.ViennaRNA.Bindings.FFI.PartFunc as FFI
 
 -- | Fold a sequence into an optimal secondary structure. Returns a pair of
 -- energy and structure.
 
-mfe :: String -> IO (Double,String)
+mfe :: ByteString -> IO (Double,ByteString)
 mfe = ffiFold
 
-mfeTemp :: Double -> String -> IO (Double,String)
+mfeTemp :: Double -> ByteString -> IO (Double,ByteString)
 mfeTemp = ffiFoldTemp
 
-circmfe :: String -> IO (Double,String)
+circmfe :: ByteString -> IO (Double,ByteString)
 circmfe = ffiCircFold
 
 -- | Given a sequence and a structure, returns the energy of the
 -- sequence/structure pair.
 
-eos :: String -> String -> IO Double
+eos :: ByteString -> ByteString -> IO Double
 eos i s = ffiEnergyOfStructure i s 0
 
-eosTemp :: Double -> String -> String -> IO Double
+eosTemp :: Double -> ByteString -> ByteString -> IO Double
 eosTemp t i s = ffiEnergyOfStructureTemp t i s 0
 
 -- | Energy of a circular structure
 
-eosCirc :: String -> String -> IO Double
+eosCirc :: ByteString -> ByteString -> IO Double
 eosCirc i s = ffiEnergyOfCircStructure i s 0
 
 -- | Given a string, calculates the partition function for said string. Returns
@@ -49,46 +50,46 @@ eosCirc i s = ffiEnergyOfCircStructure i s 0
 -- annotated with the strength of the potential pairing, and the whole base
 -- pair probability table.
 
-part :: String -> IO (Double,String,A.Array (Int,Int) Double)
+part :: ByteString -> IO (Double,ByteString,A.Array (Int,Int) Double)
 part = ffi_pf_fold
 
-partConstrained :: String -> String -> IO (Double, String, A.Array (Int,Int) Double)
+partConstrained :: ByteString -> ByteString -> IO (Double, ByteString, A.Array (Int,Int) Double)
 partConstrained = ffi_pf_fold_constrained
 
-circPart :: String -> IO (Double,String,A.Array (Int,Int) Double)
+circPart :: ByteString -> IO (Double,ByteString,A.Array (Int,Int) Double)
 circPart = ffi_pf_circ_fold
 
-circPartConstrained :: String -> String -> IO (Double, String, A.Array (Int,Int) Double)
+circPartConstrained :: ByteString -> ByteString -> IO (Double, ByteString, A.Array (Int,Int) Double)
 circPartConstrained = ffi_pf_circ_fold_constrained
 
 -- | Centroid structure
 
-centroidTemp :: Double -> String -> IO (Double,String)
+centroidTemp :: Double -> ByteString -> IO (Double,ByteString)
 centroidTemp t i = ffiCentroidTemp t i
 
 -- * RNAcofold
 
 -- | Energy of struct for cofolded structures.
 
-coeos :: String -> String -> Int -> IO Double
+coeos :: ByteString -> ByteString -> Int -> IO Double
 coeos i s c = ffiCoEnergyOfStructure c i s 0
 
 -- | mfe of co-folded structure
 
-comfe :: String -> Int -> IO (Double,String)
+comfe :: ByteString -> Int -> IO (Double,ByteString)
 comfe s c = ffiCoFold c s
 
 -- | Cofolded partition function. Makes the set of different partfun values
 -- from cofoldF available.
 
-copart :: String -> Int -> IO (CofoldF,String,A.Array (Int,Int) Double)
+copart :: ByteString -> Int -> IO (CofoldF,ByteString,A.Array (Int,Int) Double)
 copart s c = ffiCoPartitionFunction  c s
 
-copartConstrained :: String -> String -> Int -> IO (CofoldF,String,A.Array (Int,Int) Double)
+copartConstrained :: ByteString -> ByteString -> Int -> IO (CofoldF,ByteString,A.Array (Int,Int) Double)
 copartConstrained sq str c = ffiCoPartitionConstrained c sq str
 
 -- | Fold a duplex structure
 
-duplexFold :: String -> String -> IO Duplex
+duplexFold :: ByteString -> ByteString -> IO Duplex
 duplexFold = ffiDuplexFold
 

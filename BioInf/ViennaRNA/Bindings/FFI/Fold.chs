@@ -1,6 +1,7 @@
 
 module BioInf.ViennaRNA.Bindings.FFI.Fold where
 
+import Data.ByteString.Char8
 import Foreign.C.String
 import Foreign.C.Types
 import Foreign.Marshal.Alloc
@@ -14,50 +15,50 @@ import BioInf.ViennaRNA.Bindings.FFI.Utils
 
 #include "ViennaRNA/fold.h"
 
-ffiFold :: String -> IO (Double,String)
-ffiFold inp = withCAString inp $ \cinp ->
-              withCAString inp $ \struc -> do
+ffiFold :: ByteString -> IO (Double,ByteString)
+ffiFold inp = useAsCString inp $ \cinp ->
+              useAsCString inp $ \struc -> do
   e <- {#call fold #} cinp struc
-  s <- peekCAString struc
+  s <- packCString struc
   return (cf2d e, s)
 
-ffiEnergyOfStructure :: String -> String -> Int -> IO Double
+ffiEnergyOfStructure :: ByteString -> ByteString -> Int -> IO Double
 ffiEnergyOfStructure inp struc verb =
-  withCAString inp   $ \i ->
-  withCAString struc $ \s ->
+  useAsCString inp   $ \i ->
+  useAsCString struc $ \s ->
     setCutPoint (-1)
     >>  {#call energy_of_structure #} i s (fromIntegral verb :: CInt)
     >>= (return . cf2d)
 
-ffiEnergyOfCircStructure :: String -> String -> Int -> IO Double
+ffiEnergyOfCircStructure :: ByteString -> ByteString -> Int -> IO Double
 ffiEnergyOfCircStructure inp struc verb =
-  withCAString inp   $ \i ->
-  withCAString struc $ \s ->
+  useAsCString inp   $ \i ->
+  useAsCString struc $ \s ->
     setCutPoint (-1)
     >>  {#call energy_of_circ_structure #} i s (fromIntegral verb :: CInt)
     >>= (return . cf2d)
 
-ffiCircFold :: String -> IO (Double,String)
-ffiCircFold inp = withCAString inp $ \cinp ->
-                  withCAString inp $ \struc -> do
+ffiCircFold :: ByteString -> IO (Double,ByteString)
+ffiCircFold inp = useAsCString inp $ \cinp ->
+                  useAsCString inp $ \struc -> do
   e <- {#call circfold #} cinp struc
-  s <- peekCAString struc
+  s <- packCString struc
   return (cf2d e, s)
 
 
 
-ffiFoldTemp :: Double -> String -> IO (Double,String)
+ffiFoldTemp :: Double -> ByteString -> IO (Double,ByteString)
 ffiFoldTemp t inp =
-  withCAString inp $ \cinp ->
-  withCAString inp $ \struc -> do
+  useAsCString inp $ \cinp ->
+  useAsCString inp $ \struc -> do
   e <- fold_temp_p (realToFrac t) cinp struc
-  s <- peekCAString struc
+  s <- packCString struc
   return (cf2d e, s)
 
-ffiEnergyOfStructureTemp :: Double -> String -> String -> Int -> IO Double
+ffiEnergyOfStructureTemp :: Double -> ByteString -> ByteString -> Int -> IO Double
 ffiEnergyOfStructureTemp t inp struc verb =
-  withCAString inp   $ \i ->
-  withCAString struc $ \s ->
+  useAsCString inp   $ \i ->
+  useAsCString struc $ \s ->
     setCutPoint (-1)
     >>  eos_temp_p (realToFrac t) i s (fromIntegral verb :: CInt)
     >>= (return . cf2d)

@@ -6,6 +6,8 @@ module BioInf.ViennaRNA.Bindings.FFI.PartFunc
   , ffi_pf_circ_fold_constrained
   ) where
 
+import           Data.ByteString.Char8 (ByteString, packCString, useAsCString)
+import qualified Data.ByteString.Char8 as BS
 import           Foreign.C.String
 import           Foreign.C.Types
 import           Foreign.Marshal.Alloc
@@ -21,53 +23,53 @@ import BioInf.ViennaRNA.Bindings.FFI.Utils
 
 #include "ViennaRNA/part_func.h"
 
-ffi_pf_fold :: String -> IO (Double,String,A.Array (Int,Int) Double)
+ffi_pf_fold :: ByteString -> IO (Double,ByteString,A.Array (Int,Int) Double)
 ffi_pf_fold i =
-  withCAString i $ \ci ->
-  withCAString i $ \cs -> do
-  let n = length i
+  useAsCString i $ \ci ->
+  useAsCString i $ \cs -> do
+  let n = BS.length i
   let z = n * (n+1) `div` 2 +1
   e  <- {#call ffiwrap_pf_fold_constrained #} ci cs 0
-  s  <- peekCAString cs
+  s  <- packCString cs
   bp <- {#call export_bppm #}
   xs <- peekArray z (bp :: Ptr CDouble)
   let ar = A.accumArray (const id) 0 ((1,1),(n,n)) $ zip [ (ii,jj) | ii <- [n,n-1..1], jj <- [n,n-1..ii]] (drop 1 $ map unsafeCoerce xs)
   return (cf2d e, s, ar)
 
-ffi_pf_circ_fold :: String -> IO (Double,String,A.Array (Int,Int) Double)
+ffi_pf_circ_fold :: ByteString -> IO (Double,ByteString,A.Array (Int,Int) Double)
 ffi_pf_circ_fold i =
-  withCAString i $ \ci -> do
-  withCAString i $ \cs -> do
-  let n = length i
+  useAsCString i $ \ci -> do
+  useAsCString i $ \cs -> do
+  let n = BS.length i
   let z = n * (n+1) `div` 2 +1
   e  <- {#call pf_circ_fold #} ci cs
-  s  <- peekCAString cs
+  s  <- packCString cs
   bp <- {#call export_bppm #}
   xs <- peekArray z (bp :: Ptr CDouble)
   let ar = A.accumArray (const id) 0 ((1,1),(n,n)) $ zip [ (ii,jj) | ii <- [n,n-1..1], jj <- [n,n-1..ii]] (drop 1 $ map unsafeCoerce xs)
   return (cf2d e, s, ar)
 
-ffi_pf_fold_constrained :: String -> String -> IO (Double,String,A.Array (Int,Int) Double)
+ffi_pf_fold_constrained :: ByteString -> ByteString -> IO (Double,ByteString,A.Array (Int,Int) Double)
 ffi_pf_fold_constrained i s =
-  withCAString i $ \ci ->
-  withCAString s $ \cs -> do
-  let n = length i
+  useAsCString i $ \ci ->
+  useAsCString s $ \cs -> do
+  let n = BS.length i
   let z = n * (n+1) `div` 2 +1
   e  <- {#call ffiwrap_pf_fold_constrained #} ci cs 1
-  s  <- peekCAString cs
+  s  <- packCString cs
   bp <- {#call export_bppm #}
   xs <- peekArray z (bp :: Ptr CDouble)
   let ar = A.accumArray (const id) 0 ((1,1),(n,n)) $ zip [ (ii,jj) | ii <- [n,n-1..1], jj <- [n,n-1..ii]] (drop 1 $ map unsafeCoerce xs)
   return (cf2d e, s, ar)
 
-ffi_pf_circ_fold_constrained :: String -> String -> IO (Double,String,A.Array (Int,Int) Double)
+ffi_pf_circ_fold_constrained :: ByteString -> ByteString -> IO (Double,ByteString,A.Array (Int,Int) Double)
 ffi_pf_circ_fold_constrained i s =
-  withCAString i $ \ci -> do
-  withCAString i $ \cs -> do
-  let n = length i
+  useAsCString i $ \ci -> do
+  useAsCString i $ \cs -> do
+  let n = BS.length i
   let z = n * (n+1) `div` 2 +1
   e  <- {#call ffiwrap_pf_circ_fold_constrained #} ci cs 1
-  s  <- peekCAString cs
+  s  <- packCString cs
   bp <- {#call export_bppm #}
   xs <- peekArray z (bp :: Ptr CDouble)
   let ar = A.accumArray (const id) 0 ((1,1),(n,n)) $ zip [ (ii,jj) | ii <- [n,n-1..1], jj <- [n,n-1..ii]] (drop 1 $ map unsafeCoerce xs)

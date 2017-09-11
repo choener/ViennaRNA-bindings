@@ -9,6 +9,7 @@ module BioInf.ViennaRNA.Bindings.FFI.CoFold
 
 import           Control.Applicative
 import           Control.Monad
+import           Data.ByteString.Char8 (ByteString, useAsCString, packCString)
 import           Foreign.C.String
 import           Foreign.C.Types
 import           Foreign.Marshal.Alloc
@@ -17,6 +18,7 @@ import           Foreign.Ptr
 import           Foreign.Storable
 import           GHC.Float
 import qualified Data.Array.IArray as A
+import qualified Data.ByteString.Char8 as BS
 import           Unsafe.Coerce
 
 import           BioInf.ViennaRNA.Bindings.FFI.Utils
@@ -50,36 +52,36 @@ instance Storable CofoldF where
 
 -- |
 
-ffiCoFold :: Int -> String -> IO (Double,String)
-ffiCoFold cp inp = withCAString inp $ \cinp ->
-                   withCAString inp $ \struc -> do
+ffiCoFold :: Int -> ByteString -> IO (Double,ByteString)
+ffiCoFold cp inp = useAsCString inp $ \cinp ->
+                   useAsCString inp $ \struc -> do
   setCutPoint cp
   e <- {#call cofold #} cinp struc
-  s <- peekCAString struc
+  s <- packCString struc
   return (cf2d e, s)
 
 -- |
 
-ffiCoEnergyOfStructure :: Int -> String -> String -> Int -> IO Double
+ffiCoEnergyOfStructure :: Int -> ByteString -> ByteString -> Int -> IO Double
 ffiCoEnergyOfStructure cp inp struc verb =
-  withCAString inp   $ \i ->
-  withCAString struc $ \s ->
+  useAsCString inp   $ \i ->
+  useAsCString struc $ \s ->
     setCutPoint cp
     >>  {#call energy_of_structure #} i s (fromIntegral verb :: CInt)
     >>= (return . cf2d)
 
 -- |
 
-ffiCoPartitionFunction :: Int -> String -> IO (CofoldF,String,A.Array (Int,Int) Double)
+ffiCoPartitionFunction :: Int -> ByteString -> IO (CofoldF,ByteString,A.Array (Int,Int) Double)
 ffiCoPartitionFunction cutpoint i =
-  withCAString i $ \ci ->
-  withCAString i $ \cs ->
+  useAsCString i $ \ci ->
+  useAsCString i $ \cs ->
   alloca         $ \ptr -> do
   setCutPoint cutpoint
-  let n = length i
+  let n = BS.length i
   let z = n * (n+1) `div` 2 +1
   eF <- co_pf_fold_p ptr ci cs >> peek ptr
-  s  <- peekCAString cs
+  s  <- packCString cs
   bp <- {#call export_co_bppm #}
   xs <- peekArray z (bp :: Ptr CDouble)
   let ar = A.accumArray (const id) 0 ((1,1),(n,n)) $ zip [ (ii,jj) | ii <- [n,n-1..1], jj <- [n,n-1..ii]] (drop 1 $ map unsafeCoerce xs)
@@ -87,16 +89,16 @@ ffiCoPartitionFunction cutpoint i =
 
 -- | Constrained partition function
 
-ffiCoPartitionConstrained :: Int -> String -> String -> IO (CofoldF,String,A.Array (Int,Int) Double)
+ffiCoPartitionConstrained :: Int -> ByteString -> ByteString -> IO (CofoldF,ByteString,A.Array (Int,Int) Double)
 ffiCoPartitionConstrained cutpoint sq st =
-  withCAString sq $ \csq ->
-  withCAString st $ \cst ->
+  useAsCString sq $ \csq ->
+  useAsCString st $ \cst ->
   alloca          $ \ptr -> do
   setCutPoint cutpoint
-  let n = length sq
+  let n = BS.length sq
   let z = n * (n+1) `div` 2 +1
   eF <- co_pf_fold_constrained_p ptr csq cst 1 >> peek ptr
-  s  <- peekCAString cst
+  s  <- packCString cst
   bp <- {#call export_co_bppm #}
   xs <- peekArray z (bp :: Ptr CDouble)
   let ar = A.accumArray (const id) 0 ((1,1),(n,n)) $ zip [ (ii,jj) | ii <- [n,n-1..1], jj <- [n,n-1..ii]] (drop 1 $ map unsafeCoerce xs)

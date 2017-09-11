@@ -6,6 +6,7 @@ module BioInf.ViennaRNA.Bindings.FFI.Duplex
 
 import           Control.Applicative
 import           Control.Monad
+import           Data.ByteString.Char8
 import           Foreign.C.String
 import           Foreign.C.Types
 import           Foreign.Marshal.Alloc
@@ -29,7 +30,7 @@ data Duplex = Duplex
   { i                 :: {-# UNPACK #-} !Int
   , j                 :: {-# UNPACK #-} !Int
   , end               :: {-# UNPACK #-} !Int
-  , structure         ::                !String
+  , structure         ::                !ByteString
   , energy            :: {-# UNPACK #-} !Double
   , energyBacktrack   :: {-# UNPACK #-} !Double
   , openingBacktrackX :: {-# UNPACK #-} !Double
@@ -52,7 +53,7 @@ instance Storable Duplex where
     <$> liftM fromIntegral ({# get duplexT->i #} p)
     <*> liftM fromIntegral ({# get duplexT->j #} p)
     <*> liftM fromIntegral ({# get duplexT->end #} p)
-    <*> (peekCAString =<<  ({# get duplexT->structure #} p))
+    <*> (packCString =<<   ({# get duplexT->structure #} p))
     <*> liftM realToFrac   ({# get duplexT->energy #} p)
     <*> liftM realToFrac   ({# get duplexT->energy_backtrack #} p)
     <*> liftM realToFrac   ({# get duplexT->opening_backtrack_x #} p)
@@ -66,10 +67,10 @@ instance Storable Duplex where
     <*> liftM fromIntegral ({# get duplexT->qb #} p)
     <*> liftM fromIntegral ({# get duplexT->qe #} p)
 
-ffiDuplexFold :: String -> String -> IO Duplex
+ffiDuplexFold :: ByteString -> ByteString -> IO Duplex
 ffiDuplexFold l r =
-  withCAString l $ \cl  ->
-  withCAString r $ \cr  ->
+  useAsCString l $ \cl  ->
+  useAsCString r $ \cr  ->
   alloca         $ \ptr -> do
   d <- duplexfold_p ptr cl cr >> peek ptr
   return d

@@ -1,6 +1,7 @@
 
 module BioInf.ViennaRNA.Bindings.FFI.Centroid where
 
+import Data.ByteString.Char8
 import Foreign.C.String
 import Foreign.C.Types
 import Foreign.Marshal.Alloc
@@ -16,12 +17,12 @@ import BioInf.ViennaRNA.Bindings.FFI.Utils
 
 
 
-ffiCentroidTemp :: Double -> String -> IO (Double,String)
+ffiCentroidTemp :: Double -> ByteString -> IO (Double,ByteString)
 ffiCentroidTemp t inp =
-  withCAString inp $ \cinp ->
-  withCAString inp $ \struc -> do
+  useAsCString inp $ \cinp ->
+  useAsCString inp $ \struc -> do
   e <- fold_centroid_p (realToFrac t) cinp struc
-  s <- peekCAString struc
+  s <- packCString struc
   return (cd2d e, s)
 
 
