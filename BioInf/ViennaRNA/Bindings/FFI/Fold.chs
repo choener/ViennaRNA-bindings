@@ -1,7 +1,7 @@
 
 module BioInf.ViennaRNA.Bindings.FFI.Fold where
 
-import Data.ByteString.Char8
+import Data.ByteString.Char8 as BS
 import Foreign.C.String
 import Foreign.C.Types
 import Foreign.Marshal.Alloc
@@ -18,7 +18,7 @@ import BioInf.ViennaRNA.Bindings.FFI.Utils
 ffiFold :: ByteString -> IO (Double,ByteString)
 ffiFold inp = useAsCString inp $ \cinp ->
               useAsCString inp $ \struc -> do
-  e <- {#call fold #} cinp struc
+  e <- if BS.null inp then return 0 else {#call fold #} cinp struc
   s <- packCString struc
   return (cf2d e, s)
 
