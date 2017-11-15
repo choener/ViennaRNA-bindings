@@ -1,5 +1,8 @@
-
 {-# Language OverloadedStrings #-}
+
+-- |
+--
+-- NOTE Remember that all calculations are done via @RNAfold -p --noLP@.
 
 module Main where
 
@@ -106,15 +109,18 @@ case_mfeTemp_20_001 = do
 
 case_centroidTemp_37_001 :: Assertion
 case_centroidTemp_37_001 = do
-  (e,s) <- V.centroidTemp 37 "cccaaaggg"
+  (e,s,d) <- V.centroidTemp 37 "cccaaaggg"
   assertBool "energy" $ e =~ (-1.2)
   assertBool "structure" $ s == "(((...)))"
+  assertBool "avg distance" $ d =~ 1.06
 
 case_centroidTemp_37_003 :: Assertion
 case_centroidTemp_37_003 = do
-  (e,s) <- V.centroidTemp 37 "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
+  (e,s,d) <- V.centroidTemp 37 "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
   assertBool "energy" $ e =~ (-28.10)
   assertBool "structure" $ s == "(((((((..((((.........)))).(((((.(....)))))).....(((((.......))))))))))))."
+  -- using @--noLP@
+  assertBool "avg distance" $ d =~ 11.86
 
 
 

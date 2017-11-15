@@ -64,7 +64,7 @@ circPartConstrained = ffi_pf_circ_fold_constrained
 
 -- | Centroid structure
 
-centroidTemp :: Double -> ByteString -> IO (Double,ByteString)
+centroidTemp :: Double -> ByteString -> IO (Double,ByteString,Double)
 centroidTemp t i = ffiCentroidTemp t i
 
 -- * RNAcofold

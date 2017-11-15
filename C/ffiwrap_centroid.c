@@ -13,9 +13,9 @@
 #include "ViennaRNA/alifold.h"
 #include "ViennaRNA/fold.h"
 
-double ffiwrap_centroid_temp (double temp, const char *sequence, char *structure)
+double ffiwrap_centroid_temp (double temp, const char *sequence, char *structure, double *dist)
 {
-  double                dist, e;
+  double                e;
   char*                 cent;
   char*                 pf_struc;
   double                cent_en;
@@ -29,7 +29,7 @@ double ffiwrap_centroid_temp (double temp, const char *sequence, char *structure
   md.temperature = temp;
   vc  = vrna_fold_compound(sequence, &md, 0);
   e = vrna_pf(vc, pf_struc);
-  cent = vrna_centroid(vc, &dist);
+  cent = vrna_centroid(vc, dist);
   cent_en = vrna_eval_structure(vc, (const char*) cent);
   strcpy (structure, cent);
   free (cent);
