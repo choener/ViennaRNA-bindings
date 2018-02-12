@@ -1,4 +1,7 @@
 
+-- | The ffi wrappers in this module need to use the new vrna-style calls. The
+-- current old calls are not multi-threaded.
+
 module BioInf.ViennaRNA.Bindings.FFI.PartFunc
   ( ffi_pf_fold
   , ffi_pf_circ_fold

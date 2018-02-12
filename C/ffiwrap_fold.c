@@ -11,14 +11,14 @@
 #include "ViennaRNA/alifold.h"
 #include "ViennaRNA/fold.h"
 
-float ffiwrap_fold_temp (float temp, const char *sequence, char *structure)
+float ffiwrap_fold_temp (int nolp, float temp, const char *sequence, char *structure)
 {
   float                 mfe;
   vrna_fold_compound_t  *vc;
   vrna_md_t             md;
 
   vrna_md_set_default(&md);
-  md.noLP = 1;
+  md.noLP = nolp;
   md.temperature = temp;
   vc  = vrna_fold_compound(sequence, &md, 0);
   mfe = vrna_mfe(vc, structure);

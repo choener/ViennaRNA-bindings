@@ -1,5 +1,5 @@
 name:           ViennaRNA-bindings
-version:        0.233.2.0
+version:        0.233.2.1
 maintainer:     choener@tbi.univie.ac.at
 homepage:       https://github.com/choener/ViennaRNA-bindings
 bug-reports:    https://github.com/choener/ViennaRNA-bindings/issues
@@ -10,7 +10,7 @@ copyright:      The ViennaRNA Team 1994-2017
 category:       Bioinformatics, Bindings, FFI
 build-type:     Simple
 cabal-version:  >=1.10
-tested-with:    GHC == 8.0.2, GHC == 8.2.1
+tested-with:    GHC == 8.0.2, GHC == 8.2.2
 synopsis:       ViennaRNA v2 bindings
 description:    Bindings to the ViennaRNA package, version 2.3.3.
                 .
@@ -70,6 +70,7 @@ library
                     , ForeignFunctionInterface
                     , NondecreasingIndentation
                     , ScopedTypeVariables
+                    , UnicodeSyntax
   c-sources:
     C/ffiwrap_part_func.c
     C/ffiwrap_fold.c
@@ -128,7 +129,7 @@ test-suite properties
   main-is:
     properties.hs
   ghc-options:
-    -O2 -rtsopts
+    -O2 -rtsopts -threaded
   hs-source-dirs:
     tests
   default-language:
@@ -137,14 +138,19 @@ test-suite properties
     c2hs
   default-extensions: CPP
                     , TemplateHaskell
+                    , UnicodeSyntax
   build-depends: base
                , array
                , bytestring
+               , parallel
                , QuickCheck
                , tasty                >= 0.11
                , tasty-hunit          >= 0.9
+               , tasty-quickcheck     >= 0.8
                , tasty-silver         >= 3.1
                , tasty-th             >= 0.1
+               --
+               , BiobaseTypes         == 0.1.3.*
                , ViennaRNA-bindings
 
 
