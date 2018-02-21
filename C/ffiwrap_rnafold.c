@@ -2,6 +2,8 @@
 /*
  * Generic RNAfold wrapper. Depending on the options given, calculates mfe,
  * centroid, ensemble results.
+ *
+ * TODO Needs the option to hand in different energy parameters.
  */
 
 #include <stdio.h>
@@ -15,8 +17,8 @@
 #include "ViennaRNA/alifold.h"
 #include "ViennaRNA/fold.h"
 
-int ffiwrap_RNAfold_init
-  // options
+int ffiwrap_RNAfold
+  // input options
   ( int withmfe       // enable mfe calcualtion
   , int withpartfun   // enable partition function calculation
   , int withcentroid  // enable centroid calculation
@@ -25,29 +27,46 @@ int ffiwrap_RNAfold_init
   , int noguclosure
   // temperature
   , float temp
-  // input
+  // the actual input sequence
   , const char *s1
+  // output options
   // mfe results
   , char *s2mfe
   , float *emfe
+  // partition function string
+  , char *s2ensemble  // this string is *not* a canonical secondary structure string
+  , float *eensemble  // energy of the whole ensemble
   // centroid
   , char *s2centroid
   , double *ecentroid
   , double *centroiddistance
   )
 {
-  float epf = 0;
-  char *s2partfun = 0;
-  char *s2tmpcentroid = 0;
-
   vrna_fold_compound_t  *vc;
   vrna_md_t             md;
 
   vrna_md_set_default(&md);
+  // TODO if ptr to model energy is non-zero then use different energy model
   md.noLP = nolp;
   md.dangles = dangles;
   md.noGUclosure = noguclosure;
   md.temperature = temp;
+
+  if (s1==NULL || strlen (s1) == 0)
+  {
+    // no mfe
+    *emfe = 0;
+    s2mfe[0] = 0;
+    // no ensemble
+    *eensemble = 0;
+    s2ensemble[0] = 0;
+    // no centroid
+    *ecentroid = 0;
+    *centroiddistance = 0;
+    s2centroid[0] = 0;
+    return 0;
+  }
+
   vc  = vrna_fold_compound(s1, &md, 0);
 
   // calculate mfe
@@ -59,21 +78,19 @@ int ffiwrap_RNAfold_init
   }
   // partition function
   if (withpartfun) {
-    epf = vrna_pf(vc, s2partfun);
+    *eensemble = vrna_pf(vc, s2ensemble);
   } else {
-    epf = 0;
-    s2partfun = 0;
+    *eensemble = 0;
+    s2ensemble[0] = 0;
   }
   // centroid
   if (withcentroid) {
-    s2tmpcentroid = vrna_centroid(vc, centroiddistance);
-    *ecentroid = vrna_eval_structure(vc, (const char*) s2tmpcentroid);
-    strcpy (s2centroid, s2tmpcentroid);
-    free (s2tmpcentroid);
-    free (s2partfun);
+    s2centroid = vrna_centroid(vc, centroiddistance);
+    *ecentroid = vrna_eval_structure(vc, (const char*) s2centroid);
   } else{
     *ecentroid = 0;
-    s2tmpcentroid = 0;
+    *centroiddistance = 0;
+    s2centroid[0] = 0;
   }
 
   vrna_fold_compound_free(vc);

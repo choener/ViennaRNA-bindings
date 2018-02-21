@@ -20,3 +20,14 @@ foreign import ccall "fold.h &cut_point" cut_point :: Ptr CInt
 setCutPoint :: Int -> IO ()
 setCutPoint = poke cut_point . unsafeCoerce
 
+b2ci :: Bool -> CInt
+b2ci True  = 1
+b2ci False = 0
+
+data RNAfoldOptions = RNAfoldOptions
+  { _fomfe          :: !Bool
+  , _foensemble     :: !Bool
+  , _focentroid     :: !Bool
+  , _fotemperature  :: !Double
+  }
+

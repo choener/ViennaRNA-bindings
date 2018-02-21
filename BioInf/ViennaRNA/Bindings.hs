@@ -8,6 +8,7 @@ module BioInf.ViennaRNA.Bindings
   ( module BioInf.ViennaRNA.Bindings
   , CofoldF (..)
   , Duplex (..)
+  , RNAfoldOptions (..)
   ) where
 
 import           Data.ByteString.Char8
@@ -18,6 +19,22 @@ import           BioInf.ViennaRNA.Bindings.FFI.CoFold   as FFI
 import           BioInf.ViennaRNA.Bindings.FFI.Duplex   as FFI
 import           BioInf.ViennaRNA.Bindings.FFI.Fold     as FFI
 import           BioInf.ViennaRNA.Bindings.FFI.PartFunc as FFI
+import           BioInf.ViennaRNA.Bindings.FFI.RNAfold as FFI
+
+import           BioInf.ViennaRNA.Bindings.FFI.Utils as FFI
+
+-- * new, generic bindings
+
+rnafold
+  :: RNAfoldOptions
+  -> ByteString
+  -> IO ( Maybe (Double, ByteString)
+        , Maybe (Double, ByteString)
+        , Maybe (Double, ByteString, Double)
+        )
+rnafold = ffi_RNAfold
+
+-- * old bindings
 
 -- | Fold a sequence into an optimal secondary structure. Returns a pair of
 -- energy and structure.

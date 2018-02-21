@@ -49,7 +49,9 @@ library
   exposed-modules:
     -- public interfaces
     BioInf.ViennaRNA.Bindings
-    -- the FFI
+    -- the FFI (new)
+    BioInf.ViennaRNA.Bindings.FFI.RNAfold
+    -- (old)
     BioInf.ViennaRNA.Bindings.FFI.Centroid
     BioInf.ViennaRNA.Bindings.FFI.CoFold
     BioInf.ViennaRNA.Bindings.FFI.Duplex
