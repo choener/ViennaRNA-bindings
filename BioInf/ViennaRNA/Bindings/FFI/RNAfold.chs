@@ -53,8 +53,8 @@ ffi_RNAfold o inp = do
          with (0 :: CDouble) $ \cendist -> do
           {#call ffiwrap_RNAfold #}
             (b2ci $ _fomfe o) (b2ci $ _foensemble o) (b2ci $ _focentroid o) -- which parts to calculate
-            0 0 0 -- lp, dangles, gu
-            (unsafeCoerce $ _fotemperature o)    -- temperature
+            0 2 0 -- lp, dangles, gu
+            (realToFrac $ _fotemperature o)    -- temperature
             s1    -- input
             s2mfe -- mfe
             emfe

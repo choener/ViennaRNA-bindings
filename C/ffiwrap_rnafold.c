@@ -4,6 +4,10 @@
  * centroid, ensemble results.
  *
  * TODO Needs the option to hand in different energy parameters.
+ *
+ * TODO lp, dangles, gu
+ *
+ * TODO partition function array
  */
 
 #include <stdio.h>
@@ -47,9 +51,9 @@ int ffiwrap_RNAfold
 
   vrna_md_set_default(&md);
   // TODO if ptr to model energy is non-zero then use different energy model
-  md.noLP = nolp;
-  md.dangles = dangles;
-  md.noGUclosure = noguclosure;
+  md.noLP = 1; // nolp;
+  md.dangles = 2; // dangles;
+  md.noGUclosure = 0; // noguclosure;
   md.temperature = temp;
 
   if (s1==NULL || strlen (s1) == 0)

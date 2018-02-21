@@ -26,16 +26,23 @@ import BioInf.ViennaRNA.Bindings as V
 a =~ b = abs (b - a) <= 0.01
 
 
+rnao = RNAfoldOptions
+  { _fomfe = True
+  , _focentroid = True
+  , _foensemble = True
+  , _fotemperature = 37
+  }
+
 
 case_mfe_001 :: Assertion
 case_mfe_001 = do
-  (e,s) <- V.mfe "cccaaaggg"
+  (Just (e,s),_,_) <- V.rnafold rnao "cccaaaggg"
   assertBool "energy" $ e =~ (-1.2)
   assertBool "structure" $ s == "(((...)))"
 
 case_mfe_002 :: Assertion
 case_mfe_002 = do
-  (e,s) <- V.mfe "uguagcuagcuagcuagcuacguacguagcuagc"
+  (Just (e,s),_,_) <- V.rnafold rnao "uguagcuagcuagcuagcuacguacguagcuagc"
   assertBool "energy" $ e =~ (-14.0)
   assertBool "structure" $ s == "............(((((((((....)))))))))"
 
@@ -46,9 +53,29 @@ case_mfe_002 = do
 
 case_mfe_003 :: Assertion
 case_mfe_003 = do
-  (e,s) <- V.mfe "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
+  (Just (e,s),_,_) <- V.rnafold rnao "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
   assertBool "energy" $ e =~ (-28.90)
   assertBool "structure" $ s == "(((((((..((((.........)))).(((((.......))))).....(((((.......))))))))))))."
+
+case_mfe_004 :: Assertion
+case_mfe_004 = do
+  (Just (e,s),_,_) <- V.rnafold rnao "uguagcuagcuagcuagcuacguacguagcuagc"
+  assertBool "energy" $ e =~ (-14.0)
+  assertBool "structure" $ s == "............(((((((((....)))))))))"
+
+case_mfe_005 :: Assertion
+case_mfe_005 = do
+  (Just (e,s),_,_) <- V.rnafold rnao "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
+  assertBool "energy" $ e =~ (-28.90)
+  assertBool "structure" $ s == "(((((((..((((.........)))).(((((.......))))).....(((((.......))))))))))))."
+
+case_mfeTemp_20_001 :: Assertion
+case_mfeTemp_20_001 = do
+  (Just (e,s),_,_) <- V.rnafold rnao{_fotemperature = 20} "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
+  assertBool "energy" $ e =~ (-39.29)
+  assertBool "structure" $ s == "(((((((..((((.........)))).(((((.......))))).....(((((.......))))))))))))."
+
+
 
 --case_circmfe_001 :: Assertion
 --case_circmfe_001 = do
@@ -87,30 +114,6 @@ case_duplexfold_001 = do
   assertBool "energy" $ energy d =~ (-4.10)
   assertBool "structure" $ structure d == ".((...((...((.&.))...))...))."
 
-case_mfeTemp_37_001 :: Assertion
-case_mfeTemp_37_001 = do
-  (e,s) <- V.mfeTemp 37 "cccaaaggg"
-  assertBool "energy" $ e =~ (-1.2)
-  assertBool "structure" $ s == "(((...)))"
-
-case_mfeTemp_37_002 :: Assertion
-case_mfeTemp_37_002 = do
-  (e,s) <- V.mfeTemp 37 "uguagcuagcuagcuagcuacguacguagcuagc"
-  assertBool "energy" $ e =~ (-14.0)
-  assertBool "structure" $ s == "............(((((((((....)))))))))"
-
-case_mfeTemp_37_003 :: Assertion
-case_mfeTemp_37_003 = do
-  (e,s) <- V.mfeTemp 37 "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
-  assertBool "energy" $ e =~ (-28.90)
-  assertBool "structure" $ s == "(((((((..((((.........)))).(((((.......))))).....(((((.......))))))))))))."
-
-case_mfeTemp_20_001 :: Assertion
-case_mfeTemp_20_001 = do
-  (e,s) <- V.mfeTemp 20 "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
-  assertBool "energy" $ e =~ (-39.29)
-  assertBool "structure" $ s == "(((((((..((((.........)))).(((((.......))))).....(((((.......))))))))))))."
-
 
 
 case_centroidTemp_37_001 :: Assertion
@@ -128,13 +131,14 @@ case_centroidTemp_37_003 = do
   -- using @--noLP@
   assertBool "avg distance" $ d =~ 11.86
 
--- | Parallelization test.
+-- | Parallelization test for full RNAfold with all options.
 
-prop_parallel_mfeTemp ∷ [RNAseq] → Bool
-prop_parallel_mfeTemp ss = ns == ps
+prop_parallel_RNAfold ∷ [RNAseq] → Bool
+prop_parallel_RNAfold ss = ns == ps
   where ns = map f ss
         ps = parMap rdeepseq f ss
-        f (RNAseq s) = unsafePerformIO $ V.mfeTemp 37 s
+        f (RNAseq s) = unsafePerformIO $ V.rnafold rnao s
+--        f (RNAseq s) = unsafePerformIO $ V.mfeTemp 37 s
 
 
 
