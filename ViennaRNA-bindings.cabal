@@ -71,6 +71,7 @@ library
   default-extensions: CPP
                     , ForeignFunctionInterface
                     , NondecreasingIndentation
+                    , RecordWildCards
                     , ScopedTypeVariables
                     , UnicodeSyntax
   c-sources:
@@ -140,11 +141,14 @@ test-suite properties
   build-tools:
     c2hs
   default-extensions: CPP
+                    , BangPatterns
+                    , FlexibleInstances
                     , TemplateHaskell
                     , UnicodeSyntax
   build-depends: base
                , array
                , bytestring
+               , deepseq
                , parallel
                , QuickCheck
                , tasty                >= 0.11

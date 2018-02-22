@@ -6,8 +6,11 @@
 
 module Main where
 
+import Control.DeepSeq
 import Control.Parallel.Strategies (parMap,rdeepseq)
-import Data.Array ((!))
+import Data.Array.IArray ((!))
+import qualified Data.Array.IArray as AI
+import Data.Array.Base (UArray(..))
 import Data.ByteString.Char8 ()
 import Debug.Trace
 import System.IO.Unsafe (unsafePerformIO)
@@ -24,6 +27,7 @@ import BioInf.ViennaRNA.Bindings as V
 
 
 a =~ b = abs (b - a) <= 0.01
+a =~~~ b = abs (b - a) <= 0.000001
 
 
 rnao = RNAfoldOptions
@@ -31,6 +35,9 @@ rnao = RNAfoldOptions
   , _focentroid = True
   , _foensemble = True
   , _fotemperature = 37
+  , _fodangles = 2
+  , _fonogu = True
+  , _fonolp = True
   }
 
 
@@ -102,11 +109,15 @@ case_eosTemp_20_001 = do
 
 case_part_001 :: Assertion
 case_part_001 = do
-  (e,s,arr) <- V.part "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
-  assertBool "energy" $ e =~ (-31.43)
-  assertBool "structure" $ s == "(((((((..(((.{{{{,|,,.,({({((((({(....})))}).,,,)|||,,..}.}}}),))))))))))."
-  assertBool "1,13" $ arr ! (1,13) =~ 0.010
-  assertBool "4,70" $ arr ! (4,70) =~ 0.999
+  let o = rnao{_fonogu = True, _fonolp = True, _fodangles = 2}
+  --(e,s,arr) <- V.part "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
+  (Just (e,s), Just (g,t,arr),_) <- V.rnafold o "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
+  mapM_ print $ [ (k,v) | (k,v) <- AI.assocs arr, v > 0, k == (1,13) ]
+  assertBool "mfe energy" $ e =~ (-28.90)
+  assertBool "ensemble gibbs free energy" $ g =~ (-29.97)
+  assertBool "structure" $ t == "(((((((..((({..,,.....}|||.(((((,{....})))))....,{||{{.......)}))))))))))."
+  assertBool "1,13" $ arr ! (1,13) =~~~ 0.006288612
+  assertBool "4,70" $ arr ! (4,70) =~~~ 0.999954759
 
 case_duplexfold_001 :: Assertion
 case_duplexfold_001 = do
@@ -140,6 +151,11 @@ prop_parallel_RNAfold ss = ns == ps
         f (RNAseq s) = unsafePerformIO $ V.rnafold rnao s
 --        f (RNAseq s) = unsafePerformIO $ V.mfeTemp 37 s
 
+-- orphaned instance for deepseq (that should be ok, it can't leak from this
+-- executable)
+
+instance NFData (UArray (Int,Int) Double) where
+  rnf (UArray !l !h !k !arr) = ()
 
 
 main :: IO ()

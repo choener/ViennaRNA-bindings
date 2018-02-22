@@ -40,6 +40,7 @@ int ffiwrap_RNAfold
   // partition function string
   , char *s2ensemble  // this string is *not* a canonical secondary structure string
   , float *eensemble  // energy of the whole ensemble
+  , double *probs // incoming array, large enough to write in base pairing probs, if withensemble == 1
   // centroid
   , char *s2centroid
   , double *ecentroid
@@ -82,7 +83,13 @@ int ffiwrap_RNAfold
   }
   // partition function
   if (withpartfun) {
+    //eensemble is gibbs free energy of ensemble
     *eensemble = vrna_pf(vc, s2ensemble);
+    int *index = vc->iindx;
+    for (int i = 1; i < vc->length; i++)
+      for (int j = i+1; j < vc->length; j++) {
+        probs[i * vc->length + j] = vc->exp_matrices->probs[index[i]-j];
+      }
   } else {
     *eensemble = 0;
     s2ensemble[0] = 0;

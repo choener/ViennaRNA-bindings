@@ -13,6 +13,9 @@ import           Foreign.Ptr
 import           Foreign.Storable
 import           GHC.Float
 import qualified Data.Array.IArray as A
+import qualified Data.Array.MArray as AM
+import qualified Data.Array.Storable as AS
+import qualified Data.Array.Unboxed as AU
 import qualified Data.ByteString.Char8 as BS
 import           Unsafe.Coerce
 
@@ -20,27 +23,14 @@ import BioInf.ViennaRNA.Bindings.FFI.Utils
 
 
 
---foreign import ccall "ffiwrap_rnafold" ffi_RNAfold
---  :: CInt -- with mfe
---  -> CInt -- with partfun
---  -> CInt -- with centroid
---  -> CInt -- no lp
---  -> CInt -- dangles
---  -> CInt -- no gu closure
---  -> CDouble  -- temperature
---  -> CString  -- input string
---  -> CString
---  -> Ptr CDouble
---  -> IO CDouble
-
 ffi_RNAfold
   :: RNAfoldOptions
   -> ByteString   -- input
   -> IO ( Maybe (Double, ByteString) -- mfe
-        , Maybe (Double, ByteString) -- ensemble
+        , Maybe (Double, ByteString, AU.UArray (Int,Int) Double) -- ensemble
         , Maybe (Double, ByteString, Double) -- centroid
         )
-ffi_RNAfold o inp = do
+ffi_RNAfold RNAfoldOptions{..} inp = do
   if BS.null inp
     then return (Nothing, Nothing, Nothing)
     else useAsCString inp $ \s1 ->
@@ -51,31 +41,35 @@ ffi_RNAfold o inp = do
          useAsCString inp $ \s2centroid ->
          with (0 :: CDouble) $ \ecentroid ->
          with (0 :: CDouble) $ \cendist -> do
+          let l = if _foensemble then BS.length inp - 1 else 0
+          bpp :: AS.StorableArray (Int,Int) Double <- AS.newArray ((0,0),(l,l)) 0
+          AS.withStorableArray bpp $ \cbpparr -> do
           {#call ffiwrap_RNAfold #}
-            (b2ci $ _fomfe o) (b2ci $ _foensemble o) (b2ci $ _focentroid o) -- which parts to calculate
-            0 2 0 -- lp, dangles, gu
-            (realToFrac $ _fotemperature o)    -- temperature
+            (b2ci _fomfe) (b2ci _foensemble) (b2ci _focentroid) -- which parts to calculate
+            (b2ci _fonolp) (fromIntegral _fodangles) (b2ci _fonogu) -- nolp, dangles, nogu
+            (realToFrac _fotemperature)    -- temperature
             s1    -- input
             s2mfe -- mfe
             emfe
             s2ensemble  -- ensemble
             eensemble
+            (unsafeCoerce cbpparr)
             s2centroid  -- centroid
             ecentroid
             cendist
-          rmfe <- if _fomfe o
+          rmfe <- if _fomfe
             then do
               e <- cf2d <$> peek emfe
               str <- packCString s2mfe
               return $ Just (e,str)
             else return Nothing
-          rensemble <- if _foensemble o
+          rensemble <- if _foensemble
             then do
               e <- cf2d <$> peek eensemble
               str <- packCString s2ensemble
-              return $ Just (e,str)
+              AS.freeze bpp >>= \ fbpp -> return $ Just (e,str,fbpp)
             else return Nothing
-          rcentroid <- if _focentroid o
+          rcentroid <- if _focentroid
             then do
               e <- cd2d <$> peek ecentroid
               str <- packCString s2centroid
@@ -116,6 +110,7 @@ int ffiwrap_RNAfold
   // partition function string
   , char *s2ensemble  // this string is *not* a canonical secondary structure string
   , float *eensemble  // energy of the whole ensemble
+  , double *probs // incoming array, large enough to write in base pairing probs, if withensemble == 1
   // centroid
   , char *s2centroid
   , double *ecentroid

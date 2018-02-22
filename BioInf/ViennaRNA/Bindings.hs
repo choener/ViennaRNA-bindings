@@ -13,6 +13,8 @@ module BioInf.ViennaRNA.Bindings
 
 import           Data.ByteString.Char8
 import qualified Data.Array.IArray as A
+import qualified Data.Array.Unboxed as AU
+import qualified Data.Array.Storable as AS
 
 import           BioInf.ViennaRNA.Bindings.FFI.Centroid as FFI
 import           BioInf.ViennaRNA.Bindings.FFI.CoFold   as FFI
@@ -29,7 +31,7 @@ rnafold
   :: RNAfoldOptions
   -> ByteString
   -> IO ( Maybe (Double, ByteString)
-        , Maybe (Double, ByteString)
+        , Maybe (Double, ByteString, AU.UArray (Int,Int) Double)
         , Maybe (Double, ByteString, Double)
         )
 rnafold = ffi_RNAfold

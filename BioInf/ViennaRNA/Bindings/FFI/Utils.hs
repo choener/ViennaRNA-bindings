@@ -29,5 +29,8 @@ data RNAfoldOptions = RNAfoldOptions
   , _foensemble     :: !Bool
   , _focentroid     :: !Bool
   , _fotemperature  :: !Double
+  , _fodangles      :: !Int
+  , _fonogu         :: !Bool
+  , _fonolp         :: !Bool
   }
 
