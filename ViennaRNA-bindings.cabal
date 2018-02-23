@@ -61,6 +61,7 @@ library
   build-depends: base == 4.*
                , array
                , bytestring
+               , data-default-class  >= 0.1.2
   build-tools:
     c2hs
   extra-libraries:
