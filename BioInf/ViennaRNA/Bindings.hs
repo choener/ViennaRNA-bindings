@@ -37,7 +37,8 @@ import           BioInf.ViennaRNA.Bindings.FFI.Utils as FFI
 --
 -- The @ensemble@ yields the @ensemble gibbs free energy@, the @ensemble
 -- structure@ (not a canonical secondary structure!), and the @array of pair
--- probabilities@.
+-- probabilities@. These are the actual probabilities. the @dot.ps@ files
+-- contain the square roots of these.
 --
 -- The @centroid@ yields the @centroid free energy@, the @centroid structure@,
 -- and @average centroid distance to all structures@.

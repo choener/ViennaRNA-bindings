@@ -110,7 +110,7 @@ case_part_001 = do
     , ( 7, 67, 0.900660774)
     , (28, 44, 0.914199199)
     , (29, 43, 0.917305662)
-    ] $ \(i,j,p) -> assertBool (show (i,j,p,"/~=",ensembleArr ! (i,j))) $ ensembleArr ! (i,j) =~ p
+    ] $ \(i,j,p') -> let p = p'^2 in assertBool (show (i,j,p,"/~=",ensembleArr ! (i,j))) $ ensembleArr ! (i,j) =~ p
 
   --assertBool "1,13" $ ensembleArr ! (1,13) =~~~ 0.006288612
   --assertBool "4,70" $ ensembleArr ! (4,70) =~~~ 0.999954759
