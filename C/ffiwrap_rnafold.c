@@ -49,12 +49,13 @@ int ffiwrap_RNAfold
 {
   vrna_fold_compound_t  *vc;
   vrna_md_t             md;
+  char *tmp_s2centroid;
 
   vrna_md_set_default(&md);
   // TODO if ptr to model energy is non-zero then use different energy model
-  md.noLP = 1; // nolp;
-  md.dangles = 2; // dangles;
-  md.noGUclosure = 0; // noguclosure;
+  md.noLP = nolp; // nolp;
+  md.dangles = dangles; // dangles;
+  md.noGUclosure = noguclosure; // noguclosure;
   md.temperature = temp;
 
   if (s1==NULL || strlen (s1) == 0)
@@ -96,7 +97,9 @@ int ffiwrap_RNAfold
   }
   // centroid
   if (withcentroid) {
-    s2centroid = vrna_centroid(vc, centroiddistance);
+    tmp_s2centroid = vrna_centroid(vc, centroiddistance);
+    strcpy (s2centroid, tmp_s2centroid);
+    free (tmp_s2centroid);
     *ecentroid = vrna_eval_structure(vc, (const char*) s2centroid);
   } else{
     *ecentroid = 0;

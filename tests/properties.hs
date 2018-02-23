@@ -6,6 +6,7 @@
 
 module Main where
 
+import Control.Monad (forM_)
 import Control.DeepSeq
 import Control.Parallel.Strategies (parMap,rdeepseq)
 import Data.Array.IArray ((!))
@@ -82,6 +83,42 @@ case_mfeTemp_20_001 = do
   assertBool "energy" $ e =~ (-39.29)
   assertBool "structure" $ s == "(((((((..((((.........)))).(((((.......))))).....(((((.......))))))))))))."
 
+-- TODO more on @arr@ checks !
+
+case_part_001 :: Assertion
+case_part_001 = do
+  let o = rnao{_fonogu = False, _fonolp = True, _fodangles = 2}
+  --(e,s,arr) <- V.part "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
+  ( Just (mfeE,mfeS2)
+    , Just (ensembleE,ensembleS2,ensembleArr)
+    , Just (centroidE,centroidS2,centroidDist)
+    ) <- V.rnafold o "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
+--  mapM_ print $ [ (k,v) | (k,v) <- AI.assocs ensembleArr, v > 0.5 ] -- , k == (1,13) ]
+  -- mfe
+  assertBool "mfe energy" $ mfeE =~ (-28.90)
+  assertBool "mfe structure" $ mfeS2 == "(((((((..((((.........)))).(((((.......))))).....(((((.......))))))))))))."
+  -- ensemble
+  assertBool "ensemble gibbs free energy" $ ensembleE =~ (-29.97)
+  assertBool "ensemble structure" $ ensembleS2 == "(((((((..((({..,,.....}|||.(((((,{....})))))....,{||{{.......)}))))))))))."
+  forM_
+    [ ( 1, 73, 0.999200770)
+    , ( 2, 72, 0.999953925)
+    , ( 3, 71, 0.999961554)
+    , ( 4, 70, 0.999954759)
+    , ( 5, 69, 0.998632659)
+    , ( 6, 68, 0.988347048)
+    , ( 7, 67, 0.900660774)
+    , (28, 44, 0.914199199)
+    , (29, 43, 0.917305662)
+    ] $ \(i,j,p) -> assertBool (show (i,j,p,"/~=",ensembleArr ! (i,j))) $ ensembleArr ! (i,j) =~ p
+
+  --assertBool "1,13" $ ensembleArr ! (1,13) =~~~ 0.006288612
+  --assertBool "4,70" $ ensembleArr ! (4,70) =~~~ 0.999954759
+  -- centroid
+  assertBool "centroid energy" $ centroidE =~ (-28.10)
+  assertBool "centroid structure" $ centroidS2 == "(((((((..((((.........)))).(((((.(....)))))).....(((((.......))))))))))))."
+  assertBool "centroid distance" $ centroidDist =~ 11.86
+
 
 
 --case_circmfe_001 :: Assertion
@@ -104,20 +141,6 @@ case_eosTemp_20_001 :: Assertion
 case_eosTemp_20_001 = do
   e <- V.eosTemp 20 "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA" "((((((((((((.....)))))((.(.(((((.......))))).).))(((((.......))))))))))))."
   assertBool "eos" $ e =~ (-40.86)
-
--- TODO more on @arr@ checks !
-
-case_part_001 :: Assertion
-case_part_001 = do
-  let o = rnao{_fonogu = True, _fonolp = True, _fodangles = 2}
-  --(e,s,arr) <- V.part "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
-  (Just (e,s), Just (g,t,arr),_) <- V.rnafold o "GGGCUAUUAGCUCAGUUGGUUAGAGCGCACCCCUGAUAAGGGUGAGGUCGCUGAUUCGAAUUCAGCAUAGCCCA"
-  mapM_ print $ [ (k,v) | (k,v) <- AI.assocs arr, v > 0, k == (1,13) ]
-  assertBool "mfe energy" $ e =~ (-28.90)
-  assertBool "ensemble gibbs free energy" $ g =~ (-29.97)
-  assertBool "structure" $ t == "(((((((..((({..,,.....}|||.(((((,{....})))))....,{||{{.......)}))))))))))."
-  assertBool "1,13" $ arr ! (1,13) =~~~ 0.006288612
-  assertBool "4,70" $ arr ! (4,70) =~~~ 0.999954759
 
 case_duplexfold_001 :: Assertion
 case_duplexfold_001 = do

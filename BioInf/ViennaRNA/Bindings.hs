@@ -27,6 +27,21 @@ import           BioInf.ViennaRNA.Bindings.FFI.Utils as FFI
 
 -- * new, generic bindings
 
+-- | Interface to @RNAfold@. The 'RNAfoldOptions' allow settings which variants
+-- of the folding to calculate. They allow settings additional options and
+-- temperature, too.
+--
+-- The function returns a triple of (@Maybe@'s!) of @(mfe,ensemble,centroid@.
+--
+-- The @mfe@ yields the @minimum free energy, structure@ components.
+--
+-- The @ensemble@ yields the @ensemble gibbs free energy@, the @ensemble
+-- structure@ (not a canonical secondary structure!), and the @array of pair
+-- probabilities@.
+--
+-- The @centroid@ yields the @centroid free energy@, the @centroid structure@,
+-- and @average centroid distance to all structures@.
+
 rnafold
   :: RNAfoldOptions
   -> ByteString
