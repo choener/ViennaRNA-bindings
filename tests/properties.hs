@@ -22,7 +22,7 @@ import Test.Tasty.Silver as S
 import Test.Tasty.Silver.Interactive as SI
 import Test.Tasty.TH
 
-import Biobase.Types.Sequence (RNAseq(..))
+import Biobase.Types.NucleotideSequence (RNAseq(..))
 import BioInf.ViennaRNA.Bindings as V
 
 
