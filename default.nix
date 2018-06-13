@@ -15,7 +15,7 @@ rec {
     packages = p: [ p.ViennaRNA-bindings ];
     withHoogle = true;
     buildInputs = [
-      cabal-install ghc alex happy c2hs # syb language-c
+      cabal-install ghc alex happy c2hs syb language-c
       BiobaseTypes
       DPutils
       ForestStructures
