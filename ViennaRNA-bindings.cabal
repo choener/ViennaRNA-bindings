@@ -49,6 +49,8 @@ library
   exposed-modules:
     -- public interfaces
     BioInf.ViennaRNA.Bindings
+    --
+    BioInf.ViennaRNA.Bindings.Inline
     -- the FFI (new)
     BioInf.ViennaRNA.Bindings.FFI.RNAfold
     -- (old)
@@ -62,6 +64,7 @@ library
                , array
                , bytestring
                , data-default-class  >= 0.1.2
+               , inline-c
   build-tools:
     alex, happy, c2hs
   extra-libraries:
