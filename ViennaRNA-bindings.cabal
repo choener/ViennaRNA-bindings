@@ -131,36 +131,36 @@ library
 
 
 
-test-suite properties
-  type:
-    exitcode-stdio-1.0
-  main-is:
-    properties.hs
-  ghc-options:
-    -O2 -rtsopts -threaded -with-rtsopts=-N
-  hs-source-dirs:
-    tests
-  default-language:
-    Haskell2010
-  default-extensions: CPP
-                    , BangPatterns
-                    , FlexibleInstances
-                    , TemplateHaskell
-                    , UnicodeSyntax
-  build-depends: base
-               , array
-               , bytestring
-               , deepseq
-               , parallel
-               , QuickCheck
-               , tasty                >= 0.11
-               , tasty-hunit          >= 0.9
-               , tasty-quickcheck     >= 0.8
-               , tasty-silver         >= 3.1
-               , tasty-th             >= 0.1
-               --
-               , BiobaseTypes         == 0.1.3.*
-               , ViennaRNA-bindings
+--test-suite properties
+--  type:
+--    exitcode-stdio-1.0
+--  main-is:
+--    properties.hs
+--  ghc-options:
+--    -O2 -rtsopts -threaded -with-rtsopts=-N
+--  hs-source-dirs:
+--    tests
+--  default-language:
+--    Haskell2010
+--  default-extensions: CPP
+--                    , BangPatterns
+--                    , FlexibleInstances
+--                    , TemplateHaskell
+--                    , UnicodeSyntax
+--  build-depends: base
+--               , array
+--               , bytestring
+--               , deepseq
+--               , parallel
+--               , QuickCheck
+--               , tasty                >= 0.11
+--               , tasty-hunit          >= 0.9
+--               , tasty-quickcheck     >= 0.8
+--               , tasty-silver         >= 3.1
+--               , tasty-th             >= 0.1
+--               --
+--               , BiobaseTypes         == 0.1.3.*
+--               , ViennaRNA-bindings
 
 
 

@@ -1,7 +1,5 @@
-{ mkDerivation, alex, array, base, BiobaseTypes, bytestring, c2hs
-, data-default-class, deepseq, happy, inline-c, parallel
-, QuickCheck, stdenv, tasty, tasty-hunit, tasty-quickcheck
-, tasty-silver, tasty-th
+{ mkDerivation, alex, array, base, bytestring, c2hs
+, data-default-class, happy, inline-c, stdenv
 }:
 mkDerivation {
   pname = "ViennaRNA-bindings";
@@ -11,10 +9,6 @@ mkDerivation {
     array base bytestring data-default-class inline-c
   ];
   libraryToolDepends = [ alex c2hs happy ];
-  testHaskellDepends = [
-    array base BiobaseTypes bytestring deepseq parallel QuickCheck
-    tasty tasty-hunit tasty-quickcheck tasty-silver tasty-th
-  ];
   homepage = "https://github.com/choener/ViennaRNA-bindings";
   description = "ViennaRNA v2 bindings";
   license = "unknown";
