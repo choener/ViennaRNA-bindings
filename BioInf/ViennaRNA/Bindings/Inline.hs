@@ -17,6 +17,7 @@ import Foreign.ForeignPtr.Unsafe
 
 C.context (C.baseCtx <> C.bsCtx)
 C.include "../C/ViennaRNA/hairpin_loops.h"
+C.include "../C/ViennaRNA/interior_loops.h"
 C.include "../C/ViennaRNA/fold.h"
 
 -- | Create a default fold compound.
@@ -24,7 +25,7 @@ C.include "../C/ViennaRNA/fold.h"
 mkFoldCompound :: BS.ByteString -> IO (Ptr ())
 mkFoldCompound inp = do
   c <- [C.block| void * {
-    const char * seq = $bs-ptr:inp;
+    const char * seq = $bs-cstr:inp;
     vrna_fold_compound_t * c;
     vrna_md_t md;
     vrna_md_set_default (&md);
@@ -59,7 +60,7 @@ mfe inp = unsafePerformIO $ do
   let !out = BS.copy inp
   e <- [C.block| float {
     vrna_fold_compound_t * c = $(void *c);
-    vrna_mfe (c, $bs-ptr:out);
+    vrna_mfe (c, $bs-cstr:out);
   } |]
   destroyFoldCompound c
   return (realToFrac e, out)
@@ -87,5 +88,15 @@ hairpinCP c (fromIntegral -> i) (fromIntegral -> j) = unsafePerformIO $ do
     vrna_fold_compound_t * c = $(void *c);
     vrna_eval_hp_loop (c, $(int i) , $(int j));
   } |]
+  return $ fromIntegral e
+
+test_interior_loops :: BS.ByteString -> Int -> Int -> Int -> Int -> Int
+test_interior_loops inp (fromIntegral -> i) (fromIntegral -> j) (fromIntegral -> k) (fromIntegral -> l) = unsafePerformIO $ do
+  cp <- mkFoldCompound inp
+  e <- [C.block| int {
+    vrna_fold_compound_t * c = $(void *cp);
+    vrna_eval_int_loop(c, $(int i), $(int j), $(int k), $(int l));
+  } |]
+  destroyFoldCompound cp
   return $ fromIntegral e
 
