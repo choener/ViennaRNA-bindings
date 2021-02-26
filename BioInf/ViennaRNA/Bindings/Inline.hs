@@ -57,7 +57,7 @@ withFoldCompound inp f = unsafePerformIO $ do
 mfe :: BS.ByteString -> (Double, BS.ByteString)
 mfe inp = unsafePerformIO $ do
   c <- mkFoldCompound inp
-  let !out = BS.copy inp
+  out <- BI.create (BS.length inp + 1) (\_ -> return ())
   e <- [C.block| float {
     vrna_fold_compound_t * c = $(void *c);
     vrna_mfe (c, $bs-cstr:out);
