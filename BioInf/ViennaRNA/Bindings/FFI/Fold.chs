@@ -46,7 +46,7 @@ ffiFoldTemp noLP t inp
   | otherwise   =
       useAsCString inp $ \cinp ->
       useAsCString inp $ \struc -> do
-      e <- fold_temp_p (fromEnum noLP) (realToFrac t) cinp struc
+      e <- fold_temp_p (toEnum $ fromEnum noLP) (realToFrac t) cinp struc
       s <- packCString struc
       return (cf2d e, s)
 
