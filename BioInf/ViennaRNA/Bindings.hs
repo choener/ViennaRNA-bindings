@@ -60,8 +60,8 @@ rnafold = ffi_RNAfold
 mfe :: ByteString -> IO (Double,ByteString)
 mfe = ffiFold
 
-mfeTemp :: Double -> ByteString -> IO (Double,ByteString)
-mfeTemp = ffiFoldTemp
+mfeGeneric :: Bool -> Double -> ByteString -> IO (Double,ByteString)
+mfeGeneric = ffiFoldTemp
 
 circmfe :: ByteString -> IO (Double,ByteString)
 circmfe = ffiCircFold

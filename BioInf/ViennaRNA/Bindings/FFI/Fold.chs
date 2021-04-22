@@ -18,7 +18,7 @@ import BioInf.ViennaRNA.Bindings.FFI.Utils
 -- | 
 
 ffiFold ∷ ByteString → IO (Double,ByteString)
-ffiFold = ffiFoldTemp 37
+ffiFold = ffiFoldTemp True 37
 
 ffiEnergyOfStructure :: ByteString -> ByteString -> Int -> IO Double
 ffiEnergyOfStructure = ffiEnergyOfStructureTemp 37
@@ -40,13 +40,13 @@ ffiCircFold inp = useAsCString inp $ \cinp ->
 
 
 
-ffiFoldTemp :: Double -> ByteString -> IO (Double,ByteString)
-ffiFoldTemp t inp
+ffiFoldTemp :: Bool -> Double -> ByteString -> IO (Double,ByteString)
+ffiFoldTemp noLP t inp
   | BS.null inp = return (0,BS.empty)
   | otherwise   =
       useAsCString inp $ \cinp ->
       useAsCString inp $ \struc -> do
-      e <- fold_temp_p 1 (realToFrac t) cinp struc
+      e <- fold_temp_p (fromEnum noLP) (realToFrac t) cinp struc
       s <- packCString struc
       return (cf2d e, s)
 
