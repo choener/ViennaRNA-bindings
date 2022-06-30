@@ -44,10 +44,6 @@ extra-source-files:
   README.md
 
 
-build-tool-depends:
-  c2hs:c2hs
-
-
 library
   exposed-modules:
     -- public interfaces
@@ -73,6 +69,8 @@ library
     Haskell2010
   ghc-options:
     -O2
+  build-tool-depends:
+    c2hs:c2hs
   default-extensions: CPP
                     , ForeignFunctionInterface
                     , NondecreasingIndentation
