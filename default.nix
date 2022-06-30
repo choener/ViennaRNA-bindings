@@ -1,5 +1,5 @@
-{ mkDerivation, alex, array, base, bytestring, c2hs
-, data-default-class, happy, inline-c, stdenv
+{ mkDerivation, array, base, bytestring, c2hs, data-default-class
+, inline-c, lib
 }:
 mkDerivation {
   pname = "ViennaRNA-bindings";
@@ -8,9 +8,9 @@ mkDerivation {
   libraryHaskellDepends = [
     array base bytestring data-default-class inline-c
   ];
-  libraryToolDepends = [ alex c2hs happy ];
+  libraryToolDepends = [ c2hs ];
   homepage = "https://github.com/choener/ViennaRNA-bindings";
   description = "ViennaRNA v2 bindings";
   license = "unknown";
-  hydraPlatforms = stdenv.lib.platforms.none;
+  hydraPlatforms = lib.platforms.none;
 }
